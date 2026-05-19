@@ -75,8 +75,11 @@ def ensure_dependencies(packages: Iterable[str]) -> None:
 
 def ensure_frontend_assets() -> None:
     JS_DIR.mkdir(parents=True, exist_ok=True)
-    JS_FILE.write_text(STARTER_JS, encoding="utf-8")
-    print(f"[setup] Ensured starter JavaScript file: {JS_FILE}")
+    if not JS_FILE.exists():
+        JS_FILE.write_text(STARTER_JS, encoding="utf-8")
+        print(f"[setup] Created starter JavaScript file: {JS_FILE}")
+    else:
+        print(f"[setup] Existing JavaScript preserved: {JS_FILE}")
 
 
 def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
