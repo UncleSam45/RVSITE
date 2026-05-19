@@ -75,8 +75,11 @@ def ensure_dependencies(packages: Iterable[str]) -> None:
 
 def ensure_frontend_assets() -> None:
     JS_DIR.mkdir(parents=True, exist_ok=True)
-    JS_FILE.write_text(STARTER_JS, encoding="utf-8")
-    print(f"[setup] Ensured starter JavaScript file: {JS_FILE}")
+    if not JS_FILE.exists():
+        JS_FILE.write_text(STARTER_JS, encoding="utf-8")
+        print(f"[setup] Created starter JavaScript file: {JS_FILE}")
+    else:
+        print(f"[setup] Existing JavaScript preserved: {JS_FILE}")
 
 
 def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
@@ -99,10 +102,11 @@ def build_ui(port: int) -> None:
     with ui.column().classes("w-full items-center p-8 gap-4"):
         ui.label("webframe base is running").classes("text-h5")
         ui.label(f"Serving on port {port}").classes("text-caption text-grey-7")
-        ui.element("div").props('id="webframe-root"').classes("w-full max-w-2xl")
+        ui.element("div").props('id="webframe-root"').classes("w-full")
 
     app.add_static_files('/js', str(JS_DIR))
-    ui.add_body_html('<script src="/js/app.js"></script>')
+    app_js_version = int(JS_FILE.stat().st_mtime) if JS_FILE.exists() else 0
+    ui.add_body_html(f'<script src="/js/app.js?v={app_js_version}"></script>')
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
 
 
