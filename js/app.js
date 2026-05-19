@@ -2,12 +2,14 @@ const appData = {
   brand: 'Harvest & Hearth',
   tagline: 'Local Cooking Studio & Weekly Meal Craft',
   nav: [
-    'Home',
-    'Menus',
-    'Chef Specials',
-    'Catering',
-    'Testimonials',
-    'Contact',
+    'ACCUEIL',
+    'MENUS',
+    'SPÉCIAL DU JOUR',
+    'CONTACT',
+  ],
+  iconNav: [
+    { icon: '🛒', label: 'Panier' },
+    { icon: '👤', label: 'Compte' },
   ],
   categories: ['All', 'Seasonal', 'Family Packs', 'Vegetarian', 'Desserts'],
   highlights: [
@@ -86,7 +88,7 @@ function injectStyles() {
       gap: 1rem;
     }
     .brand { font-weight: 700; letter-spacing: 0.02em; }
-    .nav { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+    .nav { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
     .tab {
       border: 1px solid transparent;
       color: var(--muted);
@@ -99,6 +101,11 @@ function injectStyles() {
       color: var(--text);
       border-color: var(--line);
       background: rgba(255,255,255,0.06);
+    }
+    .tab.icon-tab {
+      padding: 0.45rem 0.6rem;
+      font-size: 1rem;
+      line-height: 1;
     }
     .hero {
       margin-top: 1.1rem;
@@ -165,6 +172,12 @@ function render(root) {
   const nav = el('nav', 'nav');
   appData.nav.forEach((item, idx) => {
     nav.append(el('span', `tab ${idx === 0 ? 'active' : ''}`, item));
+  });
+  appData.iconNav.forEach((item) => {
+    const iconTab = el('span', 'tab icon-tab', item.icon);
+    iconTab.setAttribute('aria-label', item.label);
+    iconTab.title = item.label;
+    nav.append(iconTab);
   });
   topbar.append(nav);
   topbarWrap.append(topbar);
