@@ -3,7 +3,7 @@
 
 Features:
 - Ensures required dependencies are installed in the active virtual environment.
-- Creates a `js/` directory with a starter frontend script.
+- Creates a `main.js` starter frontend script next to this file.
 - Serves a NiceGUI app on port 8888 (or next available port).
 - Injects the frontend JavaScript into the page.
 """
@@ -20,8 +20,7 @@ from typing import Iterable
 
 REQUIRED_PACKAGES = ["nicegui"]
 BASE_DIR = Path(__file__).resolve().parent
-JS_DIR = BASE_DIR / "js"
-JS_FILE = JS_DIR / "app.js"
+JS_FILE = BASE_DIR / "main.js"
 
 STARTER_JS = """// Starter frontend script for the webframe
 window.webframe = {
@@ -74,12 +73,11 @@ def ensure_dependencies(packages: Iterable[str]) -> None:
 
 
 def ensure_frontend_assets() -> None:
-    JS_DIR.mkdir(parents=True, exist_ok=True)
     if not JS_FILE.exists():
         JS_FILE.write_text(STARTER_JS, encoding="utf-8")
         print(f"[setup] Created starter JavaScript file: {JS_FILE}")
     else:
-        print(f"[setup] Existing JavaScript preserved: {JS_FILE}")
+        print(f"[setup] Existing frontend script preserved: {JS_FILE}")
 
 
 def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
@@ -107,9 +105,9 @@ def build_ui(port: int) -> None:
     """)
     ui.element("div").props('id="webframe-root"')
 
-    app.add_static_files('/js', str(JS_DIR))
     app_js_version = int(JS_FILE.stat().st_mtime) if JS_FILE.exists() else 0
-    ui.add_body_html(f'<script src="/js/app.js?v={app_js_version}"></script>')
+    app.add_static_files('/assets', str(BASE_DIR))
+    ui.add_body_html(f'<script src="/assets/main.js?v={app_js_version}"></script>')
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
 
 
