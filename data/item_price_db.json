@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "title": "Garden Harvest Bowl",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": "19-25 depending on special"
+      },
+      "last_seen_id": "garden-harvest-bowl"
+    }
+  ]
+}
