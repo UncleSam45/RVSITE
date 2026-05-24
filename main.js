@@ -28,8 +28,22 @@ async function loadItems() {
   }
 }
 
-function normalizePrice(price) {
-  return typeof price === 'number' ? `$${price}` : '';
+function normalizePrice(item) {
+  const pricing = item?.pricing;
+  if (pricing && typeof pricing === 'object') {
+    const small = pricing.small_meal != null ? `$${pricing.small_meal}` : '';
+    const large = pricing.large_meal != null ? `$${pricing.large_meal}` : '';
+    const family = pricing.family_format != null ? `${pricing.family_format}` : '';
+    const parts = [];
+    if (small) parts.push(`Small: ${small}`);
+    if (large) parts.push(`Large: ${large}`);
+    if (family) parts.push(`Family: ${family}`);
+    if (parts.length) return parts.join(' • ');
+    if (pricing.base_price != null) return `$${pricing.base_price}`;
+    if (pricing.price_range != null) return `$${pricing.price_range}`;
+  }
+  const legacyPrice = item?.price;
+  return typeof legacyPrice === 'number' ? `$${legacyPrice}` : '';
 }
 
 function isFeatured(item) {
@@ -141,7 +155,7 @@ function buildMenuCards(target, items) {
     content.append(el('div', 'badge', item.category || 'Menu'));
     content.append(el('h3', '', item.title || 'Untitled Item'));
     content.append(el('p', '', item.description || ''));
-    content.append(el('div', 'price', normalizePrice(item.price)));
+    content.append(el('div', 'price', normalizePrice(item)));
 
     card.append(image, content);
     cards.append(card);
