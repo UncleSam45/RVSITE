@@ -1,11 +1,23 @@
 {
-  "brand": "Harvest & Hearth",
+  "brand": "LA CUISINE DE ROSALIE",
   "tagline": "Local Cooking Studio & Weekly Meal Craft",
   "tabs": [
-    { "id": "home", "label": "ACCUEIL" },
-    { "id": "menu", "label": "MENUS" },
-    { "id": "special", "label": "SPÉCIAL DU JOUR" },
-    { "id": "contact", "label": "CONTACT" }
+    {
+      "id": "home",
+      "label": "ACCUEIL"
+    },
+    {
+      "id": "menu",
+      "label": "MENUS"
+    },
+    {
+      "id": "special",
+      "label": "SPÉCIAL DU JOUR"
+    },
+    {
+      "id": "contact",
+      "label": "CONTACT"
+    }
   ],
   "categories": [
     "All",
