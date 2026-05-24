@@ -1,5 +1,5 @@
 const appData = {
-  brand: 'Harvest & Hearth',
+  brand: 'LA CUISINE DE ROSALIE',
   tagline: 'Local Cooking Studio & Weekly Meal Craft',
   tabs: [
     { id: 'home', label: 'ACCUEIL' },
@@ -66,11 +66,14 @@ function injectStyles() {
   style.textContent = `
     :root { color-scheme: dark; --bg: #0a0e14; --panel: rgba(255,255,255,0.06); --line: rgba(255,255,255,0.14); --text: #f8fafc; --muted: #b0b8c4; --primary: #f5b970; --accent: #f38b75; --good: #8bd4a7; --shadow: 0 30px 70px rgba(0,0,0,0.35); }
     * { box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
     body { margin: 0; background: radial-gradient(circle at 20% 0%, #182236 0%, var(--bg) 42%), var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
     .site { width: 100%; margin: 0; padding: clamp(0.75rem, 1.5vw, 1.5rem); }
     .container { width: min(1600px, 100% - clamp(0.75rem, 2vw, 2rem)); margin-inline: auto; }
     .topbar { position: sticky; top: 1rem; z-index: 10; backdrop-filter: blur(16px); background: rgba(9, 14, 23, 0.72); border: 1px solid var(--line); border-radius: 16px; padding: 0.8rem 1rem; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-    .brand { font-weight: 700; letter-spacing: 0.02em; }
+    .brand-wrap { display: flex; align-items: center; gap: 1rem; min-width: 0; }
+    .brand-logo { width: clamp(88px, 8vw, 124px); height: clamp(88px, 8vw, 124px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; }
+    .brand { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: clamp(1.1rem, 1.3vw, 1.45rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .nav { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
     .tab { border: 1px solid transparent; color: var(--muted); padding: 0.45rem 0.75rem; border-radius: 999px; font-size: 0.92rem; transition: 180ms ease; background: transparent; cursor: pointer; }
     .tab:hover, .tab[aria-selected="true"] { color: var(--text); border-color: var(--line); background: rgba(255,255,255,0.06); }
@@ -189,7 +192,13 @@ function render(root) {
   const site = el('div', 'site');
   const topbarWrap = el('div', 'container');
   const topbar = el('header', 'topbar');
-  topbar.append(el('div', 'brand', appData.brand));
+  const brandWrap = el('div', 'brand-wrap');
+  const brandLogo = el('img', 'brand-logo');
+  brandLogo.src = '/assets/logo.png';
+  brandLogo.alt = `${appData.brand} logo`;
+  brandLogo.loading = 'eager';
+  brandWrap.append(brandLogo, el('div', 'brand', appData.brand));
+  topbar.append(brandWrap);
 
   const nav = el('div', 'nav');
   nav.setAttribute('role', 'tablist');
