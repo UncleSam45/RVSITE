@@ -4,6 +4,7 @@
 Features:
 - Ensures required dependencies are installed in the active virtual environment.
 - Creates a `main.js` starter frontend script next to this file.
+- Ensures `data/items.json` exists for menu items.
 - Serves a NiceGUI app on port 8888 (or next available port).
 - Injects the frontend JavaScript into the page.
 """
@@ -11,6 +12,7 @@ Features:
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import socket
 import subprocess
@@ -21,6 +23,24 @@ from typing import Iterable
 REQUIRED_PACKAGES = ["nicegui"]
 BASE_DIR = Path(__file__).resolve().parent
 JS_FILE = BASE_DIR / "main.js"
+DATA_DIR = BASE_DIR / "data"
+ITEMS_FILE = DATA_DIR / "items.json"
+
+DEFAULT_ITEMS = {
+    "items": [
+        {
+            "id": "garden-harvest-bowl",
+            "title": "Garden Harvest Bowl",
+            "description": "Roasted market vegetables, lemon-herb grains, and whipped feta.",
+            "price": 14,
+            "category": "Seasonal",
+            "available": True,
+            "featured": True,
+            "image": "./assets/images/garden-harvest-bowl.jpg",
+            "video": "",
+        }
+    ]
+}
 
 STARTER_JS = """// Starter frontend script for the webframe
 window.webframe = {
@@ -80,6 +100,15 @@ def ensure_frontend_assets() -> None:
         print(f"[setup] Existing frontend script preserved: {JS_FILE}")
 
 
+def ensure_data_files() -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if not ITEMS_FILE.exists():
+        ITEMS_FILE.write_text(json.dumps(DEFAULT_ITEMS, indent=2), encoding="utf-8")
+        print(f"[setup] Created items data file: {ITEMS_FILE}")
+    else:
+        print(f"[setup] Existing items data file preserved: {ITEMS_FILE}")
+
+
 def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
     for offset in range(max_tries):
         candidate = preferred + offset
@@ -114,6 +143,7 @@ def build_ui(port: int) -> None:
 def main() -> None:
     ensure_dependencies(REQUIRED_PACKAGES)
     ensure_frontend_assets()
+    ensure_data_files()
     port = find_available_port(8888)
     print(f"[run] Launching webframe on port {port}")
     build_ui(port)
