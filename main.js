@@ -1,15 +1,15 @@
 const appData = {
   brand: 'LA CUISINE DE ROSALIE',
-  tagline: 'Boutique Catering • Crafted Locally',
+  tagline: 'Repas faits maison • Livraison locale',
   tabs: [
-    { id: 'home', label: 'HOME' },
+    { id: 'home', label: 'ACCUEIL' },
     { id: 'menu', label: 'MENU' },
-    { id: 'special', label: 'EVENTS' },
+    { id: 'special', label: 'ÉVÉNEMENTS' },
     { id: 'contact', label: 'CONTACT' },
   ],
   iconNav: [
-    { icon: '☎️', label: 'Call' },
-    { icon: '🛒', label: 'Cart' },
+    { icon: '☎️', label: 'Appeler' },
+    { icon: '🛒', label: 'Panier' },
   ],
   categories: ['All'],
   highlights: [],
@@ -115,12 +115,19 @@ function injectStyles() {
     .panel-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); }
     .panel-subtitle { margin: 0; color: var(--muted); }
     .placeholder { width: min(820px, 100%); min-height: 150px; border: 1px dashed #d8cec2; border-radius: 14px; }
+    .cert-block { margin-top: 1.2rem; border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 1rem; display: grid; gap: .7rem; align-items: center; }
+    .cert-logo { width: min(260px, 100%); height: auto; justify-self: start; }
+    .cert-text { margin: 0; color: var(--muted); line-height: 1.45; }
+    .footer { margin-top: 2rem; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,0.9); box-shadow: var(--shadow); padding: 1.1rem; display: grid; gap: .8rem; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .footer-link { border: 1px solid #d8cab8; background: #fff; color: #2f2418; border-radius: 999px; padding: .45rem .8rem; font-weight: 600; cursor: pointer; }
+    .footer-note { margin: 0; color: var(--muted); font-size: .92rem; }
     @media (max-width: 900px) { .topbar { flex-wrap: wrap; } .brand-wrap, .nav { width: 100%; justify-content: center; } .brand-title { object-position: center; } }
   `;
   document.head.appendChild(style);
 }
 
-function setupTabs(tabButtons, panels) { const activateTab = (tabId) => { tabButtons.forEach((button) => { const isActive = button.dataset.tabId === tabId; button.setAttribute('aria-selected', String(isActive)); button.tabIndex = isActive ? 0 : -1; }); panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; }); }; tabButtons.forEach((button) => { button.addEventListener('click', () => activateTab(button.dataset.tabId)); }); activateTab(tabButtons[0]?.dataset.tabId); }
+function setupTabs(tabButtons, panels) { const activateTab = (tabId) => { tabButtons.forEach((button) => { const isActive = button.dataset.tabId === tabId; button.setAttribute('aria-selected', String(isActive)); button.tabIndex = isActive ? 0 : -1; }); panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; }); }; tabButtons.forEach((button) => { button.addEventListener('click', () => activateTab(button.dataset.tabId)); }); activateTab(tabButtons[0]?.dataset.tabId); return activateTab; }
 
 function buildMenuCards(target, items) {
   const cards = el('div', 'cards');
@@ -128,11 +135,11 @@ function buildMenuCards(target, items) {
     const card = el('article', 'card');
     const image = el('img', 'card-media');
     image.src = item.image || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80';
-    image.alt = item.title || 'Menu item image';
+    image.alt = item.title || "Image d'un item du menu";
     image.loading = 'lazy';
     const content = el('div', 'card-content');
     content.append(el('div', 'badge', item.category || 'Menu'));
-    content.append(el('h3', '', item.title || 'Untitled Item'));
+    content.append(el('h3', '', item.title || 'Item sans titre'));
     content.append(el('p', '', item.description || ''));
     content.append(el('div', 'price', normalizePrice(item)));
     card.append(image, content);
@@ -143,28 +150,38 @@ function buildMenuCards(target, items) {
 
 function buildHomePanel(panel) {
   const hero = el('section', 'hero');
-  hero.append(el('div', 'kicker', 'Local Town Caterer • Elevated Experience'));
-  hero.append(el('h1', '', 'Professional catering design and flavor for unforgettable gatherings.'));
-  hero.append(el('p', 'lead', 'From intimate family milestones to large community celebrations, our kitchen delivers polished presentation, comforting flavors, and smooth service that feels restaurant-quality from first bite to final toast.'));
-  hero.append(el('button', 'hero-cta', 'Book Your Catering Date'));
+  hero.append(el('div', 'kicker', 'Service local • Qualité certifiée'));
+  hero.append(el('h1', '', 'Repas faits maison avec certificat MAPAQ, livrés à votre domicile.'));
+  hero.append(el('p', 'lead', '🕒 Commandes requises au moins 48h à l\'avance. Minimum 30💲 par commande et livraison gratuite 💛 dans nos zones desservies.'));
+  hero.append(el('button', 'hero-cta', 'Commander maintenant'));
   panel.append(hero);
 
   const menuSection = el('section', 'section');
-  menuSection.append(el('h2', '', 'Menu Categories'));
+  menuSection.append(el('h2', '', 'Catégories du menu'));
   const chips = el('div', 'chips');
   appData.categories.forEach((category) => chips.append(el('span', 'chip', category)));
   menuSection.append(chips);
 
   const featuredSection = el('section', 'section');
-  featuredSection.append(el('h2', '', 'Featured Selections'));
+  featuredSection.append(el('h2', '', 'Sélections en vedette'));
   if (appData.highlights.length > 0) buildMenuCards(featuredSection, appData.highlights);
-  else featuredSection.append(el('p', 'empty-state', 'No featured items yet.'));
+  else featuredSection.append(el('p', 'empty-state', 'Aucun item en vedette pour le moment.'));
 
-  panel.append(menuSection, featuredSection);
+  const cert = el('div', 'cert-block');
+  const certLogo = el('img', 'cert-logo');
+  certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png';
+  certLogo.alt = 'Logo de certification MAPAQ';
+  certLogo.loading = 'lazy';
+  cert.append(certLogo);
+  cert.append(el('p', 'cert-text', "Certification MAPAQ: formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec afin de prévenir les risques d'intoxication alimentaire."));
+
+  panel.append(menuSection, featuredSection, cert);
 }
 
-function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Available Menu Items')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'No available items in data/items.json yet.')); panel.append(menuSection); }
-function buildEmptyPanel(panel, label) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', label)); empty.append(el('p', 'panel-subtitle', 'Reserved section: we can next add booking flow, packages, or contact forms here.')); empty.append(el('div', 'placeholder')); panel.append(empty); }
+function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Items disponibles')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.')); panel.append(menuSection); }
+function buildContactPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Contactez-nous')); empty.append(el('p', 'panel-subtitle', 'Nous couvrons les secteurs suivants au Québec : Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères.')); const phone = el('p', 'panel-subtitle', 'Téléphone : 514-298-7545'); const details = el('p', 'panel-subtitle', 'Repas faits maison certifiés MAPAQ. Commandes au moins 48h à l\'avance. Minimum de commande : 30💲. Livraison gratuite 💛.'); const certExplain = el('p', 'panel-subtitle', "Une certification MAPAQ est une formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec pour prévenir les risques d'intoxication alimentaire."); const certLogo = el('img', 'cert-logo'); certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png'; certLogo.alt = 'Logo officiel de formation MAPAQ'; certLogo.loading = 'lazy'; empty.append(phone, details, certExplain, certLogo); panel.append(empty); }
+
+function buildSpecialPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Événements')); empty.append(el('p', 'panel-subtitle', 'Service traiteur pour événements privés, corporatifs et familiaux. Contactez-nous pour planifier votre menu.')); panel.append(empty); }
 
 function render(root) {
   const site = el('div', 'site');
@@ -192,15 +209,25 @@ function render(root) {
     const panel = el('section', 'tab-panel');
     panel.dataset.tabPanel = tab.id;
     panel.hidden = idx !== 0;
-    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else buildEmptyPanel(panel, tab.label);
+    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else if (tab.id === 'contact') buildContactPanel(panel); else if (tab.id === 'special') buildSpecialPanel(panel);
     panelWrap.append(panel);
     return panel;
   });
 
-  site.append(topbarWrap, panelWrap);
+  const activateTab = setupTabs(tabButtons, panels);
+
+  const footerWrap = el('div', 'container');
+  const footer = el('footer', 'footer');
+  footer.append(el('p', 'footer-note', 'Raccourcis rapides'));
+  const footerLinks = el('div', 'footer-links');
+  appData.tabs.forEach((tab) => { const link = el('button', 'footer-link', tab.label); link.type = 'button'; link.addEventListener('click', () => activateTab(tab.id)); footerLinks.append(link); });
+  footer.append(footerLinks);
+  footer.append(el('p', 'footer-note', 'Entreprise certifiée MAPAQ en hygiène et salubrité alimentaires.'));
+  footerWrap.append(footer);
+
+  site.append(topbarWrap, panelWrap, footerWrap);
   root.innerHTML = '';
   root.append(site);
-  setupTabs(tabButtons, panels);
 }
 
 window.webframe = {
