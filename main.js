@@ -68,16 +68,17 @@ function injectStyles() {
     * { box-sizing: border-box; }
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
     body { margin: 0; background: radial-gradient(circle at 20% 0%, #182236 0%, var(--bg) 42%), var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-    .site { width: 100%; margin: 0; padding: clamp(0.75rem, 1.5vw, 1.5rem); }
+    .site { width: 100%; margin: 0; padding: clamp(0.4rem, 1vw, 0.9rem); }
     .container { width: min(1600px, 100% - clamp(0.75rem, 2vw, 2rem)); margin-inline: auto; }
-    .topbar { position: sticky; top: 1rem; z-index: 10; backdrop-filter: blur(16px); background: rgba(9, 14, 23, 0.72); border: 1px solid var(--line); border-radius: 16px; padding: 0.8rem 1rem; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-    .brand-wrap { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-    .brand-logo { width: clamp(112px, 10vw, 164px); height: clamp(112px, 10vw, 164px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; }
-    .brand-title { width: clamp(220px, 24vw, 420px); max-width: 100%; height: auto; object-fit: contain; background: transparent; border: 0; box-shadow: none; display: block; }
-    .nav { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
-    .tab { border: 1px solid transparent; color: var(--muted); padding: 0.45rem 0.75rem; border-radius: 999px; font-size: 0.92rem; transition: 180ms ease; background: transparent; cursor: pointer; }
+    .topbar { position: sticky; top: 0.5rem; z-index: 10; backdrop-filter: blur(16px); background: rgba(9, 14, 23, 0.78); border: 1px solid var(--line); border-radius: 14px; padding: 0.45rem 0.8rem; box-shadow: 0 16px 36px rgba(0,0,0,0.32); display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; min-height: 74px; }
+    .brand-wrap { display: flex; align-items: center; gap: 0.7rem; min-width: 0; flex: 1 1 auto; }
+    .brand-logo { width: clamp(56px, 5.4vw, 88px); height: clamp(56px, 5.4vw, 88px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; }
+    .brand-title { width: clamp(170px, 18vw, 320px); max-width: 100%; max-height: 44px; height: auto; object-fit: contain; background: transparent; border: 0; box-shadow: none; display: block; }
+    .nav { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; justify-content: flex-end; }
+    .tab { border: 1px solid transparent; color: var(--muted); padding: 0.38rem 0.68rem; border-radius: 999px; font-size: 0.86rem; transition: 180ms ease; background: transparent; cursor: pointer; font-weight: 600; white-space: nowrap; }
     .tab:hover, .tab[aria-selected="true"] { color: var(--text); border-color: var(--line); background: rgba(255,255,255,0.06); }
-    .tab.icon-tab { padding: 0.45rem 0.6rem; font-size: 1rem; line-height: 1; }
+    .tab.icon-tab { padding: 0.34rem 0.5rem; font-size: 0.95rem; line-height: 1; }
+    @media (max-width: 980px) { .topbar { flex-wrap: wrap; align-items: center; padding: 0.55rem 0.7rem; min-height: auto; } .brand-wrap { width: 100%; justify-content: center; } .nav { width: 100%; justify-content: center; } }
     .tab-panel { margin-top: 1.1rem; }
     .tab-panel[hidden] { display: none; }
     .hero { border-radius: 24px; border: 1px solid var(--line); padding: 2.5rem; background: linear-gradient(160deg, rgba(245,185,112,.12), rgba(243,139,117,.14) 48%, rgba(255,255,255,.02)); box-shadow: var(--shadow); }
