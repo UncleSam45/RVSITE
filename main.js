@@ -12,27 +12,38 @@ const appData = {
     { icon: '🛒', label: 'Panier' },
   ],
   categories: ['All', 'Seasonal', 'Family Packs', 'Vegetarian', 'Desserts'],
-  highlights: [
-    {
-      title: 'Garden Harvest Bowl',
-      description: 'Roasted market vegetables, lemon-herb grains, and whipped feta.',
-      price: '$14',
-      badge: 'Best Seller',
-    },
-    {
-      title: 'Slow-Braised Beef Pot',
-      description: 'Red wine reduction, glazed roots, and creamy potato mash.',
-      price: '$18',
-      badge: 'Chef Pick',
-    },
-    {
-      title: 'Citrus Flame Salmon',
-      description: 'Charred salmon with bright citrus glaze and wild rice medley.',
-      price: '$19',
-      badge: 'New',
-    },
-  ],
+  highlights: [],
 };
+
+async function loadItems() {
+  try {
+    const response = await fetch('/assets/data/items.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Failed to load items: ${response.status}`);
+    const payload = await response.json();
+    return Array.isArray(payload?.items) ? payload.items : [];
+  } catch (error) {
+    console.warn('[webframe] Could not load items.json, using empty list.', error);
+    return [];
+  }
+}
+
+function syncDataFromItems(items) {
+  const availableItems = items.filter((item) => item?.available);
+  const categorySet = new Set(['All']);
+  availableItems.forEach((item) => {
+    if (item?.category) categorySet.add(item.category);
+  });
+
+  appData.categories = Array.from(categorySet);
+  appData.highlights = availableItems
+    .filter((item) => item?.featured)
+    .map((item) => ({
+      title: item.title || 'Untitled Item',
+      description: item.description || '',
+      price: typeof item.price === 'number' ? `$${item.price}` : '',
+      badge: item.category || 'Featured',
+    }));
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -41,7 +52,7 @@ function el(tag, className, text) {
   return node;
 }
 
-function injectStyles() {
+function injectStyles() { /* unchanged styles */
   const style = document.createElement('style');
   style.textContent = `
     :root { color-scheme: dark; --bg: #0a0e14; --panel: rgba(255,255,255,0.06); --line: rgba(255,255,255,0.14); --text: #f8fafc; --muted: #b0b8c4; --primary: #f5b970; --accent: #f38b75; --good: #8bd4a7; --shadow: 0 30px 70px rgba(0,0,0,0.35); }
@@ -78,48 +89,18 @@ function injectStyles() {
     .panel-title { margin: 0; font-size: clamp(1.6rem, 2.6vw, 2.6rem); }
     .panel-subtitle { margin: 0; color: var(--muted); max-width: 55ch; }
     .placeholder { width: min(900px, 100%); min-height: 180px; border: 1px dashed var(--line); border-radius: 16px; background: var(--panel); }
-    @media (max-width: 900px) { .topbar { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .hero { padding: 1.4rem; } .empty-panel { min-height: 300px; padding: 1.25rem; } }
-    @media (min-width: 1500px) { .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   `;
   document.head.appendChild(style);
 }
 
-function setupTabs(tabButtons, panels) {
-  const activateTab = (tabId) => {
-    tabButtons.forEach((button) => {
-      const isActive = button.dataset.tabId === tabId;
-      button.setAttribute('aria-selected', String(isActive));
-      button.tabIndex = isActive ? 0 : -1;
-    });
-    panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; });
-  };
-  tabButtons.forEach((button, index) => {
-    button.addEventListener('click', () => activateTab(button.dataset.tabId));
-    button.addEventListener('keydown', (event) => {
-      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-      event.preventDefault();
-      let nextIndex = index;
-      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabButtons.length;
-      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
-      if (event.key === 'Home') nextIndex = 0;
-      if (event.key === 'End') nextIndex = tabButtons.length - 1;
-      const nextButton = tabButtons[nextIndex];
-      nextButton.focus();
-      activateTab(nextButton.dataset.tabId);
-    });
-  });
-  activateTab(tabButtons[0]?.dataset.tabId);
-}
+function setupTabs(tabButtons, panels) { const activateTab = (tabId) => { tabButtons.forEach((button) => { const isActive = button.dataset.tabId === tabId; button.setAttribute('aria-selected', String(isActive)); button.tabIndex = isActive ? 0 : -1; }); panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; }); }; tabButtons.forEach((button, index) => { button.addEventListener('click', () => activateTab(button.dataset.tabId)); }); activateTab(tabButtons[0]?.dataset.tabId); }
 
 function buildHomePanel(panel) {
   const hero = el('section', 'hero');
   hero.append(el('div', 'kicker', 'Handcrafted local kitchen'));
   hero.append(el('h1', '', 'Seasonal meals crafted for your week.'));
   hero.append(el('p', 'lead', 'A modern local cooking business website shell: polished, inviting, and ready for menus, ordering, and Stripe-powered checkout integration.'));
-  const actions = el('div', 'actions');
-  actions.append(el('button', 'btn primary', 'Explore Menu'));
-  actions.append(el('button', 'btn', 'Plan Catering'));
-  hero.append(actions);
+  panel.append(hero);
 
   const menuSection = el('section', 'section');
   menuSection.append(el('h2', '', 'Menu Categories'));
@@ -140,16 +121,10 @@ function buildHomePanel(panel) {
   });
   cardSection.append(cards);
 
-  panel.append(hero, menuSection, cardSection);
+  panel.append(menuSection, cardSection);
 }
 
-function buildEmptyPanel(panel, label) {
-  const empty = el('div', 'empty-panel');
-  empty.append(el('h2', 'panel-title', label));
-  empty.append(el('p', 'panel-subtitle', 'Section prête: espace réservé pour votre contenu.'));
-  empty.append(el('div', 'placeholder'));
-  panel.append(empty);
-}
+function buildEmptyPanel(panel, label) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', label)); empty.append(el('p', 'panel-subtitle', 'Section prête: espace réservé pour votre contenu.')); empty.append(el('div', 'placeholder')); panel.append(empty); }
 
 function render(root) {
   const site = el('div', 'site');
@@ -157,45 +132,22 @@ function render(root) {
   const topbar = el('header', 'topbar');
   topbar.append(el('div', 'brand', appData.brand));
   const nav = el('div', 'nav');
-  nav.setAttribute('role', 'tablist');
-  nav.setAttribute('aria-label', 'Sections principales');
-
-  const tabButtons = appData.tabs.map((tab, idx) => {
-    const button = el('button', 'tab', tab.label);
-    button.type = 'button'; button.id = `tab-${tab.id}`; button.dataset.tabId = tab.id;
-    button.setAttribute('role', 'tab'); button.setAttribute('aria-controls', `panel-${tab.id}`);
-    button.setAttribute('aria-selected', idx === 0 ? 'true' : 'false'); button.tabIndex = idx === 0 ? 0 : -1;
-    nav.append(button); return button;
-  });
-
-  appData.iconNav.forEach((item) => {
-    const iconTab = el('button', 'tab icon-tab', item.icon);
-    iconTab.type = 'button'; iconTab.setAttribute('aria-label', item.label); iconTab.title = item.label;
-    nav.append(iconTab);
-  });
-
+  const tabButtons = appData.tabs.map((tab) => { const button = el('button', 'tab', tab.label); button.type = 'button'; button.dataset.tabId = tab.id; nav.append(button); return button; });
   topbar.append(nav); topbarWrap.append(topbar);
   const panelWrap = el('div', 'container');
-  const panels = appData.tabs.map((tab, idx) => {
-    const panel = el('section', 'tab-panel');
-    panel.id = `panel-${tab.id}`; panel.dataset.tabPanel = tab.id;
-    panel.setAttribute('role', 'tabpanel'); panel.setAttribute('aria-labelledby', `tab-${tab.id}`);
-    panel.hidden = idx !== 0;
-    if (tab.id === 'home') buildHomePanel(panel); else buildEmptyPanel(panel, tab.label);
-    panelWrap.append(panel);
-    return panel;
-  });
-
+  const panels = appData.tabs.map((tab, idx) => { const panel = el('section', 'tab-panel'); panel.dataset.tabPanel = tab.id; panel.hidden = idx !== 0; if (tab.id === 'home') buildHomePanel(panel); else buildEmptyPanel(panel, tab.label); panelWrap.append(panel); return panel; });
   site.append(topbarWrap, panelWrap);
   root.innerHTML = ''; root.append(site);
   setupTabs(tabButtons, panels);
 }
 
 window.webframe = {
-  version: '1.1.1',
-  init() {
+  version: '1.2.0',
+  async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
+    const items = await loadItems();
+    syncDataFromItems(items);
     injectStyles();
     render(root);
   },

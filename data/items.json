@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "id": "garden-harvest-bowl",
+      "title": "Garden Harvest Bowl",
+      "description": "Roasted market vegetables, lemon-herb grains, and whipped feta.",
+      "price": 14,
+      "category": "Seasonal",
+      "available": true,
+      "featured": true,
+      "image": "./assets/images/garden-harvest-bowl.jpg",
+      "video": ""
+    }
+  ]
+}
