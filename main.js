@@ -72,7 +72,7 @@ function injectStyles() {
     .container { width: min(1600px, 100% - clamp(0.75rem, 2vw, 2rem)); margin-inline: auto; }
     .topbar { position: sticky; top: 1rem; z-index: 10; backdrop-filter: blur(16px); background: rgba(9, 14, 23, 0.72); border: 1px solid var(--line); border-radius: 16px; padding: 0.8rem 1rem; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
     .brand-wrap { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-    .brand-logo { width: clamp(88px, 8vw, 124px); height: clamp(88px, 8vw, 124px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; }
+    .brand-logo { width: clamp(88px, 8vw, 124px); height: clamp(88px, 8vw, 124px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; mix-blend-mode: multiply; }
     .brand { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: clamp(1.1rem, 1.3vw, 1.45rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .nav { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
     .tab { border: 1px solid transparent; color: var(--muted); padding: 0.45rem 0.75rem; border-radius: 999px; font-size: 0.92rem; transition: 180ms ease; background: transparent; cursor: pointer; }
