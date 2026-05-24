@@ -1,15 +1,15 @@
 const appData = {
   brand: 'LA CUISINE DE ROSALIE',
-  tagline: 'Boutique Catering • Crafted Locally',
+  tagline: 'Repas faits maison • Livraison locale',
   tabs: [
-    { id: 'home', label: 'HOME' },
+    { id: 'home', label: 'ACCUEIL' },
     { id: 'menu', label: 'MENU' },
-    { id: 'special', label: 'EVENTS' },
+    { id: 'special', label: 'ÉVÉNEMENTS' },
     { id: 'contact', label: 'CONTACT' },
   ],
   iconNav: [
-    { icon: '☎️', label: 'Call' },
-    { icon: '🛒', label: 'Cart' },
+    { icon: '☎️', label: 'Appeler' },
+    { icon: '🛒', label: 'Panier' },
   ],
   categories: ['All'],
   highlights: [],
@@ -128,11 +128,11 @@ function buildMenuCards(target, items) {
     const card = el('article', 'card');
     const image = el('img', 'card-media');
     image.src = item.image || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80';
-    image.alt = item.title || 'Menu item image';
+    image.alt = item.title || "Image d'un item du menu";
     image.loading = 'lazy';
     const content = el('div', 'card-content');
     content.append(el('div', 'badge', item.category || 'Menu'));
-    content.append(el('h3', '', item.title || 'Untitled Item'));
+    content.append(el('h3', '', item.title || 'Item sans titre'));
     content.append(el('p', '', item.description || ''));
     content.append(el('div', 'price', normalizePrice(item)));
     card.append(image, content);
@@ -143,28 +143,30 @@ function buildMenuCards(target, items) {
 
 function buildHomePanel(panel) {
   const hero = el('section', 'hero');
-  hero.append(el('div', 'kicker', 'Local Town Caterer • Elevated Experience'));
-  hero.append(el('h1', '', 'Professional catering design and flavor for unforgettable gatherings.'));
-  hero.append(el('p', 'lead', 'From intimate family milestones to large community celebrations, our kitchen delivers polished presentation, comforting flavors, and smooth service that feels restaurant-quality from first bite to final toast.'));
-  hero.append(el('button', 'hero-cta', 'Book Your Catering Date'));
+  hero.append(el('div', 'kicker', 'Service local • Qualité certifiée'));
+  hero.append(el('h1', '', 'Repas faits maison avec certificat MAPAQ, livrés à votre domicile.'));
+  hero.append(el('p', 'lead', '🕒 Commandes requises au moins 48h à l\'avance. Minimum 30💲 par commande et livraison gratuite 💛 dans nos zones desservies.'));
+  hero.append(el('button', 'hero-cta', 'Commander maintenant'));
   panel.append(hero);
 
   const menuSection = el('section', 'section');
-  menuSection.append(el('h2', '', 'Menu Categories'));
+  menuSection.append(el('h2', '', 'Catégories du menu'));
   const chips = el('div', 'chips');
   appData.categories.forEach((category) => chips.append(el('span', 'chip', category)));
   menuSection.append(chips);
 
   const featuredSection = el('section', 'section');
-  featuredSection.append(el('h2', '', 'Featured Selections'));
+  featuredSection.append(el('h2', '', 'Sélections en vedette'));
   if (appData.highlights.length > 0) buildMenuCards(featuredSection, appData.highlights);
-  else featuredSection.append(el('p', 'empty-state', 'No featured items yet.'));
+  else featuredSection.append(el('p', 'empty-state', 'Aucun item en vedette pour le moment.'));
 
   panel.append(menuSection, featuredSection);
 }
 
-function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Available Menu Items')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'No available items in data/items.json yet.')); panel.append(menuSection); }
-function buildEmptyPanel(panel, label) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', label)); empty.append(el('p', 'panel-subtitle', 'Reserved section: we can next add booking flow, packages, or contact forms here.')); empty.append(el('div', 'placeholder')); panel.append(empty); }
+function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Items disponibles')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.')); panel.append(menuSection); }
+function buildContactPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Contactez-nous')); empty.append(el('p', 'panel-subtitle', 'Nous couvrons les secteurs suivants au Québec : Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères.')); const phone = el('p', 'panel-subtitle', 'Téléphone : 514-298-7545'); const details = el('p', 'panel-subtitle', 'Repas faits maison certifiés MAPAQ. Commandes au moins 48h à l\'avance. Minimum de commande : 30💲. Livraison gratuite 💛.'); empty.append(phone, details); panel.append(empty); }
+
+function buildSpecialPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Événements')); empty.append(el('p', 'panel-subtitle', 'Service traiteur pour événements privés, corporatifs et familiaux. Contactez-nous pour planifier votre menu.')); panel.append(empty); }
 
 function render(root) {
   const site = el('div', 'site');
@@ -192,7 +194,7 @@ function render(root) {
     const panel = el('section', 'tab-panel');
     panel.dataset.tabPanel = tab.id;
     panel.hidden = idx !== 0;
-    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else buildEmptyPanel(panel, tab.label);
+    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else if (tab.id === 'contact') buildContactPanel(panel); else if (tab.id === 'special') buildSpecialPanel(panel);
     panelWrap.append(panel);
     return panel;
   });
