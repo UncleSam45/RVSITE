@@ -1,38 +1,6 @@
-const appData = {
-  brand: 'Harvest & Hearth',
-  tagline: 'Local Cooking Studio & Weekly Meal Craft',
-  tabs: [
-    { id: 'home', label: 'ACCUEIL' },
-    { id: 'menu', label: 'MENUS' },
-    { id: 'special', label: 'SPÉCIAL DU JOUR' },
-    { id: 'contact', label: 'CONTACT' },
-  ],
-  iconNav: [
-    { icon: '👤', label: 'Compte' },
-    { icon: '🛒', label: 'Panier' },
-  ],
-  categories: ['All', 'Seasonal', 'Family Packs', 'Vegetarian', 'Desserts'],
-  highlights: [
-    {
-      title: 'Garden Harvest Bowl',
-      description: 'Roasted market vegetables, lemon-herb grains, and whipped feta.',
-      price: '$14',
-      badge: 'Best Seller',
-    },
-    {
-      title: 'Slow-Braised Beef Pot',
-      description: 'Red wine reduction, glazed roots, and creamy potato mash.',
-      price: '$18',
-      badge: 'Chef Pick',
-    },
-    {
-      title: 'Citrus Flame Salmon',
-      description: 'Charred salmon with bright citrus glaze and wild rice medley.',
-      price: '$19',
-      badge: 'New',
-    },
-  ],
-};
+async function loadAppData() {
+  return fetch('./data/items.json').then((r) => r.json());
+}
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -111,11 +79,11 @@ function setupTabs(tabButtons, panels) {
   activateTab(tabButtons[0]?.dataset.tabId);
 }
 
-function buildHomePanel(panel) {
+function buildHomePanel(panel, appData) {
   const hero = el('section', 'hero');
   hero.append(el('div', 'kicker', 'Handcrafted local kitchen'));
   hero.append(el('h1', '', 'Seasonal meals crafted for your week.'));
-  hero.append(el('p', 'lead', 'A modern local cooking business website shell: polished, inviting, and ready for menus, ordering, and Stripe-powered checkout integration.'));
+  hero.append(el('p', 'lead', appData.tagline || 'A modern local cooking business website shell: polished, inviting, and ready for menus, ordering, and Stripe-powered checkout integration.'));
   const actions = el('div', 'actions');
   actions.append(el('button', 'btn primary', 'Explore Menu'));
   actions.append(el('button', 'btn', 'Plan Catering'));
@@ -124,18 +92,18 @@ function buildHomePanel(panel) {
   const menuSection = el('section', 'section');
   menuSection.append(el('h2', '', 'Menu Categories'));
   const chips = el('div', 'chips');
-  appData.categories.forEach((c, i) => chips.append(el('span', `chip ${i === 0 ? 'active' : ''}`, c)));
+  (appData.categories || []).forEach((c, i) => chips.append(el('span', `chip ${i === 0 ? 'active' : ''}`, c)));
   menuSection.append(chips);
 
   const cardSection = el('section', 'section');
   cardSection.append(el('h2', '', 'Featured This Week'));
   const cards = el('div', 'cards');
-  appData.highlights.forEach((item) => {
+  (appData.items || []).filter((item) => item.featured).forEach((item) => {
     const card = el('article', 'card');
-    card.append(el('div', 'badge', item.badge));
+    card.append(el('div', 'badge', item.badge || 'Featured'));
     card.append(el('h3', '', item.title));
     card.append(el('p', '', item.description));
-    card.append(el('div', 'price', item.price));
+    card.append(el('div', 'price', `$${item.price}`));
     cards.append(card);
   });
   cardSection.append(cards);
@@ -151,16 +119,17 @@ function buildEmptyPanel(panel, label) {
   panel.append(empty);
 }
 
-function render(root) {
+function render(root, appData) {
   const site = el('div', 'site');
   const topbarWrap = el('div', 'container');
   const topbar = el('header', 'topbar');
-  topbar.append(el('div', 'brand', appData.brand));
+  topbar.append(el('div', 'brand', appData.brand || 'Harvest & Hearth'));
   const nav = el('div', 'nav');
   nav.setAttribute('role', 'tablist');
   nav.setAttribute('aria-label', 'Sections principales');
 
-  const tabButtons = appData.tabs.map((tab, idx) => {
+  const tabs = appData.tabs || [];
+  const tabButtons = tabs.map((tab, idx) => {
     const button = el('button', 'tab', tab.label);
     button.type = 'button'; button.id = `tab-${tab.id}`; button.dataset.tabId = tab.id;
     button.setAttribute('role', 'tab'); button.setAttribute('aria-controls', `panel-${tab.id}`);
@@ -168,36 +137,31 @@ function render(root) {
     nav.append(button); return button;
   });
 
-  appData.iconNav.forEach((item) => {
-    const iconTab = el('button', 'tab icon-tab', item.icon);
-    iconTab.type = 'button'; iconTab.setAttribute('aria-label', item.label); iconTab.title = item.label;
-    nav.append(iconTab);
-  });
-
   topbar.append(nav); topbarWrap.append(topbar);
   const panelWrap = el('div', 'container');
-  const panels = appData.tabs.map((tab, idx) => {
+  const panels = tabs.map((tab, idx) => {
     const panel = el('section', 'tab-panel');
     panel.id = `panel-${tab.id}`; panel.dataset.tabPanel = tab.id;
     panel.setAttribute('role', 'tabpanel'); panel.setAttribute('aria-labelledby', `tab-${tab.id}`);
     panel.hidden = idx !== 0;
-    if (tab.id === 'home') buildHomePanel(panel); else buildEmptyPanel(panel, tab.label);
+    if (tab.id === 'home') buildHomePanel(panel, appData); else buildEmptyPanel(panel, tab.label);
     panelWrap.append(panel);
     return panel;
   });
 
   site.append(topbarWrap, panelWrap);
   root.innerHTML = ''; root.append(site);
-  setupTabs(tabButtons, panels);
+  if (tabButtons.length) setupTabs(tabButtons, panels);
 }
 
 window.webframe = {
-  version: '1.1.1',
-  init() {
+  version: '1.3.1',
+  async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
     injectStyles();
-    render(root);
+    const appData = await loadAppData();
+    render(root, appData);
   },
 };
 
