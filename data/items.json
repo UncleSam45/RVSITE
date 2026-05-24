@@ -1,0 +1,35 @@
+{
+  "brand": "Harvest & Hearth",
+  "tagline": "Local Cooking Studio & Weekly Meal Craft",
+  "tabs": [
+    { "id": "home", "label": "ACCUEIL" },
+    { "id": "menu", "label": "MENUS" },
+    { "id": "special", "label": "SPÉCIAL DU JOUR" },
+    { "id": "contact", "label": "CONTACT" }
+  ],
+  "categories": [
+    "All",
+    "Seasonal",
+    "Family Packs",
+    "Vegetarian",
+    "Desserts"
+  ],
+  "items": [
+    {
+      "id": "garden-harvest-bowl",
+      "title": "Garden Harvest Bowl",
+      "description": "Roasted market vegetables, lemon-herb grains, and whipped feta.",
+      "price": 14,
+      "category": "Seasonal",
+      "badge": "Best Seller",
+      "available": true,
+      "featured": true,
+      "image": "./assets/images/garden-harvest-bowl.jpg",
+      "video": ""
+    }
+  ],
+  "heroVideos": [
+    "./assets/videos/food-hero-01.mp4",
+    "./assets/videos/food-hero-02.mp4"
+  ]
+}
