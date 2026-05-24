@@ -15,6 +15,10 @@ function injectStyles() {
     :root { color-scheme: dark; --bg: #0a0e14; --panel: rgba(255,255,255,0.06); --line: rgba(255,255,255,0.14); --text: #f8fafc; --muted: #b0b8c4; --primary: #f5b970; --accent: #f38b75; --good: #8bd4a7; --shadow: 0 30px 70px rgba(0,0,0,0.35); }
     * { box-sizing: border-box; }
     body { margin: 0; background: radial-gradient(circle at 20% 0%, #182236 0%, var(--bg) 42%), var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .topbar-brand { display: inline-flex; align-items: center; gap: .85rem; min-width: 0; }
+    .brand-logo-wrap { width: clamp(54px, 4.2vw, 68px); aspect-ratio: 1 / 1; border-radius: 14px; background: linear-gradient(155deg, rgba(255,255,255,.12), rgba(255,255,255,.04)); border: 1px solid rgba(255,255,255,.2); display: grid; place-items: center; box-shadow: 0 10px 25px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.12); flex: 0 0 auto; overflow: hidden; }
+    .brand-logo { width: 82%; height: 82%; object-fit: contain; display: block; filter: drop-shadow(0 7px 12px rgba(0,0,0,.38)); }
+    .brand-wordmark { font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif; font-size: clamp(1rem, 1.35vw, 1.3rem); letter-spacing: .08em; font-weight: 700; text-transform: uppercase; color: #fff8ee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .site { width: 100%; margin: 0; padding: clamp(0.75rem, 1.5vw, 1.5rem); }
     .container { width: min(1600px, 100% - clamp(0.75rem, 2vw, 2rem)); margin-inline: auto; }
     .topbar { position: sticky; top: 1rem; z-index: 10; backdrop-filter: blur(16px); background: rgba(9, 14, 23, 0.72); border: 1px solid var(--line); border-radius: 16px; padding: 0.8rem 1rem; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
@@ -46,7 +50,7 @@ function injectStyles() {
     .panel-title { margin: 0; font-size: clamp(1.6rem, 2.6vw, 2.6rem); }
     .panel-subtitle { margin: 0; color: var(--muted); max-width: 55ch; }
     .placeholder { width: min(900px, 100%); min-height: 180px; border: 1px dashed var(--line); border-radius: 16px; background: var(--panel); }
-    @media (max-width: 900px) { .topbar { flex-direction: column; align-items: stretch; } .nav { justify-content: center; } .hero { padding: 1.4rem; } .empty-panel { min-height: 300px; padding: 1.25rem; } }
+    @media (max-width: 900px) { .topbar { flex-direction: column; align-items: stretch; } .topbar-brand { justify-content: center; } .brand-wordmark { text-align: center; } .nav { justify-content: center; } .hero { padding: 1.4rem; } .empty-panel { min-height: 300px; padding: 1.25rem; } }
     @media (min-width: 1500px) { .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   `;
   document.head.appendChild(style);
@@ -123,7 +127,19 @@ function render(root, appData) {
   const site = el('div', 'site');
   const topbarWrap = el('div', 'container');
   const topbar = el('header', 'topbar');
-  topbar.append(el('div', 'brand', appData.brand || 'Harvest & Hearth'));
+  const brandWrap = el('div', 'topbar-brand');
+  const logoWrap = el('div', 'brand-logo-wrap');
+  const logo = document.createElement('img');
+  logo.className = 'brand-logo';
+  logo.src = appData.logo || './logo.png';
+  logo.alt = `${appData.brand || 'Restaurant'} logo`;
+  logo.loading = 'eager';
+  logo.decoding = 'async';
+  logo.addEventListener('error', () => { logo.style.display = 'none'; });
+  logoWrap.append(logo);
+  const wordmark = el('div', 'brand-wordmark', appData.brand || 'LA CUISINE DE ROSALIE');
+  brandWrap.append(logoWrap, wordmark);
+  topbar.append(brandWrap);
   const nav = el('div', 'nav');
   nav.setAttribute('role', 'tablist');
   nav.setAttribute('aria-label', 'Sections principales');
@@ -159,6 +175,10 @@ window.webframe = {
   async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap';
+    document.head.appendChild(fontLink);
     injectStyles();
     const appData = await loadAppData();
     render(root, appData);

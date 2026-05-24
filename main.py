@@ -165,6 +165,8 @@ def build_ui(port: int) -> None:
     app.add_static_files("/data", str(DATA_DIR))
     app.add_static_files("/assets", str(ASSETS_DIR))
     app.add_static_file(url_path="/main.js", local_file=str(ACTIVE_DIR / "main.js"))
+    if (ACTIVE_DIR / "logo.png").exists():
+        app.add_static_file(url_path="/logo.png", local_file=str(ACTIVE_DIR / "logo.png"))
     ui.add_body_html('<script src="/main.js"></script>')
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
 
