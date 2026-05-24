@@ -32,6 +32,14 @@ function normalizePrice(price) {
   return typeof price === 'number' ? `$${price}` : '';
 }
 
+function isFeatured(item) {
+  if (!item) return false;
+  if (typeof item.featured === 'boolean') return item.featured;
+  if (typeof item.featured === 'string') return item.featured.trim().toLowerCase() === 'true';
+  if (typeof item.featured === 'number') return item.featured === 1;
+  return false;
+}
+
 function syncDataFromItems(items) {
   const availableItems = items.filter((item) => item?.available);
   const categorySet = new Set(['All']);
@@ -42,16 +50,7 @@ function syncDataFromItems(items) {
 
   appData.items = availableItems;
   appData.categories = Array.from(categorySet);
-  appData.highlights = availableItems
-    .filter((item) => item?.featured)
-    .map((item) => ({
-      title: item.title || 'Untitled Item',
-      description: item.description || '',
-      price: normalizePrice(item.price),
-      badge: item.category || 'Featured',
-      image: item.image || '',
-      id: item.id || '',
-    }));
+  appData.highlights = availableItems.filter((item) => isFeatured(item));
 }
 
 function el(tag, className, text) {
