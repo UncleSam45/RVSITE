@@ -1,36 +1,15 @@
 const appData = {
   brand: 'Harvest & Hearth',
   tagline: 'Local Cooking Studio & Weekly Meal Craft',
-  nav: [
-    'ACCUEIL',
-    'MENUS',
-    'SPÉCIAL DU JOUR',
-    'CONTACT',
+  tabs: [
+    { id: 'home', label: 'ACCUEIL' },
+    { id: 'menu', label: 'MENUS' },
+    { id: 'special', label: 'SPÉCIAL DU JOUR' },
+    { id: 'contact', label: 'CONTACT' },
   ],
   iconNav: [
     { icon: '👤', label: 'Compte' },
     { icon: '🛒', label: 'Panier' },
-  ],
-  categories: ['All', 'Seasonal', 'Family Packs', 'Vegetarian', 'Desserts'],
-  highlights: [
-    {
-      title: 'Garden Harvest Bowl',
-      description: 'Roasted market vegetables, lemon-herb grains, and whipped feta.',
-      price: '$14',
-      badge: 'Best Seller',
-    },
-    {
-      title: 'Slow-Braised Beef Pot',
-      description: 'Red wine reduction, glazed roots, and creamy potato mash.',
-      price: '$18',
-      badge: 'Chef Pick',
-    },
-    {
-      title: 'Citrus Flame Salmon',
-      description: 'Charred salmon with bright citrus glaze and wild rice medley.',
-      price: '$19',
-      badge: 'New',
-    },
   ],
 };
 
@@ -96,8 +75,11 @@ function injectStyles() {
       border-radius: 999px;
       font-size: 0.92rem;
       transition: 180ms ease;
+      background: transparent;
+      cursor: pointer;
     }
-    .tab:hover, .tab.active {
+    .tab:hover,
+    .tab[aria-selected="true"] {
       color: var(--text);
       border-color: var(--line);
       background: rgba(255,255,255,0.06);
@@ -107,60 +89,78 @@ function injectStyles() {
       font-size: 1rem;
       line-height: 1;
     }
-    .hero {
+    .tab-panel {
       margin-top: 1.1rem;
       border-radius: 24px;
       border: 1px solid var(--line);
-      padding: 2.5rem;
       background: linear-gradient(160deg, rgba(245,185,112,.12), rgba(243,139,117,.14) 48%, rgba(255,255,255,.02));
       box-shadow: var(--shadow);
+      min-height: 360px;
+      padding: 2rem;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      text-align: center;
+      gap: 0.8rem;
     }
-    .kicker { color: var(--good); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; font-size: .78rem; }
-    h1 { margin: .6rem 0; font-size: clamp(2rem, 3vw, 3.25rem); line-height: 1.1; }
-    .lead { color: var(--muted); max-width: 60ch; margin-bottom: 1.5rem; }
-    .actions { display: flex; gap: .7rem; flex-wrap: wrap; }
-    .btn {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: .7rem 1rem;
-      border-radius: 12px;
-      font-weight: 600;
+    .tab-panel[hidden] { display: none; }
+    .panel-title {
+      margin: 0;
+      font-size: clamp(1.6rem, 2.6vw, 2.6rem);
     }
-    .btn.primary { background: linear-gradient(125deg, var(--primary), var(--accent)); color: #1e130b; border: none; }
-    .section { margin-top: 2rem; }
-    .section h2 { margin: 0 0 .9rem; font-size: 1.35rem; }
-    .chips { display: flex; gap: .6rem; flex-wrap: wrap; }
-    .chip {
-      border: 1px solid var(--line);
-      padding: .45rem .75rem;
-      border-radius: 10px;
+    .panel-subtitle {
+      margin: 0;
       color: var(--muted);
-      font-size: .9rem;
+      max-width: 55ch;
     }
-    .cards { margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
-    .card {
-      border: 1px solid var(--line);
+    .placeholder {
+      width: min(900px, 100%);
+      min-height: 180px;
+      border: 1px dashed var(--line);
       border-radius: 16px;
       background: var(--panel);
-      padding: 1rem;
-      display: grid;
-      gap: .65rem;
     }
-    .badge { width: fit-content; font-size: .72rem; padding: .3rem .55rem; border-radius: 999px; background: rgba(139,212,167,.16); color: var(--good); }
-    .card h3 { margin: 0; }
-    .card p { margin: 0; color: var(--muted); }
-    .price { font-weight: 700; color: var(--primary); }
     @media (max-width: 900px) {
       .topbar { flex-direction: column; align-items: stretch; }
       .nav { justify-content: center; }
-      .hero { padding: 1.4rem; }
-    }
-    @media (min-width: 1500px) {
-      .cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .tab-panel { min-height: 300px; padding: 1.25rem; }
     }
   `;
   document.head.appendChild(style);
+}
+
+function setupTabs(tabButtons, panels) {
+  const activateTab = (tabId) => {
+    tabButtons.forEach((button) => {
+      const isActive = button.dataset.tabId === tabId;
+      button.setAttribute('aria-selected', String(isActive));
+      button.tabIndex = isActive ? 0 : -1;
+    });
+
+    panels.forEach((panel) => {
+      panel.hidden = panel.dataset.tabPanel !== tabId;
+    });
+  };
+
+  tabButtons.forEach((button, index) => {
+    button.addEventListener('click', () => activateTab(button.dataset.tabId));
+    button.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+
+      let nextIndex = index;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabButtons.length;
+      if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabButtons.length) % tabButtons.length;
+      if (event.key === 'Home') nextIndex = 0;
+      if (event.key === 'End') nextIndex = tabButtons.length - 1;
+
+      const nextButton = tabButtons[nextIndex];
+      nextButton.focus();
+      activateTab(nextButton.dataset.tabId);
+    });
+  });
+
+  activateTab(tabButtons[0]?.dataset.tabId);
 }
 
 function render(root) {
@@ -169,60 +169,61 @@ function render(root) {
   const topbarWrap = el('div', 'container');
   const topbar = el('header', 'topbar');
   topbar.append(el('div', 'brand', appData.brand));
-  const nav = el('nav', 'nav');
-  appData.nav.forEach((item, idx) => {
-    nav.append(el('span', `tab ${idx === 0 ? 'active' : ''}`, item));
+
+  const nav = el('div', 'nav');
+  nav.setAttribute('role', 'tablist');
+  nav.setAttribute('aria-label', 'Sections principales');
+
+  const tabButtons = appData.tabs.map((tab, idx) => {
+    const button = el('button', 'tab', tab.label);
+    button.type = 'button';
+    button.id = `tab-${tab.id}`;
+    button.dataset.tabId = tab.id;
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-controls', `panel-${tab.id}`);
+    button.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+    button.tabIndex = idx === 0 ? 0 : -1;
+    nav.append(button);
+    return button;
   });
+
   appData.iconNav.forEach((item) => {
-    const iconTab = el('span', 'tab icon-tab', item.icon);
+    const iconTab = el('button', 'tab icon-tab', item.icon);
+    iconTab.type = 'button';
     iconTab.setAttribute('aria-label', item.label);
     iconTab.title = item.label;
     nav.append(iconTab);
   });
+
   topbar.append(nav);
   topbarWrap.append(topbar);
 
-  const heroWrap = el('div', 'container');
-  const hero = el('section', 'hero');
-  hero.append(el('div', 'kicker', 'Handcrafted local kitchen'));
-  hero.append(el('h1', '', 'Seasonal meals crafted for your week.'));
-  hero.append(el('p', 'lead', 'A modern local cooking business website shell: polished, inviting, and ready for menus, ordering, and Stripe-powered checkout integration.'));
-  const actions = el('div', 'actions');
-  actions.append(el('button', 'btn primary', 'Explore Menu'));
-  actions.append(el('button', 'btn', 'Plan Catering'));
-  hero.append(actions);
-  heroWrap.append(hero);
+  const panelWrap = el('div', 'container');
+  const panels = appData.tabs.map((tab, idx) => {
+    const panel = el('section', 'tab-panel');
+    panel.id = `panel-${tab.id}`;
+    panel.dataset.tabPanel = tab.id;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', `tab-${tab.id}`);
+    panel.hidden = idx !== 0;
 
-  const menuWrap = el('div', 'container');
-  const menuSection = el('section', 'section');
-  menuSection.append(el('h2', '', 'Menu Categories'));
-  const chips = el('div', 'chips');
-  appData.categories.forEach((c, i) => chips.append(el('span', `chip ${i === 0 ? 'active' : ''}`, c)));
-  menuSection.append(chips);
-  menuWrap.append(menuSection);
+    panel.append(el('h2', 'panel-title', tab.label));
+    panel.append(el('p', 'panel-subtitle', 'Section prête: espace réservé pour votre contenu.'));
+    panel.append(el('div', 'placeholder'));
 
-  const cardWrap = el('div', 'container');
-  const cardSection = el('section', 'section');
-  cardSection.append(el('h2', '', 'Featured This Week'));
-  const cards = el('div', 'cards');
-  appData.highlights.forEach((item) => {
-    const card = el('article', 'card');
-    card.append(el('div', 'badge', item.badge));
-    card.append(el('h3', '', item.title));
-    card.append(el('p', '', item.description));
-    card.append(el('div', 'price', item.price));
-    cards.append(card);
+    panelWrap.append(panel);
+    return panel;
   });
-  cardSection.append(cards);
-  cardWrap.append(cardSection);
 
-  site.append(topbarWrap, heroWrap, menuWrap, cardWrap);
+  site.append(topbarWrap, panelWrap);
   root.innerHTML = '';
   root.append(site);
+
+  setupTabs(tabButtons, panels);
 }
 
 window.webframe = {
-  version: '1.0.0',
+  version: '1.1.0',
   init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
