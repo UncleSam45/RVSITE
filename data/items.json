@@ -7,13 +7,43 @@
       "category": "Seasonal",
       "available": true,
       "featured": true,
-      "image": "./assets/images/garden-harvest-bowl.jpg",
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
       "video": "",
       "pricing_type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": "19-25 depending on special"
+      }
+    },
+    {
+      "id": "rosemary-chicken-platter",
+      "title": "Rosemary Chicken Platter",
+      "description": "Herb-roasted chicken with garlic jus, seasonal vegetables, and buttery potatoes.",
+      "category": "Signature Entrees",
+      "available": true,
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=1200&q=80",
+      "video": "",
+      "pricing_type": "regular_meal",
+      "pricing": {
+        "small_meal": 11,
+        "large_meal": 16,
+        "family_format": "$34 tray"
+      }
+    },
+    {
+      "id": "artisan-brunch-board",
+      "title": "Artisan Brunch Board",
+      "description": "Mini pastries, seasonal fruit, smoked salmon bites, and whipped honey ricotta.",
+      "category": "Brunch & Grazing",
+      "available": true,
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?auto=format&fit=crop&w=1200&q=80",
+      "video": "",
+      "pricing_type": "sides_extras",
+      "pricing": {
+        "price_range": "14-20"
       }
     }
   ]
