@@ -194,7 +194,7 @@ function render(root) {
   const topbar = el('header', 'topbar');
   const brandWrap = el('div', 'brand-wrap');
   const brandLogo = el('img', 'brand-logo');
-  brandLogo.src = '/assets/logo.png';
+  brandLogo.src = `/assets/logo.png?v=${window.webframe?.version || '1.3.1'}`;
   brandLogo.alt = `${appData.brand} logo`;
   brandLogo.loading = 'eager';
   brandWrap.append(brandLogo, el('div', 'brand', appData.brand));
@@ -242,7 +242,7 @@ function render(root) {
 }
 
 window.webframe = {
-  version: '1.3.0',
+  version: '1.3.1',
   async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
