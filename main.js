@@ -72,8 +72,8 @@ function injectStyles() {
     .container { width: min(1600px, 100% - clamp(0.75rem, 2vw, 2rem)); margin-inline: auto; }
     .topbar { position: sticky; top: 1rem; z-index: 10; backdrop-filter: blur(16px); background: rgba(9, 14, 23, 0.72); border: 1px solid var(--line); border-radius: 16px; padding: 0.8rem 1rem; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
     .brand-wrap { display: flex; align-items: center; gap: 1rem; min-width: 0; }
-    .brand-logo { width: clamp(88px, 8vw, 124px); height: clamp(88px, 8vw, 124px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; }
-    .brand { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: clamp(1.1rem, 1.3vw, 1.45rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand-logo { width: clamp(112px, 10vw, 164px); height: clamp(112px, 10vw, 164px); object-fit: contain; background: transparent; border: 0; box-shadow: none; flex: 0 0 auto; }
+    .brand-title { width: clamp(220px, 24vw, 420px); max-width: 100%; height: auto; object-fit: contain; background: transparent; border: 0; box-shadow: none; display: block; }
     .nav { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
     .tab { border: 1px solid transparent; color: var(--muted); padding: 0.45rem 0.75rem; border-radius: 999px; font-size: 0.92rem; transition: 180ms ease; background: transparent; cursor: pointer; }
     .tab:hover, .tab[aria-selected="true"] { color: var(--text); border-color: var(--line); background: rgba(255,255,255,0.06); }
@@ -197,7 +197,11 @@ function render(root) {
   brandLogo.src = `/assets/logo.png?v=${window.webframe?.version || '1.3.1'}`;
   brandLogo.alt = `${appData.brand} logo`;
   brandLogo.loading = 'eager';
-  brandWrap.append(brandLogo, el('div', 'brand', appData.brand));
+  const brandTitle = el('img', 'brand-title');
+  brandTitle.src = `/assets/title.png?v=${window.webframe?.version || '1.3.2'}`;
+  brandTitle.alt = appData.brand;
+  brandTitle.loading = 'eager';
+  brandWrap.append(brandLogo, brandTitle);
   topbar.append(brandWrap);
 
   const nav = el('div', 'nav');
@@ -242,7 +246,7 @@ function render(root) {
 }
 
 window.webframe = {
-  version: '1.3.1',
+  version: '1.3.2',
   async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
