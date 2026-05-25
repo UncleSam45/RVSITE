@@ -17,8 +17,13 @@ const appData = {
 
 const cartState = {
   entries: [],
+  customer: {
+    name: '',
+    address: '',
+  },
   listeners: new Set(),
 };
+const CART_STORAGE_KEY = 'lacuisine_cart_v1';
 
 function formatCurrency(value) {
   return typeof value === 'number' ? `$${value.toFixed(2)}` : '';
@@ -49,6 +54,41 @@ function notifyCart() {
   cartState.listeners.forEach((listener) => listener());
 }
 
+function saveCartToStorage() {
+  try {
+    const payload = {
+      entries: cartState.entries,
+      customer: cartState.customer,
+    };
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn('[webframe] Could not save cart to localStorage.', error);
+  }
+}
+
+function loadCartFromStorage() {
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed?.entries)) {
+      cartState.entries = parsed.entries
+        .map((entry) => ({
+          ...entry,
+          qty: Math.max(1, Number(entry.qty) || 1),
+          price: Number.isFinite(entry.price) ? entry.price : null,
+        }))
+        .filter((entry) => entry.itemId && entry.optionKey);
+    }
+    if (parsed?.customer && typeof parsed.customer === 'object') {
+      cartState.customer.name = typeof parsed.customer.name === 'string' ? parsed.customer.name : '';
+      cartState.customer.address = typeof parsed.customer.address === 'string' ? parsed.customer.address : '';
+    }
+  } catch (error) {
+    console.warn('[webframe] Could not load cart from localStorage.', error);
+  }
+}
+
 function addToCart(item, option) {
   const existing = cartState.entries.find((entry) => entry.itemId === item.id && entry.optionKey === option.key);
   if (existing) existing.qty += 1;
@@ -61,6 +101,7 @@ function addToCart(item, option) {
     priceText: Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText || '',
     qty: 1,
   });
+  saveCartToStorage();
   notifyCart();
 }
 
@@ -171,6 +212,11 @@ function injectStyles() {
     .cart-name { font-weight: 600; }
     .cart-meta { font-size: .88rem; color: var(--muted); }
     .cart-total { margin-top: .9rem; padding-top: .7rem; border-top: 1px dashed #d9cfc4; display: flex; justify-content: space-between; font-weight: 700; }
+    .customer-section { margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed #d9cfc4; display: grid; gap: .6rem; }
+    .customer-title { margin: 0; font-size: .97rem; font-weight: 700; color: #2f2418; }
+    .customer-label { font-size: .85rem; color: var(--muted); font-weight: 600; }
+    .customer-input { border: 1px solid var(--line); border-radius: 10px; padding: .55rem .65rem; font: inherit; }
+    .customer-input:focus { outline: 2px solid #d6b084; border-color: #d6b084; }
     .empty-state { color: var(--muted); border: 1px dashed #d3c7b9; border-radius: 12px; padding: 1rem; background: #fcfaf7; }
     .empty-panel { border-radius: 22px; border: 1px solid var(--line); min-height: 320px; padding: 2rem; display: grid; place-items: center; text-align: center; gap: .6rem; background: #fff; box-shadow: var(--shadow); }
     .panel-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); }
@@ -244,6 +290,29 @@ function buildCartSection(target, title = 'Your Cart') {
   panel.append(el('p', 'cart-hint', 'Pick a quantity and add cleanly in one click.'));
   const itemsWrap = el('div', 'cart-items');
   const totals = el('div', 'cart-total');
+  const customerSection = el('div', 'customer-section');
+  customerSection.append(el('p', 'customer-title', 'Delivery details'));
+  const nameLabel = el('label', 'customer-label', 'Name');
+  const nameInput = el('input', 'customer-input');
+  nameInput.type = 'text';
+  nameInput.placeholder = 'Enter your full name';
+  nameInput.value = cartState.customer.name;
+  nameInput.addEventListener('input', () => {
+    cartState.customer.name = nameInput.value.trimStart();
+    saveCartToStorage();
+  });
+  nameLabel.append(nameInput);
+  const addressLabel = el('label', 'customer-label', 'Address');
+  const addressInput = el('textarea', 'customer-input');
+  addressInput.placeholder = 'Enter your delivery address';
+  addressInput.rows = 3;
+  addressInput.value = cartState.customer.address;
+  addressInput.addEventListener('input', () => {
+    cartState.customer.address = addressInput.value.trimStart();
+    saveCartToStorage();
+  });
+  addressLabel.append(addressInput);
+  customerSection.append(nameLabel, addressLabel);
 
   function renderCart() {
     itemsWrap.innerHTML = '';
@@ -266,7 +335,7 @@ function buildCartSection(target, title = 'Your Cart') {
   }
 
   subscribeCart(renderCart);
-  panel.append(itemsWrap, totals);
+  panel.append(itemsWrap, totals, customerSection);
   target.append(panel);
 }
 
@@ -373,6 +442,7 @@ window.webframe = {
   async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
+    loadCartFromStorage();
     const items = await loadItems();
     syncDataFromItems(items);
     injectStyles();
