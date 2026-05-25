@@ -16,6 +16,55 @@ const appData = {
   items: [],
 };
 
+const cartState = {
+  entries: [],
+  listeners: new Set(),
+};
+
+function formatCurrency(value) {
+  return typeof value === 'number' ? `$${value.toFixed(2)}` : '';
+}
+
+function getPortionOptions(item) {
+  const pricing = item?.pricing || {};
+  const options = [];
+  if (pricing.small_meal != null) options.push({ key: 'small_meal', label: 'Small', price: Number(pricing.small_meal) });
+  if (pricing.large_meal != null) options.push({ key: 'large_meal', label: 'Large', price: Number(pricing.large_meal) });
+  if (pricing.family_format != null) options.push({ key: 'family_format', label: 'Family', priceText: `${pricing.family_format}` });
+  return options;
+}
+
+function getCartTotals() {
+  const subtotal = cartState.entries.reduce((sum, entry) => sum + (entry.price || 0) * entry.qty, 0);
+  const itemCount = cartState.entries.reduce((sum, entry) => sum + entry.qty, 0);
+  return { subtotal, itemCount };
+}
+
+function subscribeCart(listener) {
+  cartState.listeners.add(listener);
+  listener();
+  return () => cartState.listeners.delete(listener);
+}
+
+function notifyCart() {
+  cartState.listeners.forEach((listener) => listener());
+}
+
+function addToCart(item, option) {
+  const existing = cartState.entries.find((entry) => entry.itemId === item.id && entry.optionKey === option.key);
+  if (existing) existing.qty += 1;
+  else cartState.entries.push({
+    itemId: item.id,
+    optionKey: option.key,
+    title: item.title || 'Item',
+    optionLabel: option.label,
+    price: Number.isFinite(option.price) ? option.price : null,
+    priceText: Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText || '',
+    qty: 1,
+  });
+  notifyCart();
+}
+
 async function loadItems() {
   try {
     const response = await fetch('/assets/data/items.json', { cache: 'no-store' });
@@ -110,6 +159,18 @@ function injectStyles() {
     .card h3 { margin: 0; font-size: 1.03rem; }
     .card p { margin: 0; color: var(--muted); font-size: .94rem; }
     .price { margin-top: .2rem; font-weight: 700; color: var(--accent-dark); }
+    .card-actions { display: flex; gap: .55rem; align-items: center; margin-top: .2rem; }
+    .portion-select { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: .5rem .55rem; background: #fff; color: #34291e; }
+    .add-btn { border: 0; border-radius: 10px; padding: .55rem .85rem; color: #fff; font-weight: 700; cursor: pointer; background: linear-gradient(180deg, #ba8447, #9e6d35); }
+    .add-btn:hover { filter: brightness(1.06); }
+    .cart-panel { margin-top: 1.25rem; border: 1px solid var(--line); background: #fff; border-radius: 18px; padding: 1rem; box-shadow: var(--shadow); }
+    .cart-title { margin: 0 0 .35rem; font-size: 1.1rem; }
+    .cart-hint { margin: 0; color: var(--muted); font-size: .92rem; }
+    .cart-items { margin-top: .8rem; display: grid; gap: .55rem; }
+    .cart-row { border: 1px solid #ebe3d8; border-radius: 12px; padding: .6rem .7rem; background: #fcfaf7; display: flex; justify-content: space-between; gap: .6rem; }
+    .cart-name { font-weight: 600; }
+    .cart-meta { font-size: .88rem; color: var(--muted); }
+    .cart-total { margin-top: .9rem; padding-top: .7rem; border-top: 1px dashed #d9cfc4; display: flex; justify-content: space-between; font-weight: 700; }
     .empty-state { color: var(--muted); border: 1px dashed #d3c7b9; border-radius: 12px; padding: 1rem; background: #fcfaf7; }
     .empty-panel { border-radius: 22px; border: 1px solid var(--line); min-height: 320px; padding: 2rem; display: grid; place-items: center; text-align: center; gap: .6rem; background: #fff; box-shadow: var(--shadow); }
     .panel-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); }
@@ -142,10 +203,64 @@ function buildMenuCards(target, items) {
     content.append(el('h3', '', item.title || 'Item sans titre'));
     content.append(el('p', '', item.description || ''));
     content.append(el('div', 'price', normalizePrice(item)));
+
+    const options = getPortionOptions(item);
+    if (options.length > 0) {
+      const actions = el('div', 'card-actions');
+      const select = el('select', 'portion-select');
+      options.forEach((option) => {
+        const opt = document.createElement('option');
+        opt.value = option.key;
+        const tag = Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText;
+        opt.textContent = `${option.label}${tag ? ` • ${tag}` : ''}`;
+        select.append(opt);
+      });
+      const addButton = el('button', 'add-btn', 'ADD TO CART');
+      addButton.type = 'button';
+      addButton.addEventListener('click', () => {
+        const selected = options.find((option) => option.key === select.value) || options[0];
+        addToCart(item, selected);
+      });
+      actions.append(select, addButton);
+      content.append(actions);
+    }
+
     card.append(image, content);
     cards.append(card);
   });
   target.append(cards);
+}
+
+function buildCartSection(target) {
+  const panel = el('aside', 'cart-panel');
+  panel.append(el('h3', 'cart-title', 'Your Cart'));
+  panel.append(el('p', 'cart-hint', 'Pick a quantity and add cleanly in one click.'));
+  const itemsWrap = el('div', 'cart-items');
+  const totals = el('div', 'cart-total');
+
+  function renderCart() {
+    itemsWrap.innerHTML = '';
+    const { subtotal, itemCount } = getCartTotals();
+    if (cartState.entries.length === 0) {
+      itemsWrap.append(el('p', 'empty-state', 'Your cart is empty. Add meals to start your order.'));
+    } else {
+      cartState.entries.forEach((entry) => {
+        const row = el('div', 'cart-row');
+        const left = el('div');
+        left.append(el('div', 'cart-name', `${entry.title} (${entry.optionLabel})`));
+        left.append(el('div', 'cart-meta', `Qty: ${entry.qty}`));
+        row.append(left, el('div', 'cart-name', entry.price != null ? formatCurrency(entry.price * entry.qty) : entry.priceText));
+        itemsWrap.append(row);
+      });
+    }
+    totals.innerHTML = '';
+    totals.append(el('span', '', `Items: ${itemCount}`));
+    totals.append(el('span', '', `Subtotal: ${formatCurrency(subtotal)}`));
+  }
+
+  subscribeCart(renderCart);
+  panel.append(itemsWrap, totals);
+  target.append(panel);
 }
 
 function buildHomePanel(panel) {
@@ -178,7 +293,7 @@ function buildHomePanel(panel) {
   panel.append(menuSection, featuredSection, cert);
 }
 
-function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Items disponibles')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.')); panel.append(menuSection); }
+function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Items disponibles')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.')); panel.append(menuSection); buildCartSection(panel); }
 function buildContactPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Contactez-nous')); empty.append(el('p', 'panel-subtitle', 'Nous couvrons les secteurs suivants au Québec : Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères.')); const phone = el('p', 'panel-subtitle', 'Téléphone : 514-298-7545'); const details = el('p', 'panel-subtitle', 'Repas faits maison certifiés MAPAQ. Commandes au moins 48h à l\'avance. Minimum de commande : 30💲. Livraison gratuite 💛.'); const certExplain = el('p', 'panel-subtitle', "Une certification MAPAQ est une formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec pour prévenir les risques d'intoxication alimentaire."); const certLogo = el('img', 'cert-logo'); certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png'; certLogo.alt = 'Logo officiel de formation MAPAQ'; certLogo.loading = 'lazy'; empty.append(phone, details, certExplain, certLogo); panel.append(empty); }
 
 function buildSpecialPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Événements')); empty.append(el('p', 'panel-subtitle', 'Service traiteur pour événements privés, corporatifs et familiaux. Contactez-nous pour planifier votre menu.')); panel.append(empty); }
