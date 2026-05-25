@@ -17,8 +17,19 @@ const appData = {
 
 const cartState = {
   entries: [],
+  customer: {
+    name: '',
+    phone: '',
+    streetNumber: '',
+    streetName: '',
+    apartment: '',
+    city: '',
+    province: '',
+    postalCode: '',
+  },
   listeners: new Set(),
 };
+const CART_STORAGE_KEY = 'lacuisine_cart_v1';
 
 function formatCurrency(value) {
   return typeof value === 'number' ? `$${value.toFixed(2)}` : '';
@@ -49,6 +60,50 @@ function notifyCart() {
   cartState.listeners.forEach((listener) => listener());
 }
 
+function saveCartToStorage() {
+  try {
+    const payload = {
+      entries: cartState.entries,
+      customer: cartState.customer,
+    };
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn('[webframe] Could not save cart to localStorage.', error);
+  }
+}
+
+function loadCartFromStorage() {
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed?.entries)) {
+      cartState.entries = parsed.entries
+        .map((entry) => ({
+          ...entry,
+          qty: Math.max(1, Number(entry.qty) || 1),
+          price: Number.isFinite(entry.price) ? entry.price : null,
+        }))
+        .filter((entry) => entry.itemId && entry.optionKey);
+    }
+    if (parsed?.customer && typeof parsed.customer === 'object') {
+      cartState.customer.name = typeof parsed.customer.name === 'string' ? parsed.customer.name : '';
+      cartState.customer.phone = typeof parsed.customer.phone === 'string' ? parsed.customer.phone : '';
+      cartState.customer.streetNumber = typeof parsed.customer.streetNumber === 'string' ? parsed.customer.streetNumber : '';
+      cartState.customer.streetName = typeof parsed.customer.streetName === 'string' ? parsed.customer.streetName : '';
+      cartState.customer.apartment = typeof parsed.customer.apartment === 'string' ? parsed.customer.apartment : '';
+      cartState.customer.city = typeof parsed.customer.city === 'string' ? parsed.customer.city : '';
+      cartState.customer.province = typeof parsed.customer.province === 'string' ? parsed.customer.province : '';
+      cartState.customer.postalCode = typeof parsed.customer.postalCode === 'string' ? parsed.customer.postalCode : '';
+      if ((!cartState.customer.streetName || !cartState.customer.city) && typeof parsed.customer.address === 'string') {
+        cartState.customer.streetName = parsed.customer.address;
+      }
+    }
+  } catch (error) {
+    console.warn('[webframe] Could not load cart from localStorage.', error);
+  }
+}
+
 function addToCart(item, option) {
   const existing = cartState.entries.find((entry) => entry.itemId === item.id && entry.optionKey === option.key);
   if (existing) existing.qty += 1;
@@ -61,6 +116,7 @@ function addToCart(item, option) {
     priceText: Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText || '',
     qty: 1,
   });
+  saveCartToStorage();
   notifyCart();
 }
 
@@ -171,6 +227,14 @@ function injectStyles() {
     .cart-name { font-weight: 600; }
     .cart-meta { font-size: .88rem; color: var(--muted); }
     .cart-total { margin-top: .9rem; padding-top: .7rem; border-top: 1px dashed #d9cfc4; display: flex; justify-content: space-between; font-weight: 700; }
+    .customer-section { margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed #d9cfc4; display: grid; gap: .8rem; }
+    .customer-title { margin: 0; font-size: .97rem; font-weight: 700; color: #2f2418; }
+    .customer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; align-items: end; }
+    .customer-label { font-size: .85rem; color: var(--muted); font-weight: 600; display: grid; gap: .3rem; }
+    .customer-label.full { grid-column: 1 / -1; }
+    .customer-input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: .55rem .65rem; font: inherit; background: #fff; min-height: 40px; }
+    .customer-input:focus { outline: 2px solid #d6b084; border-color: #d6b084; }
+    @media (max-width: 620px) { .customer-grid { grid-template-columns: 1fr; } }
     .empty-state { color: var(--muted); border: 1px dashed #d3c7b9; border-radius: 12px; padding: 1rem; background: #fcfaf7; }
     .empty-panel { border-radius: 22px; border: 1px solid var(--line); min-height: 320px; padding: 2rem; display: grid; place-items: center; text-align: center; gap: .6rem; background: #fff; box-shadow: var(--shadow); }
     .panel-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); }
@@ -244,6 +308,39 @@ function buildCartSection(target, title = 'Your Cart') {
   panel.append(el('p', 'cart-hint', 'Pick a quantity and add cleanly in one click.'));
   const itemsWrap = el('div', 'cart-items');
   const totals = el('div', 'cart-total');
+  const customerSection = el('div', 'customer-section');
+  customerSection.append(el('p', 'customer-title', 'Delivery details'));
+  const customerGrid = el('div', 'customer-grid');
+
+  const createField = ({ key, label, placeholder, className = '', type = 'text', maxLength }) => {
+    const fieldLabel = el('label', `customer-label ${className}`.trim(), label);
+    const input = el('input', 'customer-input');
+    input.type = type;
+    input.placeholder = placeholder;
+    input.value = cartState.customer[key] || '';
+    if (maxLength) input.maxLength = maxLength;
+    input.autocomplete = key === 'name' ? 'name' : key === 'phone' ? 'tel' : key === 'postalCode' ? 'postal-code' : 'street-address';
+    input.addEventListener('input', () => {
+      const value = key === 'postalCode' ? input.value.toUpperCase() : input.value;
+      cartState.customer[key] = value.trimStart();
+      if (key === 'postalCode' && input.value !== value) input.value = value;
+      saveCartToStorage();
+    });
+    fieldLabel.append(input);
+    return fieldLabel;
+  };
+
+  customerGrid.append(
+    createField({ key: 'name', label: 'Full name', placeholder: 'Enter your full name', className: 'full' }),
+    createField({ key: 'phone', label: 'Phone number', placeholder: '(514) 000-0000', type: 'tel', className: 'full' }),
+    createField({ key: 'streetNumber', label: 'Street number', placeholder: '123' }),
+    createField({ key: 'streetName', label: 'Street name', placeholder: 'Main Street' }),
+    createField({ key: 'apartment', label: 'Apartment (optional)', placeholder: 'Unit 4B' }),
+    createField({ key: 'city', label: 'City', placeholder: 'Montreal' }),
+    createField({ key: 'province', label: 'Province', placeholder: 'QC' }),
+    createField({ key: 'postalCode', label: 'Postal code', placeholder: 'H2X 1Y4', maxLength: 7 })
+  );
+  customerSection.append(customerGrid);
 
   function renderCart() {
     itemsWrap.innerHTML = '';
@@ -266,7 +363,7 @@ function buildCartSection(target, title = 'Your Cart') {
   }
 
   subscribeCart(renderCart);
-  panel.append(itemsWrap, totals);
+  panel.append(itemsWrap, totals, customerSection);
   target.append(panel);
 }
 
@@ -373,6 +470,7 @@ window.webframe = {
   async init() {
     const root = document.getElementById('webframe-root');
     if (!root) return;
+    loadCartFromStorage();
     const items = await loadItems();
     syncDataFromItems(items);
     injectStyles();
