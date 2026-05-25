@@ -395,12 +395,6 @@ function buildHomePanel(panel) {
   hero.append(el('button', 'hero-cta', 'Commander maintenant'));
   panel.append(hero);
 
-  const menuSection = el('section', 'section');
-  menuSection.append(el('h2', '', 'Catégories du menu'));
-  const chips = el('div', 'chips');
-  appData.categories.forEach((category) => chips.append(el('span', 'chip', category)));
-  menuSection.append(chips);
-
   const featuredSection = el('section', 'section');
   featuredSection.append(el('h2', '', 'Sélections en vedette'));
   if (appData.highlights.length > 0) buildMenuCards(featuredSection, appData.highlights);
@@ -414,7 +408,7 @@ function buildHomePanel(panel) {
   cert.append(certLogo);
   cert.append(el('p', 'cert-text', "Certification MAPAQ: formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec afin de prévenir les risques d'intoxication alimentaire."));
 
-  panel.append(menuSection, featuredSection, cert);
+  panel.append(featuredSection, cert);
 }
 
 
