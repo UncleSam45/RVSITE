@@ -3,7 +3,7 @@ const appData = {
   tagline: 'Repas faits maison • Livraison locale',
   tabs: [
     { id: 'home', label: 'ACCUEIL' },
-    { id: 'menu', label: 'MENU' },
+    { id: 'menu', label: 'MENUS' },
     { id: 'calendar', label: 'CALENDRIER' },
     { id: 'special', label: 'ÉVÉNEMENTS' },
     { id: 'contact', label: 'CONTACT' },
@@ -13,7 +13,9 @@ const appData = {
   ],
   categories: ['All'],
   highlights: [],
+  archives: [],
   items: [],
+  currentMenu: null,
 };
 
 const cartState = {
@@ -131,10 +133,13 @@ async function loadItems() {
     const response = await fetch('/assets/data/items.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`Failed to load items: ${response.status}`);
     const payload = await response.json();
-    return Array.isArray(payload?.items) ? payload.items : [];
+    return {
+      items: Array.isArray(payload?.items) ? payload.items : [],
+      currentMenu: payload?.current_menu && typeof payload.current_menu === 'object' ? payload.current_menu : null,
+    };
   } catch (error) {
     console.warn('[webframe] Could not load items.json, using empty list.', error);
-    return [];
+    return { items: [], currentMenu: null };
   }
 }
 
@@ -175,6 +180,18 @@ function syncDataFromItems(items) {
   appData.items = availableItems;
   appData.categories = Array.from(categorySet);
   appData.highlights = availableItems.filter((item) => isFeatured(item));
+  appData.archives = availableItems.filter((item) => !isFeatured(item));
+}
+
+function syncCurrentMenu(meta) {
+  appData.currentMenu = meta || null;
+}
+
+function formatDisplayDate(value) {
+  if (!value) return '';
+  const parsed = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function el(tag, className, text) {
@@ -213,6 +230,11 @@ function injectStyles() {
     .chips { display: flex; gap: .55rem; flex-wrap: wrap; }
     .chip { border: 1px solid var(--line); border-radius: 999px; padding: .42rem .75rem; background: #fff; color: #544f48; font-size: .88rem; }
     .cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .cards.carousel { grid-auto-flow: column; grid-auto-columns: minmax(260px, 320px); grid-template-columns: none; overflow-x: auto; padding-bottom: .4rem; scroll-snap-type: x mandatory; }
+    .cards.carousel .card { scroll-snap-align: start; }
+    .menu-period { border: 1px solid #dfd1bd; border-radius: 16px; background: linear-gradient(135deg, #fff6e8, #fff); padding: 1rem; display: grid; gap: .45rem; margin-bottom: 1rem; }
+    .menu-period h3 { margin: 0; font-size: 1.2rem; }
+    .menu-period .dates { font-weight: 700; color: #6e4b24; margin: 0; }
     .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(21, 14, 6, 0.08); }
     .card-media { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: #ede7de; }
     .card-content { padding: 0.95rem; display: grid; gap: .55rem; }
@@ -471,8 +493,8 @@ function buildCalendarPanel(panel) {
 
 function setupTabs(tabButtons, panels) { const activateTab = (tabId) => { tabButtons.forEach((button) => { const isActive = button.dataset.tabId === tabId; button.setAttribute('aria-selected', String(isActive)); button.tabIndex = isActive ? 0 : -1; }); panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; }); }; tabButtons.forEach((button) => { button.addEventListener('click', () => activateTab(button.dataset.tabId)); }); activateTab(tabButtons[0]?.dataset.tabId); return activateTab; }
 
-function buildMenuCards(target, items) {
-  const cards = el('div', 'cards');
+function buildMenuCards(target, items, options = {}) {
+  const cards = el('div', `cards${options.carousel ? ' carousel' : ''}`);
   items.forEach((item) => {
     const card = el('article', 'card');
     const image = el('img', 'card-media');
@@ -480,6 +502,7 @@ function buildMenuCards(target, items) {
     image.alt = item.title || "Image d'un item du menu";
     image.loading = 'lazy';
     const content = el('div', 'card-content');
+    if (!isFeatured(item)) content.append(el('div', 'badge', 'En rotation'));
     content.append(el('div', 'badge', item.category || 'Menu'));
     content.append(el('h3', '', item.title || 'Item sans titre'));
     content.append(el('p', '', item.description || ''));
@@ -613,8 +636,9 @@ function buildHomePanel(panel) {
   panel.append(hero);
 
   const featuredSection = el('section', 'section');
-  featuredSection.append(el('h2', '', 'Sélections en vedette'));
-  if (appData.highlights.length > 0) buildMenuCards(featuredSection, appData.highlights);
+  featuredSection.append(el('h2', '', 'Plats vedettes du menu en cours'));
+  featuredSection.append(el('p', 'lead', 'Ces plats sont disponibles maintenant pendant la période active du menu.'));
+  if (appData.highlights.length > 0) buildMenuCards(featuredSection, appData.highlights, { carousel: true });
   else featuredSection.append(el('p', 'empty-state', 'Aucun item en vedette pour le moment.'));
 
   const cert = el('div', 'cert-block');
@@ -638,9 +662,21 @@ function buildCartPanel(panel) {
 
 function buildMenuPanel(panel) {
   const menuSection = el('section', 'section');
-  menuSection.append(el('h2', '', 'Items disponibles'));
-  if (appData.items.length > 0) buildMenuCards(menuSection, appData.items);
-  else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.'));
+  menuSection.append(el('h2', '', 'Menu de la période'));
+  const periodCard = el('div', 'menu-period');
+  periodCard.append(el('h3', '', appData.currentMenu?.title || 'Menu en cours'));
+  const start = formatDisplayDate(appData.currentMenu?.start_date);
+  const end = formatDisplayDate(appData.currentMenu?.end_date);
+  periodCard.append(el('p', 'dates', start && end ? `Du ${start} au ${end}` : 'Période à confirmer'));
+  periodCard.append(el('p', '', appData.currentMenu?.description || 'Les plats marqués en vedette sont offerts maintenant.'));
+  menuSection.append(periodCard);
+  menuSection.append(el('h2', '', 'Disponibles maintenant'));
+  if (appData.highlights.length > 0) buildMenuCards(menuSection, appData.highlights);
+  else menuSection.append(el('p', 'empty-state', 'Aucun plat vedette disponible pour cette période.'));
+  menuSection.append(el('h2', '', 'Autres plats du roulement'));
+  menuSection.append(el('p', 'lead', 'Ces plats ne sont pas offerts en ce moment, mais reviennent dans nos menus tournants.'));
+  if (appData.archives.length > 0) buildMenuCards(menuSection, appData.archives);
+  else menuSection.append(el('p', 'empty-state', 'Tous les plats sont actuellement en vedette.'));
   panel.append(menuSection);
 }
 function buildContactPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Contactez-nous')); empty.append(el('p', 'panel-subtitle', 'Nous couvrons les secteurs suivants au Québec : Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères.')); const phone = el('p', 'panel-subtitle', 'Téléphone : 514-298-7545'); const details = el('p', 'panel-subtitle', 'Repas faits maison certifiés MAPAQ. Commandes au moins 48h à l\'avance. Minimum de commande : 30💲. Livraison gratuite 💛.'); const certExplain = el('p', 'panel-subtitle', "Une certification MAPAQ est une formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec pour prévenir les risques d'intoxication alimentaire."); const certLogo = el('img', 'cert-logo'); certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png'; certLogo.alt = 'Logo officiel de formation MAPAQ'; certLogo.loading = 'lazy'; empty.append(phone, details, certExplain, certLogo); panel.append(empty); }
@@ -715,8 +751,9 @@ window.webframe = {
     const root = document.getElementById('webframe-root');
     if (!root) return;
     loadCartFromStorage();
-    const items = await loadItems();
-    syncDataFromItems(items);
+    const payload = await loadItems();
+    syncDataFromItems(payload.items);
+    syncCurrentMenu(payload.currentMenu);
     injectStyles();
     render(root);
   },

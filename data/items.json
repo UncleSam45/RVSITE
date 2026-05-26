@@ -46,5 +46,11 @@
         "price_range": "14-20"
       }
     }
-  ]
+  ],
+  "current_menu": {
+    "title": "Menu du moment",
+    "start_date": "2026-05-20",
+    "end_date": "2026-06-10",
+    "description": "Les plats marqués en vedette sont actuellement offerts pendant cette période."
+  }
 }
