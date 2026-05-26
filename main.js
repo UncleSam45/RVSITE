@@ -4,6 +4,7 @@ const appData = {
   tabs: [
     { id: 'home', label: 'ACCUEIL' },
     { id: 'menu', label: 'MENU' },
+    { id: 'calendar', label: 'CALENDRIER' },
     { id: 'special', label: 'ÉVÉNEMENTS' },
     { id: 'contact', label: 'CONTACT' },
   ],
@@ -30,6 +31,10 @@ const cartState = {
   listeners: new Set(),
 };
 const CART_STORAGE_KEY = 'lacuisine_cart_v1';
+const calendarState = {
+  selectedDate: '',
+  plannedByDate: {},
+};
 
 function formatCurrency(value) {
   return typeof value === 'number' ? `$${value.toFixed(2)}` : '';
@@ -104,8 +109,8 @@ function loadCartFromStorage() {
   }
 }
 
-function addToCart(item, option) {
-  const existing = cartState.entries.find((entry) => entry.itemId === item.id && entry.optionKey === option.key);
+function addToCart(item, option, deliveryDate = '') {
+  const existing = cartState.entries.find((entry) => entry.itemId === item.id && entry.optionKey === option.key && (entry.deliveryDate || '') === deliveryDate);
   if (existing) existing.qty += 1;
   else cartState.entries.push({
     itemId: item.id,
@@ -114,6 +119,7 @@ function addToCart(item, option) {
     optionLabel: option.label,
     price: Number.isFinite(option.price) ? option.price : null,
     priceText: Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText || '',
+    deliveryDate,
     qty: 1,
   });
   saveCartToStorage();
@@ -247,9 +253,188 @@ function injectStyles() {
     .footer-links { display: flex; flex-wrap: wrap; gap: .6rem; }
     .footer-link { border: 1px solid #d8cab8; background: #fff; color: #2f2418; border-radius: 999px; padding: .45rem .8rem; font-weight: 600; cursor: pointer; }
     .footer-note { margin: 0; color: var(--muted); font-size: .92rem; }
+    .calendar-layout { display: grid; gap: 1rem; grid-template-columns: minmax(340px, 1.2fr) minmax(300px, 1fr); align-items: start; }
+    .calendar-card, .planner-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 1rem; }
+    .calendar-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
+    .month-label { font-weight: 700; font-size: 1.02rem; }
+    .month-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: .32rem .55rem; cursor: pointer; font-weight: 700; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .35rem; }
+    .weekday { text-align: center; font-size: .78rem; color: var(--muted); font-weight: 700; padding-bottom: .2rem; }
+    .day-btn { border: 1px solid #e9e0d4; background: #fff; border-radius: 10px; min-height: 52px; cursor: pointer; font-weight: 600; }
+    .day-btn:hover { border-color: #d7b894; }
+    .day-btn.selected { background: #f4ede5; border-color: #b88442; color: #6e4b24; }
+    .day-btn.faded { opacity: .45; }
+    .planner-list { display: grid; gap: .55rem; margin-top: .7rem; }
+    .planner-row { border: 1px solid #ebe3d8; border-radius: 12px; padding: .7rem; display: grid; gap: .45rem; background: #fcfaf7; }
+    .planner-title { font-weight: 700; }
+    .planner-actions { display: flex; gap: .55rem; }
+    .planner-date-items { margin-top: .45rem; display: grid; gap: .35rem; }
+    .planner-date-item { font-size: .86rem; color: #3b3024; background: #f7efe5; border: 1px solid #eadbc9; border-radius: 8px; padding: .32rem .45rem; display: flex; justify-content: space-between; gap: .5rem; align-items: center; }
+    .planner-remove { border: 0; background: transparent; color: #8b5e29; font-weight: 700; cursor: pointer; }
+    .planner-summary { margin-top: .8rem; border-top: 1px dashed #d9cfc4; padding-top: .7rem; color: var(--muted); font-size: .92rem; }
+    @media (max-width: 980px) { .calendar-layout { grid-template-columns: 1fr; } }
     @media (max-width: 900px) { .topbar { flex-wrap: wrap; } .brand-wrap, .nav { width: 100%; justify-content: center; } .brand-title { object-position: center; } }
   `;
   document.head.appendChild(style);
+}
+
+function formatDateIso(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function buildCalendarPanel(panel) {
+  const section = el('section', 'section');
+  section.append(el('h2', '', 'Planifiez vos commandes à l’avance'));
+  const layout = el('div', 'calendar-layout');
+  const calendarCard = el('div', 'calendar-card');
+  const plannerCard = el('div', 'planner-card');
+
+  const today = new Date();
+  let viewYear = today.getFullYear();
+  let viewMonth = today.getMonth();
+  calendarState.selectedDate = calendarState.selectedDate || formatDateIso(today);
+
+  const toolbar = el('div', 'calendar-toolbar');
+  const prev = el('button', 'month-btn', '←');
+  const next = el('button', 'month-btn', '→');
+  prev.type = 'button'; next.type = 'button';
+  const monthLabel = el('div', 'month-label');
+  toolbar.append(prev, monthLabel, next);
+  const grid = el('div', 'calendar-grid');
+  calendarCard.append(toolbar, grid);
+
+  const plannerTitle = el('h3', 'cart-title', 'Menu du jour sélectionné');
+  const plannerHint = el('p', 'cart-hint');
+  const plannerList = el('div', 'planner-list');
+  const checkoutBtn = el('button', 'hero-cta', 'Passer à la caisse');
+  checkoutBtn.type = 'button';
+  const plannerSummary = el('div', 'planner-summary');
+  plannerCard.append(plannerTitle, plannerHint, plannerList, checkoutBtn, plannerSummary);
+
+  function updatePlanner() {
+    const dateLabel = calendarState.selectedDate || 'Aucune date';
+    plannerHint.textContent = `Date: ${dateLabel}`;
+    plannerList.innerHTML = '';
+    const optionsByItem = calendarState.plannedByDate[calendarState.selectedDate] || {};
+    appData.highlights.forEach((item) => {
+      const options = getPortionOptions(item);
+      if (!options.length) return;
+      const row = el('div', 'planner-row');
+      row.append(el('div', 'planner-title', item.title || 'Item'));
+      const actions = el('div', 'planner-actions');
+      const select = el('select', 'portion-select');
+      options.forEach((opt) => {
+        const optionNode = document.createElement('option');
+        optionNode.value = opt.key;
+        optionNode.textContent = `${opt.label}${opt.price != null ? ` • ${formatCurrency(opt.price)}` : ''}`;
+        select.append(optionNode);
+      });
+      if (optionsByItem[item.id]) select.value = optionsByItem[item.id];
+      select.addEventListener('change', () => {
+        if (!calendarState.plannedByDate[calendarState.selectedDate]) calendarState.plannedByDate[calendarState.selectedDate] = {};
+        calendarState.plannedByDate[calendarState.selectedDate][item.id] = select.value;
+        updatePlannerSummary();
+      });
+      const addForDateBtn = el('button', 'add-btn', 'Ajouter à cette date');
+      addForDateBtn.type = 'button';
+      addForDateBtn.addEventListener('click', () => {
+        if (!calendarState.plannedByDate[calendarState.selectedDate]) calendarState.plannedByDate[calendarState.selectedDate] = {};
+        calendarState.plannedByDate[calendarState.selectedDate][item.id] = select.value;
+        addForDateBtn.classList.add('added');
+        addForDateBtn.textContent = 'Ajouté ✓';
+        window.setTimeout(() => {
+          addForDateBtn.classList.remove('added');
+          addForDateBtn.textContent = 'Ajouter à cette date';
+        }, 900);
+        updatePlanner();
+      });
+      actions.append(select, addForDateBtn);
+      row.append(actions);
+      const dateItems = el('div', 'planner-date-items');
+      if (optionsByItem[item.id]) {
+        const chosenOption = options.find((option) => option.key === optionsByItem[item.id]);
+        const tag = chosenOption?.price != null ? formatCurrency(chosenOption.price) : chosenOption?.priceText || '';
+        const selectedChip = el('div', 'planner-date-item');
+        const label = `${chosenOption?.label || optionsByItem[item.id]}${tag ? ` • ${tag}` : ''}`;
+        selectedChip.append(el('span', '', `Prévu: ${label}`));
+        const removeBtn = el('button', 'planner-remove', 'Retirer');
+        removeBtn.type = 'button';
+        removeBtn.addEventListener('click', () => {
+          delete calendarState.plannedByDate[calendarState.selectedDate][item.id];
+          if (Object.keys(calendarState.plannedByDate[calendarState.selectedDate]).length === 0) {
+            delete calendarState.plannedByDate[calendarState.selectedDate];
+          }
+          updatePlanner();
+        });
+        selectedChip.append(removeBtn);
+        dateItems.append(selectedChip);
+      }
+      row.append(dateItems);
+      plannerList.append(row);
+    });
+    updatePlannerSummary();
+  }
+
+  function updatePlannerSummary() {
+    const dateKeys = Object.keys(calendarState.plannedByDate).filter((dateKey) => Object.keys(calendarState.plannedByDate[dateKey] || {}).length > 0);
+    const line = dateKeys.map((dateKey) => `${dateKey}: ${Object.keys(calendarState.plannedByDate[dateKey]).length} item(s)`).join(' • ');
+    plannerSummary.textContent = line || 'Sélectionnez des options pour remplir votre calendrier.';
+  }
+
+  function renderCalendar() {
+    grid.innerHTML = '';
+    monthLabel.textContent = new Date(viewYear, viewMonth, 1).toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' });
+    ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].forEach((day) => grid.append(el('div', 'weekday', day)));
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const startShift = (firstDay.getDay() + 6) % 7;
+    const startDate = new Date(viewYear, viewMonth, 1 - startShift);
+    for (let idx = 0; idx < 42; idx += 1) {
+      const current = new Date(startDate);
+      current.setDate(startDate.getDate() + idx);
+      const iso = formatDateIso(current);
+      const button = el('button', 'day-btn', String(current.getDate()));
+      button.type = 'button';
+      if (current.getMonth() !== viewMonth) button.classList.add('faded');
+      if (iso === calendarState.selectedDate) button.classList.add('selected');
+      button.addEventListener('click', () => {
+        calendarState.selectedDate = iso;
+        renderCalendar();
+        updatePlanner();
+      });
+      grid.append(button);
+    }
+  }
+
+  prev.addEventListener('click', () => { viewMonth -= 1; if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; } renderCalendar(); });
+  next.addEventListener('click', () => { viewMonth += 1; if (viewMonth > 11) { viewMonth = 0; viewYear += 1; } renderCalendar(); });
+  checkoutBtn.addEventListener('click', () => {
+    const dates = Object.keys(calendarState.plannedByDate);
+    let added = 0;
+    dates.forEach((dateKey) => {
+      const daySelections = calendarState.plannedByDate[dateKey] || {};
+      Object.entries(daySelections).forEach(([itemId, optionKey]) => {
+        const item = appData.highlights.find((entry) => entry.id === itemId);
+        if (!item) return;
+        const option = getPortionOptions(item).find((entry) => entry.key === optionKey);
+        if (!option) return;
+        addToCart(item, option, dateKey);
+        added += 1;
+      });
+    });
+    if (added > 0) {
+      checkoutBtn.textContent = `Ajouté au panier (${added}) ✓`;
+      window.setTimeout(() => { checkoutBtn.textContent = 'Passer à la caisse'; }, 1300);
+    }
+  });
+
+  renderCalendar();
+  updatePlanner();
+  layout.append(calendarCard, plannerCard);
+  section.append(layout);
+  panel.append(section);
 }
 
 function setupTabs(tabButtons, panels) { const activateTab = (tabId) => { tabButtons.forEach((button) => { const isActive = button.dataset.tabId === tabId; button.setAttribute('aria-selected', String(isActive)); button.tabIndex = isActive ? 0 : -1; }); panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; }); }; tabButtons.forEach((button) => { button.addEventListener('click', () => activateTab(button.dataset.tabId)); }); activateTab(tabButtons[0]?.dataset.tabId); return activateTab; }
@@ -372,7 +557,7 @@ function buildCartSection(target, title = 'Your Cart') {
         const row = el('div', 'cart-row');
         const left = el('div');
         left.append(el('div', 'cart-name', `${entry.title} (${entry.optionLabel})`));
-        left.append(el('div', 'cart-meta', `Qty: ${entry.qty}`));
+        left.append(el('div', 'cart-meta', `Qty: ${entry.qty}${entry.deliveryDate ? ` • Date: ${entry.deliveryDate}` : ''}`));
         row.append(left, el('div', 'cart-name', entry.price != null ? formatCurrency(entry.price * entry.qty) : entry.priceText));
         itemsWrap.append(row);
       });
@@ -463,7 +648,7 @@ function render(root) {
     const panel = el('section', 'tab-panel');
     panel.dataset.tabPanel = tab.id;
     panel.hidden = idx !== 0;
-    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else if (tab.id === 'contact') buildContactPanel(panel); else if (tab.id === 'special') buildSpecialPanel(panel); else if (tab.id === 'cart') buildCartPanel(panel);
+    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else if (tab.id === 'calendar') buildCalendarPanel(panel); else if (tab.id === 'contact') buildContactPanel(panel); else if (tab.id === 'special') buildSpecialPanel(panel); else if (tab.id === 'cart') buildCartPanel(panel);
     panelWrap.append(panel);
     return panel;
   });
