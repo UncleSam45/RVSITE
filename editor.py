@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import traceback
 import shutil
 import uuid
 import importlib.util
@@ -113,6 +114,13 @@ class ItemsEditor:
         self.tree.column("#0", width=42, anchor="center"); self.tree.column("title", width=230); self.tree.column("category", width=110); self.tree.column("flags", width=120)
         self.tree.grid(row=1, column=0, sticky="nsew"); self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
         ys = ttk.Scrollbar(left, orient="vertical", command=self.tree.yview); ys.grid(row=1, column=1, sticky="ns"); self.tree.configure(yscrollcommand=ys.set)
+        search_bar = ttk.Frame(left)
+        search_bar.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        ttk.Label(search_bar, text="Search").pack(side="left", padx=(0, 6))
+        self.search_var = tk.StringVar()
+        search_input = ttk.Entry(search_bar, textvariable=self.search_var)
+        search_input.pack(side="left", fill="x", expand=True)
+        search_input.bind("<KeyRelease>", self.on_search_change)
 
         right = ttk.Frame(self.root, padding=(5, 0, 10, 10)); right.grid(row=1, column=1, sticky="nsew"); right.columnconfigure(1, weight=1)
         row = 0
@@ -188,13 +196,25 @@ class ItemsEditor:
 
     def refresh_tree(self) -> None:
         for row_id in self.tree.get_children(): self.tree.delete(row_id)
+        search_term = self.search_var.get().strip().lower() if hasattr(self, "search_var") else ""
         for idx, item in enumerate(self.items, start=1):
+            searchable = " ".join([
+                str(item.get("title", "")),
+                str(item.get("id", "")),
+                str(item.get("category", "")),
+                str(item.get("description", "")),
+            ]).lower()
+            if search_term and search_term not in searchable:
+                continue
             flags = [k for k in ["available", "featured"] if bool(item.get(k, False))]
             self.tree.insert("", "end", iid=str(idx - 1), text=str(idx), values=(item.get("title") or "(Untitled)", item.get("category") or "", ", ".join(flags) if flags else "-"))
 
     def on_tree_select(self, _event=None) -> None:
         sel = self.tree.selection()
         if sel: self.select_item(int(sel[0]))
+
+    def on_search_change(self, _event=None) -> None:
+        self.refresh_tree()
 
     def select_item(self, idx: int) -> None:
         if 0 <= idx < len(self.items): self.current_index = idx; self.tree.selection_set(str(idx)); self.fill_form(self.items[idx])
@@ -296,8 +316,32 @@ class ItemsEditor:
 
 
 def main() -> None:
-    ensure_dependencies(THIRD_PARTY_PACKAGES); ensure_tkinter_available()
-    root = tk.Tk(); app = ItemsEditor(root); app.set_status(f"Editing: {DATA_FILE}"); root.mainloop()
+    try:
+        ensure_dependencies(THIRD_PARTY_PACKAGES)
+        ensure_tkinter_available()
+        root = tk.Tk()
+        app = ItemsEditor(root)
+        app.set_status(f"Editing: {DATA_FILE}")
+        root.mainloop()
+    except Exception as exc:
+        error_text = (
+            "Editor failed to start.\n\n"
+            f"Error: {exc}\n\n"
+            "Troubleshooting:\n"
+            "1) Make sure tkinter is installed for this Python build.\n"
+            "2) On Linux, ensure a graphical display is available.\n"
+            "3) Run from terminal: python3 editor.py\n"
+        )
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror("Editor startup error", error_text)
+            root.destroy()
+        except Exception:
+            pass
+        print(error_text, file=sys.stderr)
+        print(traceback.format_exc(), file=sys.stderr)
+        raise
 
 
 if __name__ == "__main__":
