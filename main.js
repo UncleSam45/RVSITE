@@ -419,7 +419,13 @@ function buildCartPanel(panel) {
   panel.append(wrap);
 }
 
-function buildMenuPanel(panel) { const menuSection = el('section', 'section'); menuSection.append(el('h2', '', 'Items disponibles')); if (appData.items.length > 0) buildMenuCards(menuSection, appData.items); else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.')); panel.append(menuSection); panel.querySelectorAll('.cart-panel').forEach((node) => node.remove()); }
+function buildMenuPanel(panel) {
+  const menuSection = el('section', 'section');
+  menuSection.append(el('h2', '', 'Items disponibles'));
+  if (appData.items.length > 0) buildMenuCards(menuSection, appData.items);
+  else menuSection.append(el('p', 'empty-state', 'Aucun item disponible dans data/items.json pour le moment.'));
+  panel.append(menuSection);
+}
 function buildContactPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Contactez-nous')); empty.append(el('p', 'panel-subtitle', 'Nous couvrons les secteurs suivants au Québec : Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères.')); const phone = el('p', 'panel-subtitle', 'Téléphone : 514-298-7545'); const details = el('p', 'panel-subtitle', 'Repas faits maison certifiés MAPAQ. Commandes au moins 48h à l\'avance. Minimum de commande : 30💲. Livraison gratuite 💛.'); const certExplain = el('p', 'panel-subtitle', "Une certification MAPAQ est une formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec pour prévenir les risques d'intoxication alimentaire."); const certLogo = el('img', 'cert-logo'); certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png'; certLogo.alt = 'Logo officiel de formation MAPAQ'; certLogo.loading = 'lazy'; empty.append(phone, details, certExplain, certLogo); panel.append(empty); }
 
 function buildSpecialPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Événements')); empty.append(el('p', 'panel-subtitle', 'Service traiteur pour événements privés, corporatifs et familiaux. Contactez-nous pour planifier votre menu.')); panel.append(empty); }
@@ -462,6 +468,13 @@ function render(root) {
     return panel;
   });
 
+
+  // Safety: cart UI must exist only in the dedicated cart tab.
+  panels.forEach((panel) => {
+    if (panel.dataset.tabPanel !== 'cart') {
+      panel.querySelectorAll('.cart-panel').forEach((node) => node.remove());
+    }
+  });
   const iconTabButtons = Array.from(nav.querySelectorAll('[data-tab-id]')).filter((button) => !tabButtons.includes(button));
   const activateTab = setupTabs([...tabButtons, ...iconTabButtons], panels);
 
