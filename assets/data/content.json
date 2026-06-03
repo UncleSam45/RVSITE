@@ -4,10 +4,10 @@
     "description": "Menus faits maison en rotation, portions Petit / Grand / Familial, livraison locale à Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères."
   },
   "home": {
-    "headline": "Repas faits maison, livrés dans votre secteur.",
-    "subheadline": "Découvrez le menu de la semaine, choisissez vos portions et planifiez votre livraison au moins 48 h à l’avance.",
+    "headline": "Repas faits maison livrés dans votre secteur",
+    "subheadline": "Menus en rotation, portions Petit / Grand / Familial, commandes 48 h à l’avance.",
     "primary_cta": "Voir le menu de la semaine",
-    "secondary_cta": "Planifier une commande"
+    "secondary_cta": "Planifier ma commande"
   },
   "business_rules_to_confirm": [
     "Minimum de commande exact: 30 $ ou 35 $?",
