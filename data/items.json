@@ -8,8 +8,16 @@
       "available": true,
       "featured": true,
       "image": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["fait maison", "menu de la semaine"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "fait maison",
+        "menu de la semaine"
+      ],
+      "showcase": true
     },
     {
       "id": "penne-tomate-vin-rouge-saucisses",
@@ -19,8 +27,16 @@
       "available": true,
       "featured": true,
       "image": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["pâtes", "réconfort"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "pâtes",
+        "réconfort"
+      ],
+      "showcase": true
     },
     {
       "id": "jambon-ananas-patates-pile",
@@ -30,8 +46,16 @@
       "available": true,
       "featured": false,
       "image": "https://images.unsplash.com/photo-1514516870926-2059895f61d6?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["classique", "familial"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "classique",
+        "familial"
+      ],
+      "showcase": false
     },
     {
       "id": "linguine-alfredo-poulet-grille",
@@ -41,8 +65,16 @@
       "available": true,
       "featured": true,
       "image": "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["pâtes", "crémeux"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "pâtes",
+        "crémeux"
+      ],
+      "showcase": true
     },
     {
       "id": "boulettes-porc-bacon-sauce-tomate",
@@ -52,8 +84,16 @@
       "available": true,
       "featured": false,
       "image": "https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["fait maison", "réconfort"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "fait maison",
+        "réconfort"
+      ],
+      "showcase": false
     },
     {
       "id": "soupe-repas-lasagne",
@@ -63,8 +103,16 @@
       "available": true,
       "featured": false,
       "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["soupe repas", "lasagne"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "soupe repas",
+        "lasagne"
+      ],
+      "showcase": false
     },
     {
       "id": "macaroni-3-fromages",
@@ -74,8 +122,16 @@
       "available": true,
       "featured": true,
       "image": "https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "petit": 8, "grand": 10, "familial": 23 },
-      "tags": ["fromage", "favori"]
+      "pricing": {
+        "petit": 8,
+        "grand": 10,
+        "familial": 23
+      },
+      "tags": [
+        "fromage",
+        "favori"
+      ],
+      "showcase": true
     },
     {
       "id": "salade-du-chef",
@@ -85,8 +141,14 @@
       "available": true,
       "featured": true,
       "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "standard": 5 },
-      "tags": ["extra", "frais"]
+      "pricing": {
+        "standard": 5
+      },
+      "tags": [
+        "extra",
+        "frais"
+      ],
+      "showcase": true
     },
     {
       "id": "sous-marin-tartinade-poulet",
@@ -96,8 +158,13 @@
       "available": true,
       "featured": false,
       "image": "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "standard": 7 },
-      "tags": ["extra"]
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [
+        "extra"
+      ],
+      "showcase": false
     },
     {
       "id": "sauce-alfredo-maison-600ml",
@@ -107,8 +174,14 @@
       "available": true,
       "featured": true,
       "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=80",
-      "pricing": { "standard": 8 },
-      "tags": ["extra", "sauce"]
+      "pricing": {
+        "standard": 8
+      },
+      "tags": [
+        "extra",
+        "sauce"
+      ],
+      "showcase": true
     }
   ]
 }
