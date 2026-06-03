@@ -172,6 +172,66 @@ def read_json(path: Path, fallback: dict[str, Any]) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def public_data_warnings(data_dir: Path) -> list[str]:
+    """Return warnings when a public data directory is missing meaningful site data.
+
+    The backup is meant to protect real menu content from being overwritten by
+    empty JSON files after a fresh pull/deploy. Valid JSON alone is not enough:
+    the core business settings, item list, and active menu references must also
+    contain data before we trust a folder as a backup source or destination.
+    """
+    warnings: list[str] = []
+
+    def load_required(filename: str) -> dict[str, Any] | None:
+        path = data_dir / filename
+        if not path.exists():
+            warnings.append(f"Fichier backup manquant: {path}")
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(f"JSON invalide: {path} ({exc})")
+            return None
+        if not isinstance(payload, dict):
+            warnings.append(f"JSON inattendu: {path}")
+            return None
+        return payload
+
+    settings = load_required("settings.json")
+    menus = load_required("menus.json")
+    items = load_required("items.json")
+
+    if settings is not None:
+        business = settings.get("business") if isinstance(settings.get("business"), dict) else {}
+        if not clean(business.get("name")) and not clean(business.get("phone")):
+            warnings.append("Backup ignoré: settings.json ne contient pas de nom ou téléphone d’entreprise.")
+
+    if items is not None:
+        item_list = items.get("items")
+        if not isinstance(item_list, list) or not item_list:
+            warnings.append("Backup ignoré: items.json ne contient aucun item de menu.")
+        elif not any(clean(item.get("id")) and clean(item.get("title")) for item in item_list if isinstance(item, dict)):
+            warnings.append("Backup ignoré: items.json ne contient aucun item utilisable.")
+
+    if menus is not None:
+        current_menu = menus.get("current_menu") if isinstance(menus.get("current_menu"), dict) else {}
+        menu_ids = current_menu.get("item_ids") if isinstance(current_menu.get("item_ids"), list) else []
+        extra_ids = current_menu.get("extra_ids") if isinstance(current_menu.get("extra_ids"), list) else []
+        if not menu_ids and not extra_ids:
+            warnings.append("Backup ignoré: menus.json ne contient aucun item actif ou extra actif.")
+
+    for filename in ["delivery.json", "promotions.json", "content.json", "gallery.json"]:
+        path = data_dir / filename
+        if not path.exists():
+            continue
+        try:
+            json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            warnings.append(f"JSON invalide: {path} ({exc})")
+
+    return warnings
+
+
 def copy_tree_contents(source: Path, target: Path) -> None:
     if not source.exists():
         return
@@ -244,26 +304,22 @@ class BackupManager:
 
     def validate_backup(self, backup_dir: Path) -> tuple[bool, list[str]]:
         warnings: list[str] = []
-        manifest = backup_dir / "manifest.json"
+        data_dir = backup_dir / "assets" / "data"
         if not backup_dir.exists():
             return False, ["Le dossier de sauvegarde latest est absent."]
-        if not manifest.exists():
-            warnings.append("Manifest backup manquant.")
-        for rel in ["assets/data/items.json", "assets/data/menus.json", "assets/data/settings.json"]:
-            path = backup_dir / rel
+        if not data_dir.exists():
+            return False, [f"Dossier data backup manquant: {data_dir}"]
+        required_files = {"settings", "menus", "items"}
+        for filename in FILES:
+            path = data_dir / f"{filename}.json"
             if not path.exists():
-                warnings.append(f"JSON backup manquant: {rel}")
+                if filename in required_files:
+                    warnings.append(f"JSON backup manquant: assets/data/{filename}.json")
                 continue
             try:
                 json.loads(path.read_text(encoding="utf-8"))
             except json.JSONDecodeError as exc:
-                warnings.append(f"JSON backup invalide: {rel} ({exc})")
-        gallery = backup_dir / "assets/data/gallery.json"
-        if gallery.exists():
-            try:
-                json.loads(gallery.read_text(encoding="utf-8"))
-            except json.JSONDecodeError as exc:
-                warnings.append(f"JSON galerie backup invalide: {exc}")
+                warnings.append(f"JSON backup invalide: assets/data/{filename}.json ({exc})")
         return not warnings, warnings
 
     def validate_project_data(self) -> tuple[bool, list[str]]:
@@ -280,6 +336,7 @@ class BackupManager:
                 json.loads(path.read_text(encoding="utf-8"))
             except json.JSONDecodeError as exc:
                 warnings.append(f"JSON local invalide: {relative_asset_path(path)} ({exc})")
+        warnings.extend(public_data_warnings(DATA_DIR))
         return not warnings, warnings
 
     def restore_on_launch(self) -> tuple[bool, str]:
@@ -572,7 +629,7 @@ class DataStore:
             if not image:
                 warnings.append(f"Image manquante pour {label}")
             elif is_external_path(image):
-                warnings.append(f"Image externe à migrer pour {label}: {image}")
+                pass
             elif image.startswith("assets/images/"):
                 if not project_path(image).exists():
                     warnings.append(f"Fichier image introuvable pour {label}: {image}")
