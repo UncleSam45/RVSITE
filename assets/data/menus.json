@@ -1,0 +1,26 @@
+{
+  "current_menu": {
+    "id": "menu-2026-05-29-2026-06-03",
+    "title": "Menu du 29 mai au 3 juin",
+    "start_date": "2026-05-29",
+    "end_date": "2026-06-03",
+    "description": "Menu disponible pour commandes planifiées.",
+    "active": true,
+    "delivery_days": ["tuesday", "thursday", "sunday"],
+    "item_ids": [
+      "souvlaki-porc-patates-ail",
+      "penne-tomate-vin-rouge-saucisses",
+      "jambon-ananas-patates-pile",
+      "linguine-alfredo-poulet-grille",
+      "boulettes-porc-bacon-sauce-tomate",
+      "soupe-repas-lasagne",
+      "macaroni-3-fromages"
+    ],
+    "extra_ids": [
+      "salade-du-chef",
+      "sous-marin-tartinade-poulet",
+      "sauce-alfredo-maison-600ml"
+    ]
+  },
+  "archive": []
+}
