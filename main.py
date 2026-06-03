@@ -20,6 +20,8 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
+from editor import BackupManager
+
 REQUIRED_PACKAGES = ["nicegui"]
 BASE_DIR = Path(__file__).resolve().parent
 JS_FILE = BASE_DIR / "main.js"
@@ -124,12 +126,18 @@ def build_ui(port: int) -> None:
     app.add_static_files('/assets', str(BASE_DIR / 'assets'))
     app.add_static_files('/static', str(BASE_DIR))
     ui.add_body_html(f'<script src="/static/main.js?v={app_js_version}"></script>')
+
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
 
 
 def main() -> None:
     ensure_dependencies(REQUIRED_PACKAGES)
     ensure_frontend_assets()
+
+    backup_manager = BackupManager(BASE_DIR)
+    ok, message = backup_manager.restore_on_launch()
+    print(f"[backup] {message}" if ok else f"[backup warning] {message}")
+
     ensure_data_files()
     port = find_available_port(8888)
     print(f"[run] Launching webframe on port {port}")

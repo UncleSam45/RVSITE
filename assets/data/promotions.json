@@ -3,11 +3,18 @@
     {
       "id": "grand-format-special",
       "title": "Spécial sur le grand format",
-      "description": "Grand format habituellement 12 $.",
+      "description": "Grand format habituellement 12 $, offert à 10 $ pendant la période active.",
       "type": "portion_discount",
       "portion": "grand",
       "original_price": 12,
       "active_price": 10,
+      "enabled": true
+    },
+    {
+      "id": "rabais-reference",
+      "title": "10 $ de rabais par référence client",
+      "description": "Modalités à confirmer avec La cuisine de Rosalie avant application automatique.",
+      "type": "informational",
       "enabled": true
     }
   ]
