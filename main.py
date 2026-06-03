@@ -107,7 +107,7 @@ def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
     )
 
 
-def build_ui(port: int) -> None:
+def build_ui(port: int, backup_manager: object | None = None) -> None:
     from nicegui import app, ui
 
     ui.page_title("La cuisine de Rosalie | Repas faits maison & livraison locale")
@@ -124,16 +124,36 @@ def build_ui(port: int) -> None:
     app.add_static_files('/assets', str(BASE_DIR / 'assets'))
     app.add_static_files('/static', str(BASE_DIR))
     ui.add_body_html(f'<script src="/static/main.js?v={app_js_version}"></script>')
+
+    if backup_manager is not None:
+        @app.on_shutdown
+        def _backup_current_data() -> None:
+            backup_now = getattr(backup_manager, "backup_now", None)
+            if callable(backup_now):
+                ok, message = backup_now("server_shutdown")
+                print(f"[backup] {message}" if ok else f"[backup warning] {message}")
+
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
 
 
 def main() -> None:
     ensure_dependencies(REQUIRED_PACKAGES)
     ensure_frontend_assets()
+
+    backup_manager = None
+    try:
+        from editor import BackupManager
+
+        backup_manager = BackupManager(BASE_DIR)
+        ok, message = backup_manager.restore_on_launch()
+        print(f"[backup] {message}" if ok else f"[backup warning] {message}")
+    except Exception as exc:
+        print(f"[backup warning] Restore from Documents backup skipped: {exc}")
+
     ensure_data_files()
     port = find_available_port(8888)
     print(f"[run] Launching webframe on port {port}")
-    build_ui(port)
+    build_ui(port, backup_manager)
 
 
 if __name__ == "__main__":
