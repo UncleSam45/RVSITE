@@ -53,6 +53,16 @@ FILES = {
     "content": DATA_DIR / "content.json",
     "gallery": DATA_DIR / "gallery.json",
 }
+PUBLIC_SITE_DATA_FILES = ", ".join(
+    path.relative_to(BASE_DIR).as_posix() for path in FILES.values()
+)
+PUBLISH_HELP_TEXT = (
+    "Important: the editor saves this local checkout only. The public site reads "
+    f"{PUBLIC_SITE_DATA_FILES} plus files in assets/images/. If the live website "
+    "is hosted elsewhere, you must commit/deploy or upload those changed files "
+    "after saving; data/items.json and the editor database are not used by the "
+    "public page."
+)
 
 
 def module_installed(module_name: str) -> bool:
@@ -83,6 +93,31 @@ def project_path(path: str) -> Path:
 
 def relative_asset_path(path: Path) -> str:
     return path.relative_to(BASE_DIR).as_posix()
+
+
+def upload_event_file(event: Any) -> Any:
+    return getattr(event, "file", event)
+
+
+def upload_event_name(event: Any) -> str:
+    return clean(getattr(upload_event_file(event), "name", getattr(event, "name", "")))
+
+
+def upload_event_bytes(event: Any) -> bytes:
+    for source in (upload_event_file(event), event):
+        content = getattr(source, "content", None)
+        if hasattr(content, "read"):
+            data = content.read()
+            return data if isinstance(data, bytes) else str(data).encode()
+        if isinstance(content, bytes | bytearray):
+            return bytes(content)
+        data = getattr(source, "_data", None)
+        if isinstance(data, bytes | bytearray):
+            return bytes(data)
+        if hasattr(source, "read"):
+            data = source.read()
+            return data if isinstance(data, bytes) else str(data).encode()
+    raise ValueError("Impossible de lire le fichier téléversé.")
 
 
 def is_external_path(path: str) -> bool:
@@ -615,17 +650,26 @@ def build_ui(store: DataStore) -> None:
         if backup_manager and not backup_manager.last_status.startswith("Sauvegarde latest réussie"):
             ui.notify(backup_manager.last_status, type="warning")
         else:
-            ui.notify("Données sauvegardées et backup latest mis à jour", type="positive")
+            ui.notify(
+                "Données sauvegardées localement. Déployez/committez ces fichiers "
+                "pour mettre à jour le site public.",
+                type="positive",
+            )
 
     def export_static() -> None:
         store.write_all()
-        ui.notify(f"Données exportées dans {DATA_DIR}", type="positive")
+        ui.notify(
+            f"Données exportées dans {DATA_DIR}. Déployez/committez assets/data "
+            "et assets/images pour le site en ligne.",
+            type="positive",
+        )
 
     with ui.column().classes("shell w-full").style("gap:16px"):
         with ui.row().classes("w-full items-center justify-between"):
             with ui.column().style("gap:2px"):
                 ui.label("Menu Manager").classes("text-h4 text-weight-bold")
                 ui.label("Réglages, menu courant, items, livraison et promotions pour La cuisine de Rosalie.").classes("muted")
+                ui.label(PUBLISH_HELP_TEXT).classes("warning text-weight-bold")
             with ui.row().style("gap:8px"):
                 ui.button("Preview public site", on_click=lambda: ui.navigate.to("/", new_tab=True)).props("outline color=brown-7")
                 ui.button("Validate data", on_click=refresh_warnings).props("outline color=orange-8")
@@ -746,14 +790,14 @@ def build_ui(store: DataStore) -> None:
                     if index is None:
                         ui.notify("Impossible de trouver l’item pour l’image.", type="negative")
                         return
-                    ext = Path(event.name).suffix.lower()
+                    upload_name = upload_event_name(event)
+                    ext = Path(upload_name).suffix.lower()
                     if ext not in ALLOWED_IMAGE_EXTS:
                         ui.notify("Format non supporté: JPG, PNG ou WebP seulement.", type="negative")
                         return
                     TEMP_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                     temp_path = TEMP_UPLOAD_DIR / f"{slugify(item_id)}{ext}"
-                    content = event.content.read()
-                    temp_path.write_bytes(content)
+                    temp_path.write_bytes(upload_event_bytes(event))
                     try:
                         paths = store.update_item_image(item_id, temp_path)
                     except Exception as exc:
@@ -999,13 +1043,14 @@ def build_ui(store: DataStore) -> None:
                         return
                     if selected_slide["index"] is None:
                         save_slide()
-                    ext = Path(event.name).suffix.lower()
+                    upload_name = upload_event_name(event)
+                    ext = Path(upload_name).suffix.lower()
                     if ext not in ALLOWED_IMAGE_EXTS:
                         ui.notify("Format non supporté: JPG, PNG ou WebP seulement.", type="negative")
                         return
                     TEMP_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                     temp_path = TEMP_UPLOAD_DIR / f"gallery-{slugify(slide_id)}{ext}"
-                    temp_path.write_bytes(event.content.read())
+                    temp_path.write_bytes(upload_event_bytes(event))
                     try:
                         paths = store.update_gallery_image(slide_id, temp_path)
                     except Exception as exc:
