@@ -1,14 +1,98 @@
 {
   "items": [
     {
-      "title": "Garden Harvest Bowl",
+      "title": "Souvlaki de porc maison avec patates à l’ail",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
-        "large_meal": 12,
-        "family_format": "19-25 depending on special"
+        "large_meal": 10,
+        "family_format": 23
       },
-      "last_seen_id": "garden-harvest-bowl"
+      "last_seen_id": "souvlaki-porc-patates-ail"
+    },
+    {
+      "title": "Penne sauce tomate au vin rouge avec saucisses italiennes",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 10,
+        "family_format": 23
+      },
+      "last_seen_id": "penne-tomate-vin-rouge-saucisses"
+    },
+    {
+      "title": "Jambon à l’ananas avec patates pilé",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 10,
+        "family_format": 23
+      },
+      "last_seen_id": "jambon-ananas-patates-pile"
+    },
+    {
+      "title": "Linguine alfredo avec poulet grillé",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 10,
+        "family_format": 23
+      },
+      "last_seen_id": "linguine-alfredo-poulet-grille"
+    },
+    {
+      "title": "Boulette de porc et bacon sauce tomate avec patates pilé",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 10,
+        "family_format": 23
+      },
+      "last_seen_id": "boulettes-porc-bacon-sauce-tomate"
+    },
+    {
+      "title": "Soupe repas à la lasagne",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 10,
+        "family_format": 23
+      },
+      "last_seen_id": "soupe-repas-lasagne"
+    },
+    {
+      "title": "Macaroni 3 fromages",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 10,
+        "family_format": 23
+      },
+      "last_seen_id": "macaroni-3-fromages"
+    },
+    {
+      "title": "Salade du chef",
+      "type": "extra",
+      "pricing": {
+        "standard": 5
+      },
+      "last_seen_id": "salade-du-chef"
+    },
+    {
+      "title": "Sous-marin tartinade de poulet",
+      "type": "extra",
+      "pricing": {
+        "standard": 7
+      },
+      "last_seen_id": "sous-marin-tartinade-poulet"
+    },
+    {
+      "title": "Sauce alfredo maison 600 ml",
+      "type": "extra",
+      "pricing": {
+        "standard": 8
+      },
+      "last_seen_id": "sauce-alfredo-maison-600ml"
     }
   ]
 }
