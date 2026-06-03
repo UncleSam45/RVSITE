@@ -73,9 +73,14 @@
     node.setAttribute('content', content);
   }
 
+  function uncachedDataPath(path) {
+    const separator = path.includes('?') ? '&' : '?';
+    return `${path}${separator}v=${Date.now()}`;
+  }
+
   async function fetchJson(path, fallback) {
     try {
-      const response = await fetch(path, { cache: 'no-store' });
+      const response = await fetch(uncachedDataPath(path), { cache: 'no-store' });
       if (!response.ok) throw new Error(`${path} returned ${response.status}`);
       return response.json();
     } catch (error) {
