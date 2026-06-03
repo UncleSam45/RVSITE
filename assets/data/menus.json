@@ -4,13 +4,9 @@
     "title": "Menu du 29 mai au 3 juin",
     "start_date": "2026-05-29",
     "end_date": "2026-06-03",
-    "description": "Menu disponible pour commandes planifiées.",
+    "description": "Livraison gratuite 35 $ et plus.",
     "active": true,
-    "delivery_days": [
-      "tuesday",
-      "thursday",
-      "sunday"
-    ],
+    "delivery_days": [],
     "item_ids": [
       "souvlaki-porc-patates-ail",
       "penne-tomate-vin-rouge-saucisses",

@@ -3,185 +3,168 @@
     {
       "id": "souvlaki-porc-patates-ail",
       "title": "Souvlaki de porc maison avec patates à l’ail",
-      "description": "Porc mariné façon souvlaki, servi avec patates à l’ail maison.",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
       "featured": true,
-      "image": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1200&q=80",
+      "showcase": true,
+      "image": "assets/images/items/souvlaki-porc-patates-ail/card.webp",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "fait maison",
-        "menu de la semaine"
-      ],
-      "showcase": true
+      "tags": [],
+      "images": {
+        "original": "assets/images/items/souvlaki-porc-patates-ail/card.webp",
+        "thumb": "assets/images/items/souvlaki-porc-patates-ail/thumb.webp",
+        "card": "assets/images/items/souvlaki-porc-patates-ail/card.webp",
+        "hero": "assets/images/items/souvlaki-porc-patates-ail/hero.webp"
+      }
     },
     {
       "id": "penne-tomate-vin-rouge-saucisses",
-      "title": "Penne sauce tomate au vin rouge avec saucisses italiennes",
-      "description": "Penne généreux, sauce tomate mijotée au vin rouge et saucisses italiennes.",
+      "title": "Penne sauce tomate aux vin rouge avec saucisses italiennes",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
-      "featured": true,
-      "image": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1200&q=80",
+      "featured": false,
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "pâtes",
-        "réconfort"
-      ],
-      "showcase": true
+      "tags": [],
+      "showcase": false
     },
     {
       "id": "jambon-ananas-patates-pile",
       "title": "Jambon à l’ananas avec patates pilé",
-      "description": "Jambon tendre à l’ananas, accompagné de patates pilé maison.",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
       "featured": false,
-      "image": "https://images.unsplash.com/photo-1514516870926-2059895f61d6?auto=format&fit=crop&w=1200&q=80",
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "classique",
-        "familial"
-      ],
+      "tags": [],
       "showcase": false
     },
     {
       "id": "linguine-alfredo-poulet-grille",
       "title": "Linguine alfredo avec poulet grillé",
-      "description": "Linguine crémeux à l’alfredo maison, garni de poulet grillé.",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
       "featured": true,
-      "image": "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?auto=format&fit=crop&w=1200&q=80",
+      "showcase": true,
+      "image": "assets/images/items/linguine-alfredo-poulet-grille/card.webp",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "pâtes",
-        "crémeux"
-      ],
-      "showcase": true
+      "tags": [],
+      "images": {
+        "original": "assets/images/items/linguine-alfredo-poulet-grille/original.png",
+        "thumb": "assets/images/items/linguine-alfredo-poulet-grille/thumb.webp",
+        "card": "assets/images/items/linguine-alfredo-poulet-grille/card.webp",
+        "hero": "assets/images/items/linguine-alfredo-poulet-grille/hero.webp"
+      }
     },
     {
       "id": "boulettes-porc-bacon-sauce-tomate",
       "title": "Boulette de porc et bacon sauce tomate avec patates pilé",
-      "description": "Boulettes porc et bacon, sauce tomate maison et patates pilé.",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
       "featured": false,
-      "image": "https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=1200&q=80",
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "fait maison",
-        "réconfort"
-      ],
+      "tags": [],
       "showcase": false
     },
     {
       "id": "soupe-repas-lasagne",
       "title": "Soupe repas à la lasagne",
-      "description": "Soupe repas façon lasagne avec bœuf, légumes, pâtes, fromage et tomate.",
+      "description": "Bœuf, légumes et pâtes, fromage & tomate.",
       "category": "Plats principaux",
       "available": true,
       "featured": false,
-      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=80",
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "soupe repas",
-        "lasagne"
-      ],
+      "tags": [],
       "showcase": false
     },
     {
       "id": "macaroni-3-fromages",
       "title": "Macaroni 3 fromages",
-      "description": "Macaroni crémeux aux trois fromages, parfait pour un repas réconfortant.",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
       "featured": true,
-      "image": "https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?auto=format&fit=crop&w=1200&q=80",
+      "showcase": true,
+      "image": "assets/images/items/macaroni-3-fromages/card.webp",
       "pricing": {
         "petit": 8,
         "grand": 10,
         "familial": 23
       },
-      "tags": [
-        "fromage",
-        "favori"
-      ],
-      "showcase": true
+      "tags": []
     },
     {
       "id": "salade-du-chef",
       "title": "Salade du chef",
-      "description": "Salade fraîche préparée maison, idéale en accompagnement.",
+      "description": "",
       "category": "Accompagnements & extras",
       "available": true,
-      "featured": true,
-      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
+      "featured": false,
+      "image": "",
       "pricing": {
         "standard": 5
       },
-      "tags": [
-        "extra",
-        "frais"
-      ],
-      "showcase": true
+      "tags": [],
+      "showcase": false
     },
     {
       "id": "sous-marin-tartinade-poulet",
       "title": "Sous-marin tartinade de poulet",
-      "description": "Sous-marin garni de tartinade de poulet maison.",
+      "description": "",
       "category": "Accompagnements & extras",
       "available": true,
       "featured": false,
-      "image": "https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=1200&q=80",
+      "image": "",
       "pricing": {
         "standard": 7
       },
-      "tags": [
-        "extra"
-      ],
+      "tags": [],
       "showcase": false
     },
     {
       "id": "sauce-alfredo-maison-600ml",
-      "title": "Sauce alfredo maison 600 ml",
-      "description": "Sauce alfredo maison en format 600 ml.",
+      "title": "Sauce alfredo maison 600ml",
+      "description": "",
       "category": "Accompagnements & extras",
       "available": true,
-      "featured": true,
-      "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=80",
+      "featured": false,
+      "image": "",
       "pricing": {
         "standard": 8
       },
-      "tags": [
-        "extra",
-        "sauce"
-      ],
-      "showcase": true
+      "tags": [],
+      "showcase": false
     }
   ]
 }

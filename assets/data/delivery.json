@@ -1,10 +1,30 @@
 {
   "zones": [
-    { "city": "Contrecoeur", "province": "QC", "enabled": true },
-    { "city": "Sorel", "province": "QC", "enabled": true },
-    { "city": "Varennes", "province": "QC", "enabled": true },
-    { "city": "Saint-Roch-de-Richelieu", "province": "QC", "enabled": true },
-    { "city": "Verchères", "province": "QC", "enabled": true }
+    {
+      "city": "Contrecoeur",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Sorel",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Varennes",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Saint-Roch-de-Richelieu",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Verchères",
+      "province": "QC",
+      "enabled": true
+    }
   ],
   "rules": {
     "order_notice_hours": 48,
