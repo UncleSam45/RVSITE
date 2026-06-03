@@ -26,21 +26,7 @@ JS_FILE = BASE_DIR / "main.js"
 DATA_DIR = BASE_DIR / "data"
 ITEMS_FILE = DATA_DIR / "items.json"
 
-DEFAULT_ITEMS = {
-    "items": [
-        {
-            "id": "garden-harvest-bowl",
-            "title": "Garden Harvest Bowl",
-            "description": "Roasted market vegetables, lemon-herb grains, and whipped feta.",
-            "price": 14,
-            "category": "Seasonal",
-            "available": True,
-            "featured": True,
-            "image": "./assets/images/garden-harvest-bowl.jpg",
-            "video": "",
-        }
-    ]
-}
+DEFAULT_ITEMS = {"items": []}
 
 STARTER_JS = """// Starter frontend script for the webframe
 window.webframe = {
