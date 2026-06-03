@@ -1,0 +1,15 @@
+{
+  "zones": [
+    { "city": "Contrecoeur", "province": "QC", "enabled": true },
+    { "city": "Sorel", "province": "QC", "enabled": true },
+    { "city": "Varennes", "province": "QC", "enabled": true },
+    { "city": "Saint-Roch-de-Richelieu", "province": "QC", "enabled": true },
+    { "city": "Verchères", "province": "QC", "enabled": true }
+  ],
+  "rules": {
+    "order_notice_hours": 48,
+    "minimum_order": 35,
+    "free_delivery_threshold": 35,
+    "scheduling_note": "La livraison est planifiée avec le client."
+  }
+}

@@ -1,762 +1,507 @@
-const appData = {
-  brand: 'LA CUISINE DE ROSALIE',
-  tagline: 'Repas faits maison • Livraison locale',
-  tabs: [
-    { id: 'home', label: 'ACCUEIL' },
-    { id: 'menu', label: 'MENUS' },
-    { id: 'calendar', label: 'CALENDRIER' },
-    { id: 'special', label: 'SPÉCIAUX DU JOUR' },
-    { id: 'contact', label: 'CONTACT' },
-  ],
-  iconNav: [
-    { icon: '🛒', label: 'Panier', action: 'cart' },
-  ],
-  categories: ['All'],
-  highlights: [],
-  archives: [],
-  items: [],
-  currentMenu: null,
-};
-
-const cartState = {
-  entries: [],
-  customer: {
-    name: '',
-    phone: '',
-    streetNumber: '',
-    streetName: '',
-    apartment: '',
-    city: '',
-    province: '',
-    postalCode: '',
-  },
-  listeners: new Set(),
-};
-const CART_STORAGE_KEY = 'lacuisine_cart_v1';
-const calendarState = {
-  selectedDate: '',
-  plannedByDate: {},
-};
-
-function formatCurrency(value) {
-  return typeof value === 'number' ? `$${value.toFixed(2)}` : '';
-}
-
-function getPortionOptions(item) {
-  const pricing = item?.pricing || {};
-  const options = [];
-  if (pricing.small_meal != null) options.push({ key: 'small_meal', label: 'Small', price: Number(pricing.small_meal) });
-  if (pricing.large_meal != null) options.push({ key: 'large_meal', label: 'Large', price: Number(pricing.large_meal) });
-  if (pricing.family_format != null) options.push({ key: 'family_format', label: 'Family', priceText: `${pricing.family_format}` });
-  return options;
-}
-
-function getCartTotals() {
-  const subtotal = cartState.entries.reduce((sum, entry) => sum + (entry.price || 0) * entry.qty, 0);
-  const itemCount = cartState.entries.reduce((sum, entry) => sum + entry.qty, 0);
-  return { subtotal, itemCount };
-}
-
-function subscribeCart(listener) {
-  cartState.listeners.add(listener);
-  listener();
-  return () => cartState.listeners.delete(listener);
-}
-
-function notifyCart() {
-  cartState.listeners.forEach((listener) => listener());
-}
-
-function saveCartToStorage() {
-  try {
-    const payload = {
-      entries: cartState.entries,
-      customer: cartState.customer,
-    };
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(payload));
-  } catch (error) {
-    console.warn('[webframe] Could not save cart to localStorage.', error);
-  }
-}
-
-function loadCartFromStorage() {
-  try {
-    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed?.entries)) {
-      cartState.entries = parsed.entries
-        .map((entry) => ({
-          ...entry,
-          qty: Math.max(1, Number(entry.qty) || 1),
-          price: Number.isFinite(entry.price) ? entry.price : null,
-        }))
-        .filter((entry) => entry.itemId && entry.optionKey);
-    }
-    if (parsed?.customer && typeof parsed.customer === 'object') {
-      cartState.customer.name = typeof parsed.customer.name === 'string' ? parsed.customer.name : '';
-      cartState.customer.phone = typeof parsed.customer.phone === 'string' ? parsed.customer.phone : '';
-      cartState.customer.streetNumber = typeof parsed.customer.streetNumber === 'string' ? parsed.customer.streetNumber : '';
-      cartState.customer.streetName = typeof parsed.customer.streetName === 'string' ? parsed.customer.streetName : '';
-      cartState.customer.apartment = typeof parsed.customer.apartment === 'string' ? parsed.customer.apartment : '';
-      cartState.customer.city = typeof parsed.customer.city === 'string' ? parsed.customer.city : '';
-      cartState.customer.province = typeof parsed.customer.province === 'string' ? parsed.customer.province : '';
-      cartState.customer.postalCode = typeof parsed.customer.postalCode === 'string' ? parsed.customer.postalCode : '';
-      if ((!cartState.customer.streetName || !cartState.customer.city) && typeof parsed.customer.address === 'string') {
-        cartState.customer.streetName = parsed.customer.address;
-      }
-    }
-  } catch (error) {
-    console.warn('[webframe] Could not load cart from localStorage.', error);
-  }
-}
-
-function addToCart(item, option, deliveryDate = '') {
-  const existing = cartState.entries.find((entry) => entry.itemId === item.id && entry.optionKey === option.key && (entry.deliveryDate || '') === deliveryDate);
-  if (existing) existing.qty += 1;
-  else cartState.entries.push({
-    itemId: item.id,
-    optionKey: option.key,
-    title: item.title || 'Item',
-    optionLabel: option.label,
-    price: Number.isFinite(option.price) ? option.price : null,
-    priceText: Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText || '',
-    deliveryDate,
-    qty: 1,
-  });
-  saveCartToStorage();
-  notifyCart();
-}
-
-async function loadItems() {
-  try {
-    const response = await fetch('/assets/data/items.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Failed to load items: ${response.status}`);
-    const payload = await response.json();
-    return {
-      items: Array.isArray(payload?.items) ? payload.items : [],
-      currentMenu: payload?.current_menu && typeof payload.current_menu === 'object' ? payload.current_menu : null,
-    };
-  } catch (error) {
-    console.warn('[webframe] Could not load items.json, using empty list.', error);
-    return { items: [], currentMenu: null };
-  }
-}
-
-function normalizePrice(item) {
-  const pricing = item?.pricing;
-  if (pricing && typeof pricing === 'object') {
-    const small = pricing.small_meal != null ? `$${pricing.small_meal}` : '';
-    const large = pricing.large_meal != null ? `$${pricing.large_meal}` : '';
-    const family = pricing.family_format != null ? `${pricing.family_format}` : '';
-    const parts = [];
-    if (small) parts.push(`Small: ${small}`);
-    if (large) parts.push(`Large: ${large}`);
-    if (family) parts.push(`Family: ${family}`);
-    if (parts.length) return parts.join(' • ');
-    if (pricing.base_price != null) return `$${pricing.base_price}`;
-    if (pricing.price_range != null) return `$${pricing.price_range}`;
-  }
-  const legacyPrice = item?.price;
-  return typeof legacyPrice === 'number' ? `$${legacyPrice}` : '';
-}
-
-function isFeatured(item) {
-  if (!item) return false;
-  if (typeof item.featured === 'boolean') return item.featured;
-  if (typeof item.featured === 'string') return item.featured.trim().toLowerCase() === 'true';
-  if (typeof item.featured === 'number') return item.featured === 1;
-  return false;
-}
-
-function syncDataFromItems(items) {
-  const availableItems = items.filter((item) => item?.available);
-  const categorySet = new Set(['All']);
-
-  availableItems.forEach((item) => {
-    if (item?.category) categorySet.add(item.category);
-  });
-
-  appData.items = availableItems;
-  appData.categories = Array.from(categorySet);
-  appData.highlights = availableItems.filter((item) => isFeatured(item));
-  appData.archives = availableItems.filter((item) => !isFeatured(item));
-}
-
-function syncCurrentMenu(meta) {
-  appData.currentMenu = meta || null;
-}
-
-function formatDisplayDate(value) {
-  if (!value) return '';
-  const parsed = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-function el(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text) node.textContent = text;
-  return node;
-}
-
-function injectStyles() {
-  const style = document.createElement('style');
-  style.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
-    :root { color-scheme: light; --bg: #f6f4f1; --card: #ffffff; --line: #e7e1d9; --text: #1e1e1e; --muted: #5f5a54; --accent: #b88442; --accent-dark: #8b5e29; --success: #3f7456; --shadow: 0 14px 34px rgba(18, 14, 8, 0.09); }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: linear-gradient(180deg, #f8f5f1 0%, #f3efe8 100%); color: var(--text); font-family: Inter, system-ui, -apple-system, sans-serif; }
-    .site { padding: clamp(0.8rem, 2vw, 1.6rem); }
-    .container { width: min(1260px, 100% - 1rem); margin-inline: auto; }
-    .topbar { position: sticky; top: 0.8rem; z-index: 40; backdrop-filter: blur(12px); background: rgba(255,255,255,0.88); border: 1px solid var(--line); border-radius: 18px; padding: 0.7rem 1rem; box-shadow: var(--shadow); display: flex; align-items: center; gap: 1rem; justify-content: space-between; }
-    .brand-wrap { display: flex; align-items: center; gap: 0.8rem; min-width: 0; flex: 1; }
-    .brand-logo { width: 74px; height: 74px; object-fit: contain; }
-    .brand-title { width: min(360px, 48vw); max-height: 58px; object-fit: contain; object-position: left; }
-    .nav { display: flex; flex-wrap: wrap; gap: 0.45rem; justify-content: flex-end; }
-    .tab { border: 1px solid transparent; color: var(--muted); background: transparent; border-radius: 999px; padding: 0.52rem 0.9rem; font-weight: 600; cursor: pointer; }
-    .tab:hover, .tab[aria-selected="true"] { color: #21180e; border-color: #d5c8b8; background: #f4ede5; }
-    .tab.icon-tab { padding-inline: 0.65rem; }
-    .tab-panel { margin-top: 1.4rem; }
-    .tab-panel[hidden] { display: none; }
-    .hero { border-radius: 24px; border: 1px solid var(--line); background: linear-gradient(130deg, rgba(255,255,255,0.95), rgba(247,241,234,0.95)); box-shadow: var(--shadow); padding: clamp(1.5rem, 4vw, 3rem); }
-    .kicker { color: var(--success); text-transform: uppercase; letter-spacing: .08em; font-size: .76rem; font-weight: 700; }
-    h1 { margin: .7rem 0; line-height: 1.1; font-size: clamp(2rem, 4vw, 3.5rem); font-family: 'Playfair Display', Georgia, serif; }
-    .lead { max-width: 65ch; color: var(--muted); margin-bottom: 1.3rem; }
-    .hero-cta { border: 0; border-radius: 999px; font-weight: 700; padding: 0.75rem 1.2rem; cursor: pointer; color: #fff; background: linear-gradient(180deg, #ba8447, #9e6d35); box-shadow: 0 10px 20px rgba(139, 94, 41, 0.28); }
-    .section { margin-top: 2rem; }
-    .section h2 { margin: 0 0 .85rem; font-size: 1.25rem; }
-    .chips { display: flex; gap: .55rem; flex-wrap: wrap; }
-    .chip { border: 1px solid var(--line); border-radius: 999px; padding: .42rem .75rem; background: #fff; color: #544f48; font-size: .88rem; }
-    .cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-    .cards.carousel { grid-auto-flow: column; grid-auto-columns: minmax(260px, 320px); grid-template-columns: none; overflow-x: auto; padding-bottom: .4rem; scroll-snap-type: x mandatory; }
-    .cards.carousel .card { scroll-snap-align: start; }
-    .menu-period { border: 1px solid #dfd1bd; border-radius: 16px; background: linear-gradient(135deg, #fff6e8, #fff); padding: 1rem; display: grid; gap: .45rem; margin-bottom: 1rem; }
-    .menu-period h3 { margin: 0; font-size: 1.2rem; }
-    .menu-period .dates { font-weight: 700; color: #6e4b24; margin: 0; }
-    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 20px rgba(21, 14, 6, 0.08); }
-    .card-media { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: #ede7de; }
-    .card-content { padding: 0.95rem; display: grid; gap: .55rem; }
-    .badge { width: fit-content; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; padding: .24rem .5rem; border-radius: 999px; background: #f4eee5; color: #6e4b24; }
-    .card h3 { margin: 0; font-size: 1.03rem; }
-    .card p { margin: 0; color: var(--muted); font-size: .94rem; }
-    .price { margin-top: .2rem; font-weight: 700; color: var(--accent-dark); }
-    .card-actions { display: flex; gap: .55rem; align-items: center; margin-top: .2rem; }
-    .portion-select { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: .5rem .55rem; background: #fff; color: #34291e; }
-    .add-btn { border: 0; border-radius: 10px; padding: .55rem .85rem; color: #fff; font-weight: 700; cursor: pointer; background: linear-gradient(180deg, #ba8447, #9e6d35); }
-    .add-btn:hover { filter: brightness(1.06); }
-    .add-btn.added { background: linear-gradient(180deg, #4d8b69, #35664d); }
-    .cart-panel { margin-top: 1.25rem; border: 1px solid var(--line); background: #fff; border-radius: 18px; padding: 1rem; box-shadow: var(--shadow); }
-    .cart-title { margin: 0 0 .35rem; font-size: 1.1rem; }
-    .cart-hint { margin: 0; color: var(--muted); font-size: .92rem; }
-    .cart-items { margin-top: .8rem; display: grid; gap: .55rem; }
-    .cart-row { border: 1px solid #ebe3d8; border-radius: 12px; padding: .6rem .7rem; background: #fcfaf7; display: flex; justify-content: space-between; gap: .6rem; }
-    .cart-name { font-weight: 600; }
-    .cart-meta { font-size: .88rem; color: var(--muted); }
-    .cart-total { margin-top: .9rem; padding-top: .7rem; border-top: 1px dashed #d9cfc4; display: flex; justify-content: space-between; font-weight: 700; }
-    .customer-section { margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed #d9cfc4; display: grid; gap: .8rem; }
-    .customer-title { margin: 0; font-size: .97rem; font-weight: 700; color: #2f2418; }
-    .customer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; align-items: end; }
-    .customer-label { font-size: .85rem; color: var(--muted); font-weight: 600; display: grid; gap: .3rem; }
-    .customer-label.full { grid-column: 1 / -1; }
-    .customer-input { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: .55rem .65rem; font: inherit; background: #fff; min-height: 40px; }
-    .customer-input:focus { outline: 2px solid #d6b084; border-color: #d6b084; }
-    @media (max-width: 620px) { .customer-grid { grid-template-columns: 1fr; } }
-    .empty-state { color: var(--muted); border: 1px dashed #d3c7b9; border-radius: 12px; padding: 1rem; background: #fcfaf7; }
-    .empty-panel { border-radius: 22px; border: 1px solid var(--line); min-height: 320px; padding: 2rem; display: grid; place-items: center; text-align: center; gap: .6rem; background: #fff; box-shadow: var(--shadow); }
-    .panel-title { margin: 0; font-size: clamp(1.4rem, 3vw, 2.4rem); }
-    .panel-subtitle { margin: 0; color: var(--muted); }
-    .placeholder { width: min(820px, 100%); min-height: 150px; border: 1px dashed #d8cec2; border-radius: 14px; }
-    .cert-block { margin-top: 1.2rem; border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 1rem; display: grid; gap: .7rem; align-items: center; }
-    .cert-logo { width: min(260px, 100%); height: auto; justify-self: start; }
-    .cert-text { margin: 0; color: var(--muted); line-height: 1.45; }
-    .footer { margin-top: 2rem; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,0.9); box-shadow: var(--shadow); padding: 1.1rem; display: grid; gap: .8rem; }
-    .footer-links { display: flex; flex-wrap: wrap; gap: .6rem; }
-    .footer-link { border: 1px solid #d8cab8; background: #fff; color: #2f2418; border-radius: 999px; padding: .45rem .8rem; font-weight: 600; cursor: pointer; }
-    .footer-note { margin: 0; color: var(--muted); font-size: .92rem; }
-    .calendar-layout { display: grid; gap: 1rem; grid-template-columns: minmax(340px, 1.2fr) minmax(300px, 1fr); align-items: start; }
-    .calendar-card, .planner-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); padding: 1rem; }
-    .calendar-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
-    .month-label { font-weight: 700; font-size: 1.02rem; }
-    .month-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: .32rem .55rem; cursor: pointer; font-weight: 700; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .35rem; }
-    .weekday { text-align: center; font-size: .78rem; color: var(--muted); font-weight: 700; padding-bottom: .2rem; }
-    .day-btn { border: 1px solid #e9e0d4; background: #fff; border-radius: 10px; min-height: 52px; cursor: pointer; font-weight: 600; }
-    .day-btn:hover { border-color: #d7b894; }
-    .day-btn.selected { background: #f4ede5; border-color: #b88442; color: #6e4b24; }
-    .day-btn.faded { opacity: .45; }
-    .planner-list { display: grid; gap: .55rem; margin-top: .7rem; }
-    .planner-row { border: 1px solid #ebe3d8; border-radius: 12px; padding: .7rem; display: grid; gap: .45rem; background: #fcfaf7; }
-    .planner-title { font-weight: 700; }
-    .planner-actions { display: flex; gap: .55rem; }
-    .planner-date-items { margin-top: .45rem; display: grid; gap: .35rem; }
-    .planner-date-item { font-size: .86rem; color: #3b3024; background: #f7efe5; border: 1px solid #eadbc9; border-radius: 8px; padding: .32rem .45rem; display: flex; justify-content: space-between; gap: .5rem; align-items: center; }
-    .planner-remove { border: 0; background: transparent; color: #8b5e29; font-weight: 700; cursor: pointer; }
-    .planner-summary { margin-top: .8rem; border-top: 1px dashed #d9cfc4; padding-top: .7rem; color: var(--muted); font-size: .92rem; display: grid; gap: .55rem; }
-    .summary-date { font-weight: 700; color: #2f2418; }
-    .summary-list { margin: 0; padding-left: 1rem; display: grid; gap: .3rem; }
-    .summary-item { color: #4a3d2f; }
-    .summary-empty { margin: 0; }
-    @media (max-width: 980px) { .calendar-layout { grid-template-columns: 1fr; } }
-    @media (max-width: 900px) { .topbar { flex-wrap: wrap; } .brand-wrap, .nav { width: 100%; justify-content: center; } .brand-title { object-position: center; } }
-  `;
-  document.head.appendChild(style);
-}
-
-function formatDateIso(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function buildCalendarPanel(panel) {
-  const section = el('section', 'section');
-  section.append(el('h2', '', 'Planifiez vos commandes à l’avance'));
-  const layout = el('div', 'calendar-layout');
-  const calendarCard = el('div', 'calendar-card');
-  const plannerCard = el('div', 'planner-card');
-
-  const today = new Date();
-  let viewYear = today.getFullYear();
-  let viewMonth = today.getMonth();
-  calendarState.selectedDate = calendarState.selectedDate || formatDateIso(today);
-
-  const toolbar = el('div', 'calendar-toolbar');
-  const prev = el('button', 'month-btn', '←');
-  const next = el('button', 'month-btn', '→');
-  prev.type = 'button'; next.type = 'button';
-  const monthLabel = el('div', 'month-label');
-  toolbar.append(prev, monthLabel, next);
-  const grid = el('div', 'calendar-grid');
-  calendarCard.append(toolbar, grid);
-
-  const plannerTitle = el('h3', 'cart-title', 'Menu du jour sélectionné');
-  const plannerHint = el('p', 'cart-hint');
-  const plannerList = el('div', 'planner-list');
-  const checkoutBtn = el('button', 'hero-cta', 'Passer à la caisse');
-  checkoutBtn.type = 'button';
-  const plannerSummary = el('div', 'planner-summary');
-  plannerCard.append(plannerTitle, plannerHint, plannerList, checkoutBtn, plannerSummary);
-
-  function updatePlanner() {
-    const dateLabel = calendarState.selectedDate || 'Aucune date';
-    plannerHint.textContent = `Date: ${dateLabel}`;
-    plannerList.innerHTML = '';
-    const optionsByItem = calendarState.plannedByDate[calendarState.selectedDate] || {};
-    appData.highlights.forEach((item) => {
-      const options = getPortionOptions(item);
-      if (!options.length) return;
-      const row = el('div', 'planner-row');
-      row.append(el('div', 'planner-title', item.title || 'Item'));
-      const actions = el('div', 'planner-actions');
-      const select = el('select', 'portion-select');
-      options.forEach((opt) => {
-        const optionNode = document.createElement('option');
-        optionNode.value = opt.key;
-        optionNode.textContent = `${opt.label}${opt.price != null ? ` • ${formatCurrency(opt.price)}` : ''}`;
-        select.append(optionNode);
-      });
-      if (optionsByItem[item.id]) select.value = optionsByItem[item.id];
-      select.addEventListener('change', () => {
-        if (!calendarState.plannedByDate[calendarState.selectedDate]) calendarState.plannedByDate[calendarState.selectedDate] = {};
-        calendarState.plannedByDate[calendarState.selectedDate][item.id] = select.value;
-        updatePlannerSummary();
-      });
-      const addForDateBtn = el('button', 'add-btn', 'Ajouter à cette date');
-      addForDateBtn.type = 'button';
-      addForDateBtn.addEventListener('click', () => {
-        if (!calendarState.plannedByDate[calendarState.selectedDate]) calendarState.plannedByDate[calendarState.selectedDate] = {};
-        calendarState.plannedByDate[calendarState.selectedDate][item.id] = select.value;
-        addForDateBtn.classList.add('added');
-        addForDateBtn.textContent = 'Ajouté ✓';
-        window.setTimeout(() => {
-          addForDateBtn.classList.remove('added');
-          addForDateBtn.textContent = 'Ajouter à cette date';
-        }, 900);
-        updatePlanner();
-      });
-      actions.append(select, addForDateBtn);
-      row.append(actions);
-      const dateItems = el('div', 'planner-date-items');
-      if (optionsByItem[item.id]) {
-        const chosenOption = options.find((option) => option.key === optionsByItem[item.id]);
-        const tag = chosenOption?.price != null ? formatCurrency(chosenOption.price) : chosenOption?.priceText || '';
-        const selectedChip = el('div', 'planner-date-item');
-        const label = `${chosenOption?.label || optionsByItem[item.id]}${tag ? ` • ${tag}` : ''}`;
-        selectedChip.append(el('span', '', `Prévu: ${label}`));
-        const removeBtn = el('button', 'planner-remove', 'Retirer');
-        removeBtn.type = 'button';
-        removeBtn.addEventListener('click', () => {
-          delete calendarState.plannedByDate[calendarState.selectedDate][item.id];
-          if (Object.keys(calendarState.plannedByDate[calendarState.selectedDate]).length === 0) {
-            delete calendarState.plannedByDate[calendarState.selectedDate];
-          }
-          updatePlanner();
-        });
-        selectedChip.append(removeBtn);
-        dateItems.append(selectedChip);
-      }
-      row.append(dateItems);
-      plannerList.append(row);
-    });
-    updatePlannerSummary();
-  }
-
-  function updatePlannerSummary() {
-    const dateKeys = Object.keys(calendarState.plannedByDate).filter((dateKey) => Object.keys(calendarState.plannedByDate[dateKey] || {}).length > 0);
-    plannerSummary.innerHTML = '';
-    if (dateKeys.length === 0) {
-      plannerSummary.append(el('p', 'summary-empty', 'Sélectionnez des options pour remplir votre calendrier.'));
-      return;
-    }
-    dateKeys.sort();
-    dateKeys.forEach((dateKey) => {
-      const block = el('div');
-      block.append(el('div', 'summary-date', dateKey));
-      const list = el('ul', 'summary-list');
-      Object.entries(calendarState.plannedByDate[dateKey] || {}).forEach(([itemId, optionKey]) => {
-        const item = appData.highlights.find((entry) => entry.id === itemId);
-        if (!item) return;
-        const option = getPortionOptions(item).find((entry) => entry.key === optionKey);
-        const label = option?.label || optionKey;
-        const tag = option?.price != null ? ` • ${formatCurrency(option.price)}` : option?.priceText ? ` • ${option.priceText}` : '';
-        const li = el('li', 'summary-item', `${item.title} (${label}${tag})`);
-        const remove = el('button', 'planner-remove', 'Retirer');
-        remove.type = 'button';
-        remove.addEventListener('click', () => {
-          delete calendarState.plannedByDate[dateKey][itemId];
-          if (Object.keys(calendarState.plannedByDate[dateKey]).length === 0) delete calendarState.plannedByDate[dateKey];
-          updatePlanner();
-        });
-        li.append(' ', remove);
-        list.append(li);
-      });
-      block.append(list);
-      plannerSummary.append(block);
-    });
-  }
-
-  function renderCalendar() {
-    grid.innerHTML = '';
-    monthLabel.textContent = new Date(viewYear, viewMonth, 1).toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' });
-    ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].forEach((day) => grid.append(el('div', 'weekday', day)));
-    const firstDay = new Date(viewYear, viewMonth, 1);
-    const startShift = (firstDay.getDay() + 6) % 7;
-    const startDate = new Date(viewYear, viewMonth, 1 - startShift);
-    for (let idx = 0; idx < 42; idx += 1) {
-      const current = new Date(startDate);
-      current.setDate(startDate.getDate() + idx);
-      const iso = formatDateIso(current);
-      const button = el('button', 'day-btn', String(current.getDate()));
-      button.type = 'button';
-      if (current.getMonth() !== viewMonth) button.classList.add('faded');
-      if (iso === calendarState.selectedDate) button.classList.add('selected');
-      button.addEventListener('click', () => {
-        calendarState.selectedDate = iso;
-        renderCalendar();
-        updatePlanner();
-      });
-      grid.append(button);
-    }
-  }
-
-  prev.addEventListener('click', () => { viewMonth -= 1; if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; } renderCalendar(); });
-  next.addEventListener('click', () => { viewMonth += 1; if (viewMonth > 11) { viewMonth = 0; viewYear += 1; } renderCalendar(); });
-  checkoutBtn.addEventListener('click', () => {
-    const dates = Object.keys(calendarState.plannedByDate);
-    let added = 0;
-    dates.forEach((dateKey) => {
-      const daySelections = calendarState.plannedByDate[dateKey] || {};
-      Object.entries(daySelections).forEach(([itemId, optionKey]) => {
-        const item = appData.highlights.find((entry) => entry.id === itemId);
-        if (!item) return;
-        const option = getPortionOptions(item).find((entry) => entry.key === optionKey);
-        if (!option) return;
-        addToCart(item, option, dateKey);
-        added += 1;
-      });
-    });
-    if (added > 0) {
-      checkoutBtn.textContent = `Ajouté au panier (${added}) ✓`;
-      window.setTimeout(() => { checkoutBtn.textContent = 'Passer à la caisse'; }, 1300);
-    }
-  });
-
-  renderCalendar();
-  updatePlanner();
-  layout.append(calendarCard, plannerCard);
-  section.append(layout);
-  panel.append(section);
-}
-
-function setupTabs(tabButtons, panels) { const activateTab = (tabId) => { tabButtons.forEach((button) => { const isActive = button.dataset.tabId === tabId; button.setAttribute('aria-selected', String(isActive)); button.tabIndex = isActive ? 0 : -1; }); panels.forEach((panel) => { panel.hidden = panel.dataset.tabPanel !== tabId; }); }; tabButtons.forEach((button) => { button.addEventListener('click', () => activateTab(button.dataset.tabId)); }); activateTab(tabButtons[0]?.dataset.tabId); return activateTab; }
-
-function buildMenuCards(target, items, options = {}) {
-  const cards = el('div', `cards${options.carousel ? ' carousel' : ''}`);
-  items.forEach((item) => {
-    const card = el('article', 'card');
-    const image = el('img', 'card-media');
-    image.src = item.image || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80';
-    image.alt = item.title || "Image d'un item du menu";
-    image.loading = 'lazy';
-    const content = el('div', 'card-content');
-    if (!isFeatured(item)) content.append(el('div', 'badge', 'En rotation'));
-    content.append(el('div', 'badge', item.category || 'Menu'));
-    content.append(el('h3', '', item.title || 'Item sans titre'));
-    content.append(el('p', '', item.description || ''));
-    content.append(el('div', 'price', normalizePrice(item)));
-
-    const options = getPortionOptions(item);
-    if (options.length > 0) {
-      const actions = el('div', 'card-actions');
-      const select = el('select', 'portion-select');
-      options.forEach((option) => {
-        const opt = document.createElement('option');
-        opt.value = option.key;
-        const tag = Number.isFinite(option.price) ? formatCurrency(option.price) : option.priceText;
-        opt.textContent = `${option.label}${tag ? ` • ${tag}` : ''}`;
-        select.append(opt);
-      });
-      const addButton = el('button', 'add-btn', 'ADD TO CART');
-      addButton.type = 'button';
-      addButton.addEventListener('click', () => {
-        const selected = options.find((option) => option.key === select.value) || options[0];
-        if (!selected) return;
-        addToCart(item, selected);
-        addButton.classList.add('added');
-        addButton.textContent = 'ADDED ✓';
-        window.setTimeout(() => {
-          addButton.classList.remove('added');
-          addButton.textContent = 'ADD TO CART';
-        }, 900);
-      });
-      actions.append(select, addButton);
-      content.append(actions);
-    }
-
-    card.append(image, content);
-    cards.append(card);
-  });
-  target.append(cards);
-}
-
-function buildCartSection(target, title = 'Your Cart') {
-  const panel = el('aside', 'cart-panel');
-  panel.append(el('h3', 'cart-title', title));
-  panel.append(el('p', 'cart-hint', 'Pick a quantity and add cleanly in one click.'));
-  const itemsWrap = el('div', 'cart-items');
-  const totals = el('div', 'cart-total');
-  const customerSection = el('div', 'customer-section');
-  customerSection.append(el('p', 'customer-title', 'Delivery details'));
-  const customerGrid = el('div', 'customer-grid');
-
-  const createField = ({ key, label, placeholder, className = '', type = 'text', maxLength }) => {
-    const fieldLabel = el('label', `customer-label ${className}`.trim(), label);
-    const input = el('input', 'customer-input');
-    input.type = type;
-    input.placeholder = placeholder;
-    input.value = cartState.customer[key] || '';
-    if (maxLength) input.maxLength = maxLength;
-    input.autocomplete = key === 'name' ? 'name' : key === 'phone' ? 'tel' : key === 'postalCode' ? 'postal-code' : 'street-address';
-    input.addEventListener('input', () => {
-      const value = key === 'postalCode' ? input.value.toUpperCase() : input.value;
-      cartState.customer[key] = value.trimStart();
-      if (key === 'postalCode' && input.value !== value) input.value = value;
-      saveCartToStorage();
-    });
-    fieldLabel.append(input);
-    return fieldLabel;
+(() => {
+  const DATA_PATHS = {
+    settings: 'assets/data/settings.json',
+    menus: 'assets/data/menus.json',
+    items: 'assets/data/items.json',
+    delivery: 'assets/data/delivery.json',
+    promotions: 'assets/data/promotions.json',
+    content: 'assets/data/content.json',
   };
 
-  const cityLabel = el('label', 'customer-label', 'City');
-  const citySelect = el('select', 'customer-input');
-  const cityOptions = ['Contrecoeur', 'Sorel', 'Varennes', 'Saint-Roch-de-Richelieu', 'Verchères'];
-  const placeholderOption = document.createElement('option');
-  placeholderOption.value = '';
-  placeholderOption.textContent = 'Select a city';
-  citySelect.append(placeholderOption);
-  cityOptions.forEach((city) => {
-    const option = document.createElement('option');
-    option.value = city;
-    option.textContent = city;
-    citySelect.append(option);
-  });
-  citySelect.value = cityOptions.includes(cartState.customer.city) ? cartState.customer.city : '';
-  citySelect.addEventListener('change', () => {
-    cartState.customer.city = citySelect.value;
-    saveCartToStorage();
-  });
-  cityLabel.append(citySelect);
+  const CART_STORAGE_KEY = 'lacuisine_rosalie_cart_v2';
+  const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const WEEKDAY_LABELS = {
+    sunday: 'dimanche', monday: 'lundi', tuesday: 'mardi', wednesday: 'mercredi',
+    thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi',
+  };
+  const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
+  const DATE_REASONS = {
+    available: 'Disponible', too_soon: 'Commande trop tardive', outside_menu_period: 'Hors menu',
+    no_delivery: 'Pas de livraison', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
+  };
 
-  customerGrid.append(
-    createField({ key: 'name', label: 'Full name', placeholder: 'Enter your full name', className: 'full' }),
-    createField({ key: 'phone', label: 'Phone number', placeholder: '(514) 000-0000', type: 'tel', className: 'full' }),
-    createField({ key: 'streetNumber', label: 'Street number', placeholder: '123' }),
-    createField({ key: 'streetName', label: 'Street name', placeholder: 'Main Street' }),
-    createField({ key: 'apartment', label: 'Apartment (optional)', placeholder: 'Unit 4B' }),
-    cityLabel,
-    createField({ key: 'province', label: 'Province', placeholder: 'QC' }),
-    createField({ key: 'postalCode', label: 'Postal code', placeholder: 'H2X 1Y4', maxLength: 7 })
-  );
-  customerSection.append(customerGrid);
+  const state = {
+    page: 'home',
+    data: null,
+    cart: {
+      items: [],
+      deliveryDate: '',
+      customer: {
+        name: '', phone: '', email: '', streetNumber: '', streetName: '', apartment: '', city: '', province: 'QC', postalCode: '', notes: '',
+      },
+    },
+    selectedPortions: {},
+    quantities: {},
+    toastTimer: null,
+  };
 
-  function renderCart() {
-    itemsWrap.innerHTML = '';
-    const { subtotal, itemCount } = getCartTotals();
-    if (cartState.entries.length === 0) {
-      itemsWrap.append(el('p', 'empty-state', 'Your cart is empty. Add meals to start your order.'));
-    } else {
-      cartState.entries.forEach((entry) => {
-        const row = el('div', 'cart-row');
-        const left = el('div');
-        left.append(el('div', 'cart-name', `${entry.title} (${entry.optionLabel})`));
-        left.append(el('div', 'cart-meta', `Qty: ${entry.qty}${entry.deliveryDate ? ` • Date: ${entry.deliveryDate}` : ''}`));
-        row.append(left, el('div', 'cart-name', entry.price != null ? formatCurrency(entry.price * entry.qty) : entry.priceText));
-        itemsWrap.append(row);
-      });
-    }
-    totals.innerHTML = '';
-    totals.append(el('span', '', `Items: ${itemCount}`));
-    totals.append(el('span', '', `Subtotal: ${formatCurrency(subtotal)}`));
+  function injectStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+      :root{--bg:#F8F3EA;--card:#FFFFFF;--text:#241A12;--muted:#6B6258;--olive:#506B2F;--deep-olive:#2F421E;--gold:#B88442;--brown:#5B351C;--border:#E4D8C8;--success:#3F7456;--warning:#A06320;--error:#A7392D;--shadow:0 18px 45px rgba(36,26,18,.10);--soft:0 8px 22px rgba(36,26,18,.08)}
+      *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:radial-gradient(circle at top left,#fffaf1 0,#F8F3EA 36%,#f3eadc 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased} button,input,select,textarea{font:inherit} button{min-height:44px} a{color:inherit}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      .site{min-height:100vh;padding:12px 12px 92px}.container{width:min(1180px,100%);margin-inline:auto}.topbar{position:sticky;top:10px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 12px;border:1px solid rgba(228,216,200,.9);border-radius:24px;background:rgba(255,253,248,.92);backdrop-filter:blur(16px);box-shadow:var(--soft)}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;flex:0 0 auto;border-radius:18px;background:linear-gradient(135deg,var(--deep-olive),var(--olive));color:#fff;font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;box-shadow:0 10px 22px rgba(47,66,30,.18)}.brand-copy{display:block}.brand-name{display:block;font-family:'Playfair Display',Georgia,serif;font-size:1.18rem;font-weight:700;line-height:1.05}.brand-tagline{display:block;color:var(--muted);font-size:.82rem;margin-top:3px}.nav{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap}.nav-btn{border:1px solid transparent;background:transparent;color:var(--muted);border-radius:999px;padding:9px 12px;font-size:.9rem;font-weight:800;cursor:pointer}.nav-btn:hover,.nav-btn[aria-current=true]{background:#f3eadf;border-color:#dccbb7;color:var(--deep-olive)}.cart-nav{background:var(--deep-olive);color:#fff;border-color:var(--deep-olive)}.cart-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;margin-left:5px;padding:0 6px;border-radius:99px;background:var(--gold);color:#fff;font-size:.78rem}.mobile-menu{display:none;border:1px solid var(--border);border-radius:999px;background:#fff;padding:8px 12px;font-weight:800;color:var(--deep-olive)}
+      main{padding-top:18px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center;border:1px solid var(--border);border-radius:32px;padding:clamp(22px,4vw,52px);background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(251,245,236,.94));box-shadow:var(--shadow);overflow:hidden}.kicker{color:var(--olive);text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;font-weight:900}.hero h1,.page-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.15rem,5vw,4.65rem);line-height:1.02;margin:10px 0;color:var(--text)}.lead{font-size:clamp(1rem,2vw,1.18rem);line-height:1.75;color:var(--muted);max-width:62ch}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:999px;border:1px solid transparent;padding:12px 18px;font-weight:900;cursor:pointer;text-decoration:none;transition:transform .15s ease,filter .15s ease}.btn:hover{transform:translateY(-1px);filter:brightness(1.03)}.btn-primary{background:linear-gradient(180deg,#c08d50,#9f682f);color:#fff;box-shadow:0 12px 24px rgba(184,132,66,.24)}.btn-secondary{background:#fff;color:var(--deep-olive);border-color:#d8c8b5}.btn-olive{background:var(--deep-olive);color:#fff}.btn-ghost{background:#fff8ef;color:var(--brown);border-color:#ead9c5}.trust-chips,.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fffdf8;border-radius:999px;padding:8px 11px;color:#5f554b;font-size:.88rem;font-weight:700}.hero-visual{position:relative;min-height:390px;border-radius:28px;overflow:hidden;background:linear-gradient(135deg,#efe1cd,#fff)}.hero-visual img{width:100%;height:100%;min-height:390px;object-fit:cover;display:block}.hero-card{position:absolute;left:18px;right:18px;bottom:18px;border:1px solid rgba(255,255,255,.72);border-radius:22px;padding:16px;background:rgba(255,253,248,.9);backdrop-filter:blur(12px);box-shadow:var(--soft)}.hero-card strong{display:block;font-family:'Playfair Display',Georgia,serif;font-size:1.35rem}.section{margin-top:26px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:14px}.section h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.7rem,3vw,2.6rem);margin:0}.section p{color:var(--muted);line-height:1.65}.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.card,.panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.94);box-shadow:var(--soft)}.panel{padding:20px}.mini-card{padding:18px}.mini-card strong{display:block;margin-bottom:6px;color:var(--deep-olive)}.menu-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}.menu-header{border:1px solid #dac6ad;border-radius:28px;padding:24px;background:linear-gradient(135deg,#fff8ef,#fff);box-shadow:var(--soft)}.menu-header h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2rem,4vw,3.4rem);margin:4px 0}.promo{border-left:5px solid var(--gold);background:#fff7eb}.menu-section-title{display:flex;align-items:center;gap:10px;margin:24px 0 12px}.menu-section-title h2{font-size:1.7rem}.menu-card{display:grid;grid-template-columns:160px 1fr;overflow:hidden}.menu-card img{width:100%;height:100%;min-height:210px;object-fit:cover;background:#eee0d2}.menu-card-body{padding:18px;display:grid;gap:12px}.badge{width:fit-content;padding:5px 9px;border-radius:999px;background:#edf2e7;color:var(--deep-olive);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;font-weight:900}.menu-card h3{margin:0;font-size:1.25rem}.menu-card p{margin:0;color:var(--muted);line-height:1.55}.portion-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.portion-btn{border:1px solid #d8c8b6;border-radius:16px;background:#fffdf8;padding:10px 8px;cursor:pointer;text-align:center;color:var(--text);font-weight:900}.portion-btn small{display:block;color:var(--muted);font-weight:800;margin-top:2px}.portion-btn.active{background:var(--deep-olive);border-color:var(--deep-olive);color:#fff}.portion-btn.active small{color:#efe6d9}.item-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.qty{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:#fff}.qty button{border:0;background:transparent;width:42px;cursor:pointer;font-weight:900;color:var(--deep-olive)}.qty span{min-width:34px;text-align:center;font-weight:900}.unavailable{opacity:.62}.unavailable .btn,.unavailable .portion-btn{pointer-events:none}.cart-panel{position:sticky;top:108px;padding:18px}.cart-panel h2{font-family:'Playfair Display',Georgia,serif;margin:0 0 10px}.cart-empty{padding:14px;border:1px dashed #d8c8b6;border-radius:16px;color:var(--muted);background:#fffaf2}.cart-lines{display:grid;gap:10px}.cart-line{border:1px solid #eadfd2;border-radius:16px;padding:12px;background:#fffdf8}.line-top{display:flex;justify-content:space-between;gap:10px}.line-title{font-weight:900}.line-meta{color:var(--muted);font-size:.86rem;margin-top:2px}.line-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}.remove-btn{border:0;background:transparent;color:var(--error);font-weight:900;cursor:pointer}.cart-total,.summary-row{display:flex;justify-content:space-between;gap:12px;padding-top:12px;margin-top:12px;border-top:1px dashed #d7c7b6;font-weight:900}.notice{padding:12px;border-radius:16px;border:1px solid #efd9b8;background:#fff8e9;color:var(--warning);font-weight:800;line-height:1.45}.success-note{border-color:#cfe2d5;background:#f0f8f2;color:var(--success)}.checkout-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}.step{padding:20px}.step h2{display:flex;gap:10px;align-items:center;margin:0 0 12px;font-size:1.3rem}.step-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--deep-olive);color:#fff;font-size:.9rem}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:.88rem;font-weight:900;color:#4b3a2a}.field input,.field select,.field textarea{width:100%;min-height:46px;border:1px solid #d9cab8;border-radius:14px;background:#fffdf8;padding:10px 12px;color:var(--text)}.field textarea{min-height:96px;resize:vertical}.date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.date-btn{border:1px solid var(--border);border-radius:16px;background:#fffdf8;padding:10px 4px;cursor:pointer;color:var(--text)}.date-btn strong{display:block}.date-btn span{display:block;font-size:.73rem;color:var(--muted);margin-top:2px}.date-btn.disabled{background:#f0e6d9;color:#8a7b6d;cursor:not-allowed}.date-btn.selected{background:var(--deep-olive);border-color:var(--deep-olive);color:#fff}.date-btn.selected span{color:#f1e7d8}.quote-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.quote-item{padding:16px;border:1px solid var(--border);border-radius:18px;background:#fffdf8;font-weight:900;color:var(--deep-olive)}.zone-map{min-height:300px;border-radius:28px;background:radial-gradient(circle at 50% 45%,rgba(184,132,66,.45),transparent 24%),radial-gradient(circle at 35% 35%,rgba(80,107,47,.35),transparent 18%),linear-gradient(135deg,#f4e7d6,#fffaf2);display:grid;place-items:center;text-align:center;padding:24px;color:var(--deep-olive);font-weight:900}.footer{margin-top:30px;padding:24px;color:#f8f3ea;background:linear-gradient(135deg,var(--deep-olive),#203015);border-radius:28px}.footer-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:18px}.footer a{color:#fff}.toast{position:fixed;right:18px;bottom:86px;z-index:80;background:var(--deep-olive);color:#fff;border-radius:999px;padding:12px 16px;box-shadow:var(--shadow);font-weight:900;transform:translateY(16px);opacity:0;pointer-events:none;transition:.2s}.toast.show{transform:translateY(0);opacity:1}.mobile-cart-bar{position:fixed;left:12px;right:12px;bottom:12px;z-index:75;display:none;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:var(--deep-olive);color:#fff;padding:10px 12px 10px 16px;box-shadow:var(--shadow);font-weight:900}.mobile-cart-bar button{border:0;border-radius:999px;background:var(--gold);color:#fff;padding:9px 14px;font-weight:900;cursor:pointer}
+      @media(max-width:980px){.nav{display:none}.mobile-menu{display:inline-flex}.topbar.open .nav{display:flex;position:absolute;left:10px;right:10px;top:76px;padding:12px;border:1px solid var(--border);border-radius:20px;background:#fffdf8;box-shadow:var(--shadow)}.hero,.menu-layout,.checkout-grid{grid-template-columns:1fr}.cart-panel{position:static}.grid-3,.grid-4,.footer-grid{grid-template-columns:1fr 1fr}.mobile-cart-bar{display:flex}.menu-card{grid-template-columns:130px 1fr}.site{padding-bottom:92px}}
+      @media(max-width:660px){.site{padding-left:8px;padding-right:8px}.topbar{border-radius:18px}.brand-mark{width:48px;height:48px;border-radius:16px;font-size:1.05rem}.hero{padding:20px;border-radius:24px}.hero-visual,.hero-visual img{min-height:270px}.grid-2,.grid-3,.grid-4,.footer-grid,.form-grid,.quote-list{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.menu-card{grid-template-columns:1fr}.menu-card img{height:210px}.portion-grid{grid-template-columns:1fr}.date-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.checkout-grid{gap:12px}.panel,.step{padding:16px}.brand-name{font-size:1rem}.brand-tagline{font-size:.76rem}}
+    `;
+    document.head.appendChild(style);
   }
 
-  subscribeCart(renderCart);
-  panel.append(itemsWrap, totals, customerSection);
-  target.append(panel);
-}
+  function setSeo(content) {
+    const seo = content?.seo || {};
+    document.title = seo.title || 'La cuisine de Rosalie | Repas faits maison & livraison locale';
+    upsertMeta('description', seo.description || 'Menus faits maison en rotation, portions Petit / Grand / Familial et livraison locale.');
+    upsertMeta('og:title', document.title, 'property');
+    upsertMeta('og:description', seo.description || '', 'property');
+    upsertMeta('og:type', 'website', 'property');
+  }
 
-function buildHomePanel(panel) {
-  const hero = el('section', 'hero');
-  hero.append(el('div', 'kicker', 'Service local • Qualité certifiée'));
-  hero.append(el('h1', '', 'Repas faits maison avec certificat MAPAQ, livrés à votre domicile.'));
-  hero.append(el('p', 'lead', '🕒 Commandes requises au moins 48h à l\'avance. Minimum 30💲 par commande et livraison gratuite 💛 dans nos zones desservies.'));
-  hero.append(el('button', 'hero-cta', 'Commander maintenant'));
-  panel.append(hero);
-
-  const featuredSection = el('section', 'section');
-  featuredSection.append(el('h2', '', 'Plats vedettes du menu en cours'));
-  featuredSection.append(el('p', 'lead', 'Ces plats sont disponibles maintenant pendant la période active du menu.'));
-  if (appData.highlights.length > 0) buildMenuCards(featuredSection, appData.highlights, { carousel: true });
-  else featuredSection.append(el('p', 'empty-state', 'Aucun item en vedette pour le moment.'));
-
-  const cert = el('div', 'cert-block');
-  const certLogo = el('img', 'cert-logo');
-  certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png';
-  certLogo.alt = 'Logo de certification MAPAQ';
-  certLogo.loading = 'lazy';
-  cert.append(certLogo);
-  cert.append(el('p', 'cert-text', "Certification MAPAQ: formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec afin de prévenir les risques d'intoxication alimentaire."));
-
-  panel.append(featuredSection, cert);
-}
-
-
-function buildCartPanel(panel) {
-  const wrap = el('section', 'section');
-  wrap.append(el('h2', '', 'Panier'));
-  buildCartSection(wrap, 'Cart Summary');
-  panel.append(wrap);
-}
-
-function buildMenuPanel(panel) {
-  const menuSection = el('section', 'section');
-  menuSection.append(el('h2', '', 'Menu de la période'));
-  const periodCard = el('div', 'menu-period');
-  periodCard.append(el('h3', '', appData.currentMenu?.title || 'Menu en cours'));
-  const start = formatDisplayDate(appData.currentMenu?.start_date);
-  const end = formatDisplayDate(appData.currentMenu?.end_date);
-  periodCard.append(el('p', 'dates', start && end ? `Du ${start} au ${end}` : 'Période à confirmer'));
-  periodCard.append(el('p', '', appData.currentMenu?.description || 'Les plats marqués en vedette sont offerts maintenant.'));
-  menuSection.append(periodCard);
-  menuSection.append(el('h2', '', 'Disponibles maintenant'));
-  if (appData.highlights.length > 0) buildMenuCards(menuSection, appData.highlights);
-  else menuSection.append(el('p', 'empty-state', 'Aucun plat vedette disponible pour cette période.'));
-  menuSection.append(el('h2', '', 'Autres plats du roulement'));
-  menuSection.append(el('p', 'lead', 'Ces plats ne sont pas offerts en ce moment, mais reviennent dans nos menus tournants.'));
-  if (appData.archives.length > 0) buildMenuCards(menuSection, appData.archives);
-  else menuSection.append(el('p', 'empty-state', 'Tous les plats sont actuellement en vedette.'));
-  panel.append(menuSection);
-}
-function buildContactPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'Contactez-nous')); empty.append(el('p', 'panel-subtitle', 'Nous couvrons les secteurs suivants au Québec : Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères.')); const phone = el('p', 'panel-subtitle', 'Téléphone : 514-298-7545'); const details = el('p', 'panel-subtitle', 'Repas faits maison certifiés MAPAQ. Commandes au moins 48h à l\'avance. Minimum de commande : 30💲. Livraison gratuite 💛.'); const certExplain = el('p', 'panel-subtitle', "Une certification MAPAQ est une formation obligatoire en hygiène et salubrité alimentaires délivrée par le ministère de l'Agriculture, des Pêcheries et de l'Alimentation du Québec pour prévenir les risques d'intoxication alimentaire."); const certLogo = el('img', 'cert-logo'); certLogo.src = 'https://www.hygiene-et-salubrite-alimentaires.com/wp-content/uploads/2018/05/Formation-mapaq.png'; certLogo.alt = 'Logo officiel de formation MAPAQ'; certLogo.loading = 'lazy'; empty.append(phone, details, certExplain, certLogo); panel.append(empty); }
-
-function buildSpecialPanel(panel) { const empty = el('div', 'empty-panel'); empty.append(el('h2', 'panel-title', 'SPÉCIAUX DU JOUR')); empty.append(el('p', 'panel-subtitle', 'Service traiteur pour événements privés, corporatifs et familiaux. Contactez-nous pour planifier votre menu.')); panel.append(empty); }
-
-function render(root) {
-  const site = el('div', 'site');
-  const topbarWrap = el('div', 'container');
-  const topbar = el('header', 'topbar');
-  const brandWrap = el('div', 'brand-wrap');
-  const brandLogo = el('img', 'brand-logo');
-  brandLogo.src = `/assets/logo.png?v=${window.webframe?.version || '1.4.0'}`;
-  brandLogo.alt = `${appData.brand} logo`;
-  brandLogo.loading = 'eager';
-  const brandTitle = el('img', 'brand-title');
-  brandTitle.src = `/assets/title.png?v=${window.webframe?.version || '1.4.0'}`;
-  brandTitle.alt = appData.brand;
-  brandTitle.loading = 'eager';
-  brandWrap.append(brandLogo, brandTitle);
-  topbar.append(brandWrap);
-  const nav = el('div', 'nav');
-  nav.setAttribute('role', 'tablist');
-  const tabButtons = appData.tabs.map((tab) => { const button = el('button', 'tab', tab.label); button.type = 'button'; button.dataset.tabId = tab.id; nav.append(button); return button; });
-  appData.iconNav.forEach((item) => {
-    const iconTab = el('button', 'tab icon-tab', item.icon);
-    iconTab.type = 'button';
-    iconTab.setAttribute('aria-label', item.label);
-    if (item.action === 'cart') iconTab.dataset.tabId = 'cart';
-    nav.append(iconTab);
-  });
-  topbar.append(nav); topbarWrap.append(topbar);
-
-  const panelWrap = el('div', 'container');
-  const panelDefs = [...appData.tabs, { id: 'cart', label: 'Cart' }];
-  const panels = panelDefs.map((tab, idx) => {
-    const panel = el('section', 'tab-panel');
-    panel.dataset.tabPanel = tab.id;
-    panel.hidden = idx !== 0;
-    if (tab.id === 'home') buildHomePanel(panel); else if (tab.id === 'menu') buildMenuPanel(panel); else if (tab.id === 'calendar') buildCalendarPanel(panel); else if (tab.id === 'contact') buildContactPanel(panel); else if (tab.id === 'special') buildSpecialPanel(panel); else if (tab.id === 'cart') buildCartPanel(panel);
-    panelWrap.append(panel);
-    return panel;
-  });
-
-
-  // Safety: cart UI must exist only in the dedicated cart tab.
-  panels.forEach((panel) => {
-    if (panel.dataset.tabPanel !== 'cart') {
-      panel.querySelectorAll('.cart-panel').forEach((node) => node.remove());
+  function upsertMeta(name, content, attr = 'name') {
+    let node = document.querySelector(`meta[${attr}="${name}"]`);
+    if (!node) {
+      node = document.createElement('meta');
+      node.setAttribute(attr, name);
+      document.head.appendChild(node);
     }
-  });
-  const iconTabButtons = Array.from(nav.querySelectorAll('[data-tab-id]')).filter((button) => !tabButtons.includes(button));
-  const activateTab = setupTabs([...tabButtons, ...iconTabButtons], panels);
+    node.setAttribute('content', content);
+  }
 
-  const footerWrap = el('div', 'container');
-  const footer = el('footer', 'footer');
-  footer.append(el('p', 'footer-note', 'Raccourcis rapides'));
-  const footerLinks = el('div', 'footer-links');
-  appData.tabs.forEach((tab) => { const link = el('button', 'footer-link', tab.label); link.type = 'button'; link.addEventListener('click', () => activateTab(tab.id)); footerLinks.append(link); });
-  footer.append(footerLinks);
-  footer.append(el('p', 'footer-note', 'Entreprise certifiée MAPAQ en hygiène et salubrité alimentaires.'));
-  footerWrap.append(footer);
+  async function fetchJson(path, fallback) {
+    try {
+      const response = await fetch(path, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`${path} returned ${response.status}`);
+      return response.json();
+    } catch (error) {
+      console.warn('[La cuisine de Rosalie] Données indisponibles:', error);
+      return fallback;
+    }
+  }
 
-  site.append(topbarWrap, panelWrap, footerWrap);
-  root.innerHTML = '';
-  root.append(site);
-}
+  async function loadData() {
+    const [settings, menus, items, delivery, promotions, content] = await Promise.all([
+      fetchJson(DATA_PATHS.settings, {}), fetchJson(DATA_PATHS.menus, {}), fetchJson(DATA_PATHS.items, { items: [] }),
+      fetchJson(DATA_PATHS.delivery, { zones: [], rules: {} }), fetchJson(DATA_PATHS.promotions, { active: [] }), fetchJson(DATA_PATHS.content, {}),
+    ]);
+    return { settings, menus, items: items.items || [], delivery, promotions, content };
+  }
 
-window.webframe = {
-  version: '1.4.0',
-  async init() {
+  function formatCurrency(value) {
+    return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: state.data?.settings?.ordering?.currency || 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(value) || 0).replace(/\u00a0/g, ' ');
+  }
+
+  function formatDate(dateLike) {
+    if (!dateLike) return 'à confirmer';
+    const date = typeof dateLike === 'string' ? new Date(`${dateLike}T12:00:00`) : dateLike;
+    return new Intl.DateTimeFormat('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
+  }
+
+  function getSettingRules() {
+    const ordering = state.data?.settings?.ordering || {};
+    const deliveryRules = state.data?.delivery?.rules || {};
+    return { ...ordering, ...deliveryRules };
+  }
+
+  function getEnabledZones() {
+    return (state.data?.delivery?.zones || []).filter((zone) => zone.enabled !== false);
+  }
+
+  function getCurrentMenu() {
+    return state.data?.menus?.current_menu || {};
+  }
+
+  function getMenuItems(type = 'items') {
+    const menu = getCurrentMenu();
+    const ids = type === 'extras' ? menu.extra_ids || [] : menu.item_ids || [];
+    const byId = new Map((state.data?.items || []).map((item) => [item.id, item]));
+    return ids.map((id) => byId.get(id)).filter(Boolean);
+  }
+
+  function getPortions(item) {
+    return Object.entries(item.pricing || {})
+      .filter(([, price]) => price !== null && price !== undefined && price !== '')
+      .map(([key, price]) => ({ key, label: PORTION_LABELS[key] || key, price: Number(price) }));
+  }
+
+  function getItemById(id) {
+    return (state.data?.items || []).find((item) => item.id === id);
+  }
+
+  function cartTotals() {
+    const subtotal = state.cart.items.reduce((sum, line) => sum + line.price * line.qty, 0);
+    const count = state.cart.items.reduce((sum, line) => sum + line.qty, 0);
+    return { subtotal, count };
+  }
+
+  function saveCart() {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.cart));
+  }
+
+  function loadCart() {
+    try {
+      const raw = localStorage.getItem(CART_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.items)) state.cart.items = parsed.items.filter((line) => line.itemId && line.portion && Number(line.qty) > 0);
+      if (typeof parsed.deliveryDate === 'string') state.cart.deliveryDate = parsed.deliveryDate;
+      if (parsed.customer && typeof parsed.customer === 'object') state.cart.customer = { ...state.cart.customer, ...parsed.customer };
+    } catch (error) {
+      console.warn('Panier local illisible.', error);
+    }
+  }
+
+  function addToCart(item, portionKey, qty = 1) {
+    const portion = getPortions(item).find((option) => option.key === portionKey);
+    if (!portion || item.available === false) return;
+    const existing = state.cart.items.find((line) => line.itemId === item.id && line.portion === portion.key);
+    if (existing) existing.qty += qty;
+    else state.cart.items.push({ itemId: item.id, title: item.title, portion: portion.key, portionLabel: portion.label, price: portion.price, qty });
+    saveCart();
+    showToast(`${item.title} ajouté au panier`);
+    render();
+  }
+
+  function changeLineQty(itemId, portion, delta) {
+    const line = state.cart.items.find((entry) => entry.itemId === itemId && entry.portion === portion);
+    if (!line) return;
+    line.qty += delta;
+    if (line.qty <= 0) state.cart.items = state.cart.items.filter((entry) => !(entry.itemId === itemId && entry.portion === portion));
+    saveCart();
+    render();
+  }
+
+  function removeLine(itemId, portion) {
+    state.cart.items = state.cart.items.filter((entry) => !(entry.itemId === itemId && entry.portion === portion));
+    saveCart();
+    render();
+  }
+
+  function setPage(page) {
+    state.page = page;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+  }
+
+  function isDateAvailable(date) {
+    const rules = getSettingRules();
+    const menu = getCurrentMenu();
+    const noticeHours = Number(rules.order_notice_hours || 48);
+    const threshold = new Date(Date.now() + noticeHours * 60 * 60 * 1000);
+    const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
+    if (normalized < threshold) return { ok: false, reason: 'too_soon' };
+    if (menu.start_date && date < new Date(`${menu.start_date}T00:00:00`)) return { ok: false, reason: 'outside_menu_period' };
+    if (menu.end_date && date > new Date(`${menu.end_date}T23:59:59`)) return { ok: false, reason: 'outside_menu_period' };
+    const weekday = WEEKDAYS[date.getDay()];
+    if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return { ok: false, reason: 'no_delivery' };
+    return { ok: true, reason: 'available' };
+  }
+
+  function firstAvailableDate() {
+    const menu = getCurrentMenu();
+    const start = menu.start_date ? new Date(`${menu.start_date}T12:00:00`) : new Date();
+    const date = new Date(Math.max(start.getTime(), Date.now()));
+    date.setHours(12, 0, 0, 0);
+    for (let i = 0; i < 45; i += 1) {
+      const candidate = new Date(date);
+      candidate.setDate(date.getDate() + i);
+      if (isDateAvailable(candidate).ok) return candidate.toISOString().slice(0, 10);
+    }
+    return '';
+  }
+
+  function validateOrder() {
+    const errors = [];
+    const rules = getSettingRules();
+    const totals = cartTotals();
+    const customer = state.cart.customer;
+    if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
+    if (totals.subtotal < Number(rules.minimum_order || 0)) errors.push(`Minimum de commande: ${formatCurrency(rules.minimum_order || 0)}.`);
+    if (!state.cart.deliveryDate || !isDateAvailable(new Date(`${state.cart.deliveryDate}T12:00:00`)).ok) errors.push('Choisissez une date de livraison disponible.');
+    if (!customer.name.trim()) errors.push('Le nom complet est requis.');
+    if (!customer.phone.trim()) errors.push('Le téléphone est requis.');
+    if (!customer.streetNumber.trim() || !customer.streetName.trim()) errors.push('L’adresse de livraison est requise.');
+    if (!customer.city.trim()) errors.push('La ville est requise.');
+    const allowed = getEnabledZones().map((zone) => zone.city.toLowerCase());
+    if (customer.city && !allowed.includes(customer.city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
+    return errors;
+  }
+
+  function buildCheckoutPayload() {
+    const customer = state.cart.customer;
+    return {
+      items: state.cart.items.map((line) => ({ item_id: line.itemId, portion: line.portion, qty: line.qty })),
+      delivery_date: state.cart.deliveryDate,
+      customer: {
+        name: customer.name, phone: customer.phone, email: customer.email, street_number: customer.streetNumber,
+        street_name: customer.streetName, apartment: customer.apartment, city: customer.city, province: customer.province || 'QC',
+        postal_code: (customer.postalCode || '').toUpperCase(), notes: customer.notes,
+      },
+    };
+  }
+
+  async function checkout() {
+    const errors = validateOrder();
+    if (errors.length) {
+      showToast(errors[0]);
+      render();
+      return;
+    }
+    const endpoint = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
+    try {
+      const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(buildCheckoutPayload()) });
+      const payload = await response.json();
+      if (!response.ok || !payload.checkout_url) throw new Error(payload.error || 'Session Stripe indisponible.');
+      window.location.assign(payload.checkout_url);
+    } catch (error) {
+      showToast('Paiement sécurisé bientôt disponible. La commande est prête à être envoyée.');
+      console.warn('Checkout non configuré:', error, buildCheckoutPayload());
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.querySelector('.toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(state.toastTimer);
+    state.toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  function navHtml() {
+    const nav = [
+      ['home', 'Accueil'], ['menu', 'Menu'], ['commander', 'Commander'], ['traiteur', 'Traiteur'], ['livraison', 'Livraison'], ['contact', 'Contact'],
+    ];
+    const { count } = cartTotals();
+    return `
+      <header class="topbar container" id="topbar">
+        <button class="brand" data-page="home" aria-label="Accueil La cuisine de Rosalie" style="border:0;background:transparent;cursor:pointer">
+          <span class="brand-mark" aria-hidden="true">LR</span>
+          <span class="brand-copy"><span class="brand-name">${escapeHtml(state.data.settings.business.name || 'La cuisine de Rosalie')}</span><span class="brand-tagline">${escapeHtml(state.data.settings.business.tagline)}</span></span>
+        </button>
+        <button class="mobile-menu" data-menu-toggle aria-expanded="false">Menu</button>
+        <nav class="nav" aria-label="Navigation principale">
+          ${nav.map(([id, label]) => `<button class="nav-btn" data-page="${id}" aria-current="${state.page === id}">${label}</button>`).join('')}
+          <button class="nav-btn cart-nav" data-page="commander" aria-current="${state.page === 'commander'}">Panier <span class="cart-badge">${count}</span></button>
+        </nav>
+      </header>`;
+  }
+
+  function homeHtml() {
+    const menuItems = getMenuItems().filter((item) => item.featured).slice(0, 3);
+    const zones = getEnabledZones().map((zone) => zone.city).join(', ');
+    return `
+      <section class="hero container">
+        <div>
+          <div class="kicker">Menu de la semaine • Livraison locale</div>
+          <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison, livrés dans votre secteur.')}</h1>
+          <p class="lead">${escapeHtml(state.data.content.home?.subheadline || '')}</p>
+          <div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier une commande</button></div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span><span class="chip">Commande 48 h à l’avance</span><span class="chip">Hygiène & salubrité alimentaires</span></div>
+        </div>
+        <div class="hero-visual">
+          <img src="https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82" alt="Repas maison préparé avec soin" loading="eager">
+          <div class="hero-card"><strong>${escapeHtml(getCurrentMenu().title || 'Menu de la semaine')}</strong><span>Petit / Grand / Familial • livraison à céduler avec le client</span></div>
+        </div>
+      </section>
+      <section class="section container">
+        <div class="section-head"><div><div class="kicker">À commander maintenant</div><h2>Aperçu du menu</h2></div><button class="btn btn-ghost" data-page="menu">Tout voir</button></div>
+        <div class="grid grid-3">${menuItems.map((item) => itemPreviewHtml(item)).join('')}</div>
+      </section>
+      <section class="section container grid grid-4">
+        ${['Choisissez vos plats', 'Sélectionnez Petit, Grand ou Familial', 'Planifiez votre livraison', 'Savourez vos repas faits maison'].map((text, index) => `<div class="card mini-card"><strong>${index + 1}. ${text}</strong><p>Un parcours simple, pensé pour commander rapidement sur téléphone.</p></div>`).join('')}
+      </section>
+      <section class="section container panel">
+        <div class="section-head"><div><div class="kicker">Secteur desservi</div><h2>Livraison locale</h2><p>Livraison disponible à ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les règles</button></div>
+      </section>`;
+  }
+
+  function itemPreviewHtml(item) {
+    const portions = getPortions(item);
+    return `<article class="card menu-card" style="grid-template-columns:1fr"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy"><div class="menu-card-body"><span class="badge">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="chip-row">${portions.map((p) => `<span class="chip">${p.label} ${formatCurrency(p.price)}</span>`).join('')}</div></div></article>`;
+  }
+
+  function menuPageHtml() {
+    const menu = getCurrentMenu();
+    const rules = getSettingRules();
+    const promos = (state.data.promotions.active || []).filter((promo) => promo.enabled);
+    return `
+      <div class="container menu-layout">
+        <div>
+          <section class="menu-header">
+            <div class="kicker">Menu en rotation</div><h1>${escapeHtml(menu.title || 'Menu de la semaine')}</h1>
+            <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p>
+            <div class="chip-row"><span class="chip">Commande ${rules.order_notice_hours || 48} h à l’avance</span><span class="chip">Livraison locale disponible</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
+          </section>
+          ${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
+          ${menuSectionHtml('Plats principaux', getMenuItems('items'))}
+          ${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}
+        </div>
+        ${cartPanelHtml(true)}
+      </div>`;
+  }
+
+  function menuSectionHtml(title, items) {
+    return `<section class="section"><div class="menu-section-title"><h2>${escapeHtml(title)}</h2></div><div class="grid">${items.map(menuItemHtml).join('')}</div></section>`;
+  }
+
+  function menuItemHtml(item) {
+    const portions = getPortions(item);
+    const selected = state.selectedPortions[item.id] || portions[0]?.key || 'standard';
+    const qty = state.quantities[item.id] || 1;
+    return `<article class="card menu-card ${item.available === false ? 'unavailable' : ''}">
+      <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy">
+      <div class="menu-card-body">
+        <span class="badge">${item.available === false ? 'De retour bientôt' : escapeHtml(item.category)}</span>
+        <h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>
+        <div class="portion-grid" role="group" aria-label="Portions pour ${escapeHtml(item.title)}">
+          ${portions.map((portion) => `<button class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}</small></button>`).join('')}
+        </div>
+        <div class="item-actions">
+          <div class="qty" aria-label="Quantité"><button data-menu-qty="${item.id}:-1" aria-label="Réduire">−</button><span>${qty}</span><button data-menu-qty="${item.id}:1" aria-label="Augmenter">+</button></div>
+          <button class="btn btn-primary" data-add="${item.id}" ${item.available === false ? 'disabled' : ''}>Ajouter</button>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function cartPanelHtml(includeButton = false) {
+    const totals = cartTotals();
+    const rules = getSettingRules();
+    const lines = state.cart.items.map((line) => cartLineHtml(line)).join('');
+    const min = Number(rules.minimum_order || 0);
+    const threshold = Number(rules.free_delivery_threshold || 0);
+    return `<aside class="cart-panel card" aria-label="Votre panier"><h2>Votre panier</h2>
+      ${state.cart.items.length ? `<div class="cart-lines">${lines}</div>` : `<div class="cart-empty">Votre panier est vide. Ajoutez un plat du menu de la semaine.</div>`}
+      <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
+      ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
+      ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
+      ${includeButton ? `<button class="btn btn-primary" data-page="commander" style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
+    </aside>`;
+  }
+
+  function cartLineHtml(line) {
+    return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
+  }
+
+  function commanderHtml() {
+    if (!state.cart.deliveryDate) state.cart.deliveryDate = firstAvailableDate();
+    const errors = validateOrder();
+    const totals = cartTotals();
+    return `<div class="container checkout-grid">
+      <div class="grid">
+        <section class="card step"><h2><span class="step-number">1</span>Votre commande</h2>${cartPanelHtml(false)}</section>
+        <section class="card step"><h2><span class="step-number">2</span>Date de livraison</h2>${dateSelectorHtml()}</section>
+        <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
+      </div>
+      <aside class="card cart-panel"><h2>Confirmation</h2><p class="line-meta">Date: ${state.cart.deliveryDate ? formatDate(state.cart.deliveryDate) : 'Aucune date disponible'}</p><div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Le serveur validera les prix officiels, la ville, la date et les règles avant paiement Stripe sécurisé.</p></aside>
+    </div>`;
+  }
+
+  function dateSelectorHtml() {
+    const first = firstAvailableDate();
+    const start = first ? new Date(`${first}T12:00:00`) : new Date();
+    const buttons = [];
+    for (let i = 0; i < 14; i += 1) {
+      const date = new Date(start); date.setDate(start.getDate() + i);
+      const iso = date.toISOString().slice(0, 10);
+      const status = isDateAvailable(date);
+      buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" ${status.ok ? '' : 'disabled'}><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
+    }
+    return `<p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date disponible dans la période du menu avec le délai de 48 h.'}</p><div class="date-grid">${buttons.join('')}</div><p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
+  }
+
+  function customerFormHtml() {
+    const c = state.cart.customer;
+    const zones = getEnabledZones();
+    const input = (key, label, attrs = '') => `<div class="field"><label for="${key}">${label}</label><input id="${key}" data-customer="${key}" value="${escapeHtml(c[key] || '')}" ${attrs}></div>`;
+    return `<div class="form-grid">
+      ${input('name', 'Nom complet', 'autocomplete="name"')}${input('phone', 'Téléphone', 'autocomplete="tel"')}${input('email', 'Courriel (optionnel)', 'autocomplete="email" type="email"')}${input('streetNumber', 'Numéro civique')}${input('streetName', 'Rue', 'autocomplete="address-line1"')}${input('apartment', 'Appartement')}
+      <div class="field"><label for="city">Ville</label><select id="city" data-customer="city"><option value="">Choisir une ville</option>${zones.map((zone) => `<option value="${escapeHtml(zone.city)}" ${c.city === zone.city ? 'selected' : ''}>${escapeHtml(zone.city)}</option>`).join('')}</select></div>
+      ${input('postalCode', 'Code postal', 'autocomplete="postal-code"')}
+      <div class="field full"><label for="notes">Instructions, allergies ou commentaires</label><textarea id="notes" data-customer="notes">${escapeHtml(c.notes || '')}</textarea></div>
+    </div>`;
+  }
+
+  function traiteurHtml() {
+    const services = ['Événements familiaux', 'Petits groupes', 'Repas préparés', 'Plateaux / formats familiaux', 'Menus personnalisés'];
+    return `<section class="container hero"><div><div class="kicker">Traiteur & événements</div><h1>Des repas faits maison pour vos moments importants.</h1><p class="lead">Repas familiaux, événements privés, réunions et repas corporatifs: Rosalie peut préparer une proposition adaptée à votre groupe.</p><div class="quote-list">${services.map((service) => `<div class="quote-item">${service}</div>`).join('')}</div></div><div class="panel"><h2>Demander une soumission</h2><form class="form-grid" action="mailto:${escapeHtml(state.data.settings.business.email || state.data.settings.business.phone)}" method="post" enctype="text/plain"><div class="field"><label>Nom</label><input name="nom"></div><div class="field"><label>Téléphone / courriel</label><input name="contact"></div><div class="field"><label>Date de l’événement</label><input name="date" type="date"></div><div class="field"><label>Nombre de personnes</label><input name="personnes" type="number" min="1"></div><div class="field"><label>Ville</label><input name="ville"></div><div class="field"><label>Type d’événement</label><input name="type"></div><div class="field full"><label>Message</label><textarea name="message"></textarea></div><button class="btn btn-primary" type="submit">Demander une soumission</button></form></div></section>`;
+  }
+
+  function livraisonHtml() {
+    const rules = getSettingRules();
+    const zones = getEnabledZones();
+    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Des règles claires avant de commander.</h1><p>Les commandes doivent être placées au moins ${rules.order_notice_hours || 48} h à l’avance afin de garantir la préparation.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
+  }
+
+  function contactHtml() {
+    const business = state.data.settings.business;
+    const zones = getEnabledZones().map((zone) => zone.city).join(', ');
+    return `<section class="container grid grid-2"><div class="panel"><div class="kicker">Contact</div><h1 class="page-title">Une question ou une commande spéciale?</h1><p>Réponse locale et humaine pour vos repas de la semaine, formats familiaux et demandes traiteur.</p><div class="grid"><a class="btn btn-primary" href="tel:${escapeHtml(business.phone)}">Téléphone: ${escapeHtml(business.phone)}</a><a class="btn btn-secondary" href="${escapeHtml(business.facebook_url)}" target="_blank" rel="noopener">Facebook</a><a class="btn btn-secondary" href="${escapeHtml(business.messenger_url || business.facebook_url)}" target="_blank" rel="noopener">Messenger</a></div></div><div class="panel"><h2>Informations utiles</h2><p><strong>Zones:</strong> ${escapeHtml(zones)}.</p><p><strong>Commande:</strong> au moins ${getSettingRules().order_notice_hours || 48} h à l’avance.</p><p><strong>Confiance:</strong> ${escapeHtml(state.data.settings.trust.hygiene_statement)}</p><p class="notice">À confirmer avant lancement: minimum exact, modalités de livraison gratuite, jours de livraison, paiement et rabais de référence.</p></div></section>`;
+  }
+
+  function footerHtml() {
+    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>48 h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
+  }
+
+  function mobileCartBarHtml() {
+    const totals = cartTotals();
+    return `<div class="mobile-cart-bar"><span>${totals.count} article${totals.count > 1 ? 's' : ''} • ${formatCurrency(totals.subtotal)}</span><button data-page="commander">Voir le panier</button></div>`;
+  }
+
+  function render() {
     const root = document.getElementById('webframe-root');
-    if (!root) return;
-    loadCartFromStorage();
-    const payload = await loadItems();
-    syncDataFromItems(payload.items);
-    syncCurrentMenu(payload.currentMenu);
-    injectStyles();
-    render(root);
-  },
-};
+    const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml };
+    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
+    bindEvents(root);
+  }
 
-window.addEventListener('DOMContentLoaded', () => window.webframe?.init());
+  function bindEvents(root) {
+    root.querySelectorAll('[data-page]').forEach((button) => button.addEventListener('click', () => setPage(button.dataset.page)));
+    root.querySelector('[data-menu-toggle]')?.addEventListener('click', (event) => {
+      const topbar = root.querySelector('#topbar');
+      topbar.classList.toggle('open');
+      event.currentTarget.setAttribute('aria-expanded', topbar.classList.contains('open'));
+    });
+    root.querySelectorAll('[data-portion]').forEach((button) => button.addEventListener('click', () => {
+      const [itemId, portion] = button.dataset.portion.split(':'); state.selectedPortions[itemId] = portion; render();
+    }));
+    root.querySelectorAll('[data-menu-qty]').forEach((button) => button.addEventListener('click', () => {
+      const [itemId, delta] = button.dataset.menuQty.split(':'); state.quantities[itemId] = Math.max(1, (state.quantities[itemId] || 1) + Number(delta)); render();
+    }));
+    root.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', () => {
+      const item = getItemById(button.dataset.add); if (!item) return;
+      const portion = state.selectedPortions[item.id] || getPortions(item)[0]?.key; addToCart(item, portion, state.quantities[item.id] || 1);
+    }));
+    root.querySelectorAll('[data-line-qty]').forEach((button) => button.addEventListener('click', () => {
+      const [itemId, portion, delta] = button.dataset.lineQty.split(':'); changeLineQty(itemId, portion, Number(delta));
+    }));
+    root.querySelectorAll('[data-remove]').forEach((button) => button.addEventListener('click', () => {
+      const [itemId, portion] = button.dataset.remove.split(':'); removeLine(itemId, portion);
+    }));
+    root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => { state.cart.deliveryDate = button.dataset.date; saveCart(); render(); }));
+    root.querySelectorAll('[data-customer]').forEach((field) => field.addEventListener('input', () => {
+      const key = field.dataset.customer; state.cart.customer[key] = key === 'postalCode' ? field.value.toUpperCase() : field.value; saveCart();
+    }));
+    root.querySelectorAll('[data-customer]').forEach((field) => field.addEventListener('change', () => {
+      const key = field.dataset.customer; state.cart.customer[key] = key === 'postalCode' ? field.value.toUpperCase() : field.value; saveCart(); render();
+    }));
+    root.querySelector('[data-checkout]')?.addEventListener('click', checkout);
+  }
+
+  async function init() {
+    injectStyles();
+    loadCart();
+    state.data = await loadData();
+    setSeo(state.data.content);
+    const first = firstAvailableDate();
+    if (!state.cart.deliveryDate && first) state.cart.deliveryDate = first;
+    render();
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+})();

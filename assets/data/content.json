@@ -1,0 +1,19 @@
+{
+  "seo": {
+    "title": "La cuisine de Rosalie | Repas faits maison & livraison locale",
+    "description": "Menus faits maison en rotation, portions Petit / Grand / Familial, livraison locale à Contrecoeur, Sorel, Varennes, Saint-Roch-de-Richelieu et Verchères."
+  },
+  "home": {
+    "headline": "Repas faits maison, livrés dans votre secteur.",
+    "subheadline": "Découvrez le menu de la semaine, choisissez vos portions et planifiez votre livraison au moins 48 h à l’avance.",
+    "primary_cta": "Voir le menu de la semaine",
+    "secondary_cta": "Planifier une commande"
+  },
+  "business_rules_to_confirm": [
+    "Minimum de commande exact: 30 $ ou 35 $?",
+    "Seuil de livraison gratuite et modalités.",
+    "Jours de livraison fixes ou variables selon le menu.",
+    "Paiement complet en ligne, dépôt ou paiement à la livraison.",
+    "Application du rabais de référence de 10 $."
+  ]
+}

@@ -124,7 +124,7 @@ def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
 def build_ui(port: int) -> None:
     from nicegui import app, ui
 
-    ui.page_title("webframe")
+    ui.page_title("La cuisine de Rosalie | Repas faits maison & livraison locale")
 
     ui.add_head_html("""
     <style>
@@ -135,8 +135,9 @@ def build_ui(port: int) -> None:
     ui.element("div").props('id="webframe-root"')
 
     app_js_version = int(JS_FILE.stat().st_mtime) if JS_FILE.exists() else 0
-    app.add_static_files('/assets', str(BASE_DIR))
-    ui.add_body_html(f'<script src="/assets/main.js?v={app_js_version}"></script>')
+    app.add_static_files('/assets', str(BASE_DIR / 'assets'))
+    app.add_static_files('/static', str(BASE_DIR))
+    ui.add_body_html(f'<script src="/static/main.js?v={app_js_version}"></script>')
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
 
 
