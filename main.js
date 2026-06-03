@@ -73,9 +73,14 @@
     node.setAttribute('content', content);
   }
 
+  function uncachedDataPath(path) {
+    const separator = path.includes('?') ? '&' : '?';
+    return `${path}${separator}v=${Date.now()}`;
+  }
+
   async function fetchJson(path, fallback) {
     try {
-      const response = await fetch(path, { cache: 'no-store' });
+      const response = await fetch(uncachedDataPath(path), { cache: 'no-store' });
       if (!response.ok) throw new Error(`${path} returned ${response.status}`);
       return response.json();
     } catch (error) {
@@ -132,6 +137,26 @@
 
   function getItemById(id) {
     return (state.data?.items || []).find((item) => item.id === id);
+  }
+
+  function itemImagePath(item, preferred = 'card') {
+    const images = item?.images || {};
+    if (preferred === 'hero') return images.hero || images.card || item?.image || images.original || images.thumb || '';
+    if (preferred === 'thumb') return images.thumb || item?.image || images.card || images.original || images.hero || '';
+    return images[preferred] || item?.image || images.card || images.hero || images.original || images.thumb || '';
+  }
+
+  function currentMenuIds() {
+    const menu = getCurrentMenu();
+    return new Set([...(menu.item_ids || []), ...(menu.extra_ids || [])]);
+  }
+
+  function getCurrentMenuOfferings() {
+    return [...getMenuItems('items'), ...getMenuItems('extras')];
+  }
+
+  function getCurrentMenuImageItems() {
+    return getCurrentMenuOfferings().filter((item) => item.available !== false && itemImagePath(item, 'hero'));
   }
 
   function cartTotals() {
@@ -307,10 +332,50 @@
     current: 'Disponible cette semaine', past: 'Création passée', catering: 'Traiteur', custom: 'Sur demande', seasonal: 'Saisonnier',
   };
 
+  function autoGallerySlides() {
+    const menuIds = currentMenuIds();
+    return (state.data?.items || [])
+      .map((item, index) => ({ item, index, image: itemImagePath(item, 'hero') }))
+      .filter(({ item, image }) => item.available !== false && image)
+      .map(({ item, index, image }) => ({
+        id: `auto-item-${item.id || index}`,
+        title: item.title || 'Plat maison',
+        subtitle: item.description || item.category || 'Création maison de La cuisine de Rosalie',
+        image,
+        thumb: itemImagePath(item, 'thumb'),
+        linked_item_id: item.id,
+        status: menuIds.has(item.id) ? 'current' : 'custom',
+        badge: menuIds.has(item.id) ? GALLERY_STATUS_LABELS.current : item.category || GALLERY_STATUS_LABELS.custom,
+        cta_label: menuIds.has(item.id) ? 'Voir au menu' : 'Nous contacter',
+        cta_page: menuIds.has(item.id) ? 'menu' : 'contact',
+        enabled: true,
+        sort: 1000 + index,
+        auto: true,
+      }));
+  }
+
+  function resolveManualSlide(slide) {
+    const linkedItem = slide.linked_item_id ? getItemById(slide.linked_item_id) : null;
+    const image = slide.image || itemImagePath(linkedItem, 'hero');
+    if (!image) return null;
+    return {
+      ...slide,
+      title: slide.title || linkedItem?.title || 'Plat maison',
+      subtitle: slide.subtitle || linkedItem?.description || linkedItem?.category || '',
+      image,
+      thumb: slide.thumb || itemImagePath(linkedItem, 'thumb'),
+    };
+  }
+
   function getGallerySlides() {
-    return (state.data?.gallery?.slides || [])
+    const manualSlides = (state.data?.gallery?.slides || [])
       .filter((slide) => slide.enabled !== false)
+      .map(resolveManualSlide)
+      .filter(Boolean)
       .sort((a, b) => Number(a.sort || 0) - Number(b.sort || 0));
+    const manualItemIds = new Set(manualSlides.map((slide) => slide.linked_item_id).filter(Boolean));
+    const automaticSlides = autoGallerySlides().filter((slide) => !manualItemIds.has(slide.linked_item_id));
+    return [...manualSlides, ...automaticSlides];
   }
 
   function galleryTargetPage(slide) {
@@ -397,9 +462,13 @@
   function homeHtml() {
     const menu = getCurrentMenu();
     const rules = getSettingRules();
-    const menuItems = getMenuItems().filter((item) => item.available !== false && item.featured === true).slice(0, 3);
+    const currentAvailableItems = getMenuItems().filter((item) => item.available !== false);
+    const featuredItems = currentAvailableItems.filter((item) => item.featured === true);
+    const menuItems = (featuredItems.length ? featuredItems : currentAvailableItems).slice(0, 3);
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
-    const heroImage = state.data.content.home?.hero_image || 'assets/images/hero/homepage-hero.webp';
+    const heroItems = getCurrentMenuImageItems();
+    const activeHeroItem = heroItems.length ? heroItems[state.carousel.index % heroItems.length] : null;
+    const heroImage = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || 'assets/images/hero/homepage-hero.webp';
     return `
       <section class="hero container">
         <div>
@@ -410,8 +479,8 @@
           <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span><span class="chip">Commande ${rules.order_notice_hours || 48} h à l’avance</span><span class="chip">Portions Petit / Grand / Familial</span></div>
         </div>
         <div class="hero-visual">
-          <img src="${escapeHtml(heroImage)}" alt="Repas maison préparé avec soin" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menu.title || 'Menu de la semaine')}</strong><span>Petit / Grand / Familial • livraison à céduler avec le client</span></div>
+          <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
+          <div class="hero-card"><strong>${escapeHtml(activeHeroItem?.title || menu.title || 'Menu de la semaine')}</strong><span>${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client</span></div>
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
@@ -422,7 +491,7 @@
       </section>
       ${galleryCarouselHtml()}
       ${menuItems.length ? `<section class="section container">
-        <div class="section-head"><div><div class="kicker">À commander maintenant</div><h2>Aperçu du menu actuel</h2><p>Seulement les items actifs, disponibles et mis en vedette cette semaine.</p></div><button class="btn btn-ghost" data-page="menu">Tout voir</button></div>
+        <div class="section-head"><div><div class="kicker">À commander maintenant</div><h2>Aperçu du menu actuel</h2><p>Items actifs et disponibles cette semaine. Cliquez pour voir toutes les portions, prix et options.</p></div><button class="btn btn-ghost" data-page="menu">Tout voir le menu</button></div>
         <div class="grid grid-3">${menuItems.map((item) => itemPreviewHtml(item)).join('')}</div>
       </section>` : ''}
       <section class="section container grid grid-4">
@@ -436,13 +505,14 @@
   }
 
   function itemImageHtml(item) {
-    if (!item.image) return `<div class="food-placeholder" aria-label="Photo à venir"><span>Photo à venir</span><small>La cuisine de Rosalie</small></div>`;
-    return `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;food-placeholder&quot;&gt;&lt;span&gt;Photo à venir&lt;/span&gt;&lt;small&gt;La cuisine de Rosalie&lt;/small&gt;&lt;/div&gt;'">`;
+    const image = itemImagePath(item);
+    if (!image) return `<div class="food-placeholder" aria-label="Photo à venir"><span>Photo à venir</span><small>La cuisine de Rosalie</small></div>`;
+    return `<img src="${escapeHtml(image)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;food-placeholder&quot;&gt;&lt;span&gt;Photo à venir&lt;/span&gt;&lt;small&gt;La cuisine de Rosalie&lt;/small&gt;&lt;/div&gt;'">`;
   }
 
   function itemPreviewHtml(item) {
     const portions = getPortions(item);
-    return `<article class="card menu-card" style="grid-template-columns:1fr">${itemImageHtml(item)}<div class="menu-card-body"><span class="badge">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="chip-row">${portions.map((p) => `<span class="chip">${p.label} ${formatCurrency(p.price)}</span>`).join('')}</div></div></article>`;
+    return `<article class="card menu-card" style="grid-template-columns:1fr">${itemImageHtml(item)}<div class="menu-card-body"><span class="badge">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="chip-row">${portions.map((p) => `<span class="chip">${p.label} ${formatCurrency(p.price)}</span>`).join('')}</div><button class="btn btn-ghost" data-page="menu">Voir dans le menu</button></div></article>`;
   }
 
   function menuPageHtml() {
