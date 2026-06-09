@@ -122,7 +122,13 @@
         "grand": 10,
         "familial": 23
       },
-      "tags": []
+      "tags": [],
+      "images": {
+        "original": "assets/images/items/macaroni-3-fromages/card.webp",
+        "thumb": "assets/images/items/macaroni-3-fromages/thumb.webp",
+        "card": "assets/images/items/macaroni-3-fromages/card.webp",
+        "hero": "assets/images/items/macaroni-3-fromages/hero.webp"
+      }
     },
     {
       "id": "salade-du-chef",
