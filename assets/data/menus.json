@@ -1,25 +1,25 @@
 {
   "current_menu": {
-    "id": "menu-2026-05-29-2026-06-03",
-    "title": "Menu du 29 mai au 3 juin",
-    "start_date": "2026-05-29",
-    "end_date": "2026-06-03",
-    "description": "Livraison gratuite 35 $ et plus.",
+    "id": "menu-2026-06-30-2026-07-06",
+    "title": "Menu du 30 juin au 6 juillet",
+    "start_date": "2026-06-30",
+    "end_date": "2026-07-06",
+    "description": "Commande minimale de 35 $ et plus. Délais de préparation de 48 h à 72 h.",
     "active": true,
     "delivery_days": [],
     "item_ids": [
-      "souvlaki-porc-patates-ail",
-      "penne-tomate-vin-rouge-saucisses",
-      "jambon-ananas-patates-pile",
-      "linguine-alfredo-poulet-grille",
-      "boulettes-porc-bacon-sauce-tomate",
-      "soupe-repas-lasagne",
-      "macaroni-3-fromages"
+      "pates-strogonoff",
+      "boulettes-sauce-asiatique-riz-legumes",
+      "riz-mexicain",
+      "rotini-sauce-rosee-parmesan",
+      "spaghetti-sauce-tomate-boulettes-italiennes",
+      "poulet-champignons-riz",
+      "penne-alfredo-bacon"
     ],
     "extra_ids": [
+      "soupe-legumes",
       "salade-du-chef",
-      "sous-marin-tartinade-poulet",
-      "sauce-alfredo-maison-600ml"
+      "sous-marin-jambon-fromage"
     ]
   },
   "archive": []
