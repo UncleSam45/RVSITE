@@ -16,6 +16,36 @@
     return `${STATIC_ASSET_BASE}${path}`;
   }
 
+  // Defense-in-depth: keep the public storefront in construction mode even if an older index.html that loads main.js is redeployed.
+  const MAINTENANCE_MODE = true;
+
+  function renderMaintenancePage() {
+    document.title = 'La cuisine de Rosalie | Site en construction';
+    document.documentElement.lang = 'fr-CA';
+    document.body.innerHTML = `
+      <main class="maintenance-page" aria-labelledby="maintenance-title">
+        <section class="maintenance-card">
+          <div class="maintenance-logo" aria-hidden="true">
+            <img src="${localAssetPath('assets/images/logo.png')}" alt="" />
+          </div>
+          <p class="maintenance-eyebrow">La cuisine de Rosalie</p>
+          <h1 id="maintenance-title">Site en construction</h1>
+          <p>Nous effectuons présentement des ajustements au site web. Merci de votre patience — la page complète sera de retour bientôt.</p>
+          <div class="maintenance-notice">Pour éviter toute confusion, les menus et commandes en ligne sont temporairement désactivés.</div>
+        </section>
+      </main>
+    `;
+  }
+
+  function injectMaintenanceStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+      :root{--maintenance-bg:#fff2b8;--maintenance-card:rgba(255,253,248,.94);--maintenance-text:#24382f;--maintenance-muted:#66766e;--maintenance-olive:#2f6f55;--maintenance-border:#ead99b;--maintenance-shadow:0 24px 70px rgba(82,105,69,.16)}
+      *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 8%,rgba(255,221,235,.76) 0,transparent 32%),radial-gradient(circle at 88% 12%,rgba(201,241,210,.84) 0,transparent 34%),linear-gradient(135deg,#fff2b8 0%,#ffefa7 48%,#eaf8d7 100%);color:var(--maintenance-text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}.maintenance-page{min-height:100vh;display:grid;place-items:center;padding:24px}.maintenance-card{width:min(720px,100%);padding:clamp(28px,6vw,56px);border:1px solid var(--maintenance-border);border-radius:32px;background:var(--maintenance-card);box-shadow:var(--maintenance-shadow);text-align:center}.maintenance-logo{display:inline-flex;align-items:center;justify-content:center;width:min(220px,72vw);margin-bottom:28px;padding:14px;border-radius:28px;background:linear-gradient(135deg,#ffe889,#cfefa9 52%,#93d7b0);box-shadow:0 14px 30px rgba(247,202,77,.24)}.maintenance-logo img{display:block;width:100%;height:auto}.maintenance-eyebrow{margin:0 0 10px;color:var(--maintenance-olive);font-size:.82rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.maintenance-card h1{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(2.4rem,8vw,4.6rem);line-height:.98}.maintenance-card p{margin:18px auto 0;max-width:54ch;color:var(--maintenance-muted);font-size:clamp(1rem,2.4vw,1.18rem);line-height:1.7}.maintenance-notice{margin-top:28px;padding:16px 18px;border:1px dashed var(--maintenance-border);border-radius:20px;background:rgba(255,246,204,.72);color:var(--maintenance-olive);font-weight:800}
+    `;
+    document.head.appendChild(style);
+  }
+
   const CART_STORAGE_KEY = 'lacuisine_rosalie_cart_v2';
   const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const WEEKDAY_LABELS = {
@@ -716,6 +746,12 @@
   }
 
   async function init() {
+    if (MAINTENANCE_MODE) {
+      injectMaintenanceStyles();
+      renderMaintenancePage();
+      return;
+    }
+
     injectStyles();
     loadCart();
     state.data = await loadData();
