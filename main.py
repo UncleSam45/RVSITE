@@ -4,8 +4,8 @@
 Features:
 - Ensures required dependencies are installed in the active virtual environment.
 - Creates a `main.js` starter frontend script next to this file.
-- Ensures `data/items.json` exists for menu items.
-- Serves a NiceGUI app on port 8888 (or next available port).
+- Ensures `data/items.json` exists for editor compatibility.
+- Serves the public site directly from committed `assets/data/*.json` files.
 - Injects the frontend JavaScript into the page.
 """
 
@@ -20,7 +20,6 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
-from editor import BackupManager
 
 REQUIRED_PACKAGES = ["nicegui"]
 BASE_DIR = Path(__file__).resolve().parent
@@ -112,7 +111,7 @@ def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
 def build_ui(port: int) -> None:
     from nicegui import app, ui
 
-    ui.page_title("La cuisine de Rosalie | Repas faits maison & livraison locale")
+    ui.page_title("La cuisine de Rosalie | Menu de la semaine du 30 juin au 6 juillet")
 
     ui.add_head_html("""
     <style>
@@ -134,10 +133,10 @@ def main() -> None:
     ensure_dependencies(REQUIRED_PACKAGES)
     ensure_frontend_assets()
 
-    backup_manager = BackupManager(BASE_DIR)
-    ok, message = backup_manager.restore_on_launch()
-    print(f"[backup] {message}" if ok else f"[backup warning] {message}")
-
+    # Do not restore editor backups while launching the public site. The storefront
+    # must serve the committed assets/data/*.json files exactly as deployed;
+    # restoring a local "latest" backup here can overwrite the current menu with
+    # stale menu data and make the website appear unchanged after a deployment.
     ensure_data_files()
     port = find_available_port(8888)
     print(f"[run] Launching webframe on port {port}")
