@@ -1259,7 +1259,10 @@ def main() -> None:
         Image = PILImage
         ImageOps = PILImageOps
     backup_manager = BackupManager(BASE_DIR)
-    backup_manager.restore_on_launch()
+    backup_manager.restore_status = (
+        "Restauration automatique désactivée: les fichiers assets/data/*.json "
+        "committés restent la source de vérité. Utilisez Restore latest manually au besoin."
+    )
     store = DataStore(backup_manager)
     port = int(os.environ.get("EDITOR_PORT", "0")) or find_available_port(8890)
     print(f"[run] Editor available on http://0.0.0.0:{port}")

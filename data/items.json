@@ -1,8 +1,8 @@
 {
   "items": [
     {
-      "id": "souvlaki-porc-patates-ail",
-      "title": "Souvlaki de porc maison avec patates à l’ail",
+      "id": "pates-strogonoff",
+      "title": "Pâtes strogonoff",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -17,8 +17,8 @@
       "showcase": false
     },
     {
-      "id": "penne-tomate-vin-rouge-saucisses",
-      "title": "Penne sauce tomate aux vin rouge avec saucisses italiennes",
+      "id": "boulettes-sauce-asiatique-riz-legumes",
+      "title": "Boulettes sauce asiatique avec riz et légumes",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -33,8 +33,8 @@
       "showcase": false
     },
     {
-      "id": "jambon-ananas-patates-pile",
-      "title": "Jambon à l’ananas avec patates pilé",
+      "id": "riz-mexicain",
+      "title": "Riz mexicain",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -49,8 +49,8 @@
       "showcase": false
     },
     {
-      "id": "linguine-alfredo-poulet-grille",
-      "title": "Linguine alfredo avec poulet grillé",
+      "id": "rotini-sauce-rosee-parmesan",
+      "title": "Rotini sauce rosée et parmesan",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -65,8 +65,8 @@
       "showcase": false
     },
     {
-      "id": "boulettes-porc-bacon-sauce-tomate",
-      "title": "Boulette de porc et bacon sauce tomate avec patates pilé",
+      "id": "spaghetti-sauce-tomate-boulettes-italiennes",
+      "title": "Spaghetti sauce tomate et boulettes italiennes",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -81,9 +81,9 @@
       "showcase": false
     },
     {
-      "id": "soupe-repas-lasagne",
-      "title": "Soupe repas à la lasagne",
-      "description": "Bœuf, légumes et pâtes, fromage & tomate.",
+      "id": "poulet-champignons-riz",
+      "title": "Poulet aux champignons avec riz",
+      "description": "",
       "category": "Plats principaux",
       "available": true,
       "featured": false,
@@ -97,8 +97,8 @@
       "showcase": false
     },
     {
-      "id": "macaroni-3-fromages",
-      "title": "Macaroni 3 fromages",
+      "id": "penne-alfredo-bacon",
+      "title": "Penne alfredo bacon",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -108,6 +108,20 @@
         "petit": 8,
         "grand": 10,
         "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "soupe-legumes",
+      "title": "Soupe aux légumes",
+      "description": "",
+      "category": "Accompagnements & extras",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 4
       },
       "tags": [],
       "showcase": false
@@ -127,8 +141,8 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-tartinade-poulet",
-      "title": "Sous-marin tartinade de poulet",
+      "id": "sous-marin-jambon-fromage",
+      "title": "Sous-marin jambon fromage",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -136,20 +150,6 @@
       "image": "",
       "pricing": {
         "standard": 7
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "sauce-alfredo-maison-600ml",
-      "title": "Sauce alfredo maison 600ml",
-      "description": "",
-      "category": "Accompagnements & extras",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 8
       },
       "tags": [],
       "showcase": false
