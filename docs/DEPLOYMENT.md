@@ -39,8 +39,20 @@ version des menus après un déploiement.
 
 Le site public charge `index.html`, `main.js`, les données JSON dans
 `assets/data/` et les images dans `assets/images/`. Il peut être servi par
-NiceGUI localement (`python main.py`) ou adapté à GitHub Pages en publiant les
-fichiers statiques.
+NiceGUI localement (`python main.py`) ou publié tel quel comme site statique.
+
+## GitHub Pages
+
+Ce dépôt contient maintenant un workflow GitHub Actions (`.github/workflows/pages.yml`)
+qui publie automatiquement les fichiers statiques requis depuis la racine du
+dépôt vers GitHub Pages. Il copie seulement `index.html`, `main.js`, `assets/`,
+`logo.png` et `banner.png` dans l'artefact publié.
+
+Si GitHub Pages affiche une erreur du type `docs/index.html` manquant, c'est que
+la source Pages du dépôt pointe probablement vers le dossier `/docs`. Ce dossier
+contient la documentation, pas le site public. Dans GitHub, allez dans
+**Settings → Pages → Build and deployment**, puis choisissez **GitHub Actions**
+comme source et lancez le workflow **Deploy static site to GitHub Pages**.
 
 ## Stripe Checkout
 
