@@ -112,9 +112,22 @@
     return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: state.data?.settings?.ordering?.currency || 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(value) || 0).replace(/\u00a0/g, ' ');
   }
 
+  function parseLocalDate(dateLike, hour = 12) {
+    if (dateLike instanceof Date) return new Date(dateLike.getFullYear(), dateLike.getMonth(), dateLike.getDate(), hour, 0, 0, 0);
+    const [year, month, day] = String(dateLike || '').split('-').map(Number);
+    return new Date(year, (month || 1) - 1, day || 1, hour, 0, 0, 0);
+  }
+
+  function toLocalIsoDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   function formatDate(dateLike) {
     if (!dateLike) return 'à confirmer';
-    const date = typeof dateLike === 'string' ? new Date(`${dateLike}T12:00:00`) : dateLike;
+    const date = typeof dateLike === 'string' ? parseLocalDate(dateLike) : dateLike;
     return new Intl.DateTimeFormat('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
   }
 
@@ -236,13 +249,13 @@
     const noticeHours = Number(rules.order_notice_hours || 48);
     const threshold = new Date(Date.now() + noticeHours * 60 * 60 * 1000);
     if (menu.active === false) return { ok: false, reason: 'closed' };
-    const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59);
-    if (normalized < threshold) return { ok: false, reason: 'too_soon' };
-    if (menu.start_date && date < new Date(`${menu.start_date}T00:00:00`)) return { ok: false, reason: 'outside_menu_period' };
-    if (menu.end_date && date > new Date(`${menu.end_date}T23:59:59`)) return { ok: false, reason: 'outside_menu_period' };
+    const deliveryCutoff = parseLocalDate(date);
+    if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
+    if (menu.start_date && deliveryCutoff < parseLocalDate(menu.start_date, 0)) return { ok: false, reason: 'outside_menu_period' };
+    if (menu.end_date && deliveryCutoff > parseLocalDate(menu.end_date, 23)) return { ok: false, reason: 'outside_menu_period' };
     const weekday = WEEKDAYS[date.getDay()];
     if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return { ok: false, reason: 'no_delivery' };
-    const iso = date.toISOString().slice(0, 10);
+    const iso = toLocalIsoDate(date);
     if (Array.isArray(menu.full_dates) && menu.full_dates.includes(iso)) return { ok: false, reason: 'full' };
     if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(iso)) return { ok: false, reason: 'closed' };
     return { ok: true, reason: 'available' };
@@ -250,13 +263,13 @@
 
   function firstAvailableDate() {
     const menu = getCurrentMenu();
-    const start = menu.start_date ? new Date(`${menu.start_date}T12:00:00`) : new Date();
+    const start = menu.start_date ? parseLocalDate(menu.start_date) : new Date();
     const date = new Date(Math.max(start.getTime(), Date.now()));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
       candidate.setDate(date.getDate() + i);
-      if (isDateAvailable(candidate).ok) return candidate.toISOString().slice(0, 10);
+      if (isDateAvailable(candidate).ok) return toLocalIsoDate(candidate);
     }
     return '';
   }
@@ -268,7 +281,7 @@
     const customer = state.cart.customer;
     if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
     if (totals.subtotal < Number(rules.minimum_order || 0)) errors.push(`Minimum de commande: ${formatCurrency(rules.minimum_order || 0)}.`);
-    if (!state.cart.deliveryDate || !isDateAvailable(new Date(`${state.cart.deliveryDate}T12:00:00`)).ok) errors.push('Choisissez une date de livraison disponible.');
+    if (!state.cart.deliveryDate || !isDateAvailable(parseLocalDate(state.cart.deliveryDate)).ok) errors.push('Choisissez une date de livraison disponible.');
     if (!customer.name.trim()) errors.push('Le nom complet est requis.');
     if (!customer.phone.trim()) errors.push('Le téléphone est requis.');
     if (!customer.streetNumber.trim() || !customer.streetName.trim()) errors.push('L’adresse de livraison est requise.');
@@ -616,11 +629,11 @@
 
   function dateSelectorHtml() {
     const first = firstAvailableDate();
-    const start = first ? new Date(`${first}T12:00:00`) : new Date();
+    const start = first ? parseLocalDate(first) : new Date();
     const buttons = [];
     for (let i = 0; i < 14; i += 1) {
       const date = new Date(start); date.setDate(start.getDate() + i);
-      const iso = date.toISOString().slice(0, 10);
+      const iso = toLocalIsoDate(date);
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
@@ -697,9 +710,10 @@
       const [itemId, portion] = button.dataset.remove.split(':'); removeLine(itemId, portion);
     }));
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
-      const status = isDateAvailable(new Date(`${button.dataset.date}T12:00:00`));
+      const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: 'Cette date n’est pas disponible, car les commandes doivent être placées 48 h à l’avance.', no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const noticeHours = getSettingRules().order_notice_hours || 48;
+        const messages = { too_soon: `Cette date n’est pas disponible, car les commandes doivent être placées ${noticeHours} h à l’avance.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
