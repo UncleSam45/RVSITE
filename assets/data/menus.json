@@ -1,25 +1,26 @@
 {
   "current_menu": {
-    "id": "menu-2026-07-03-2026-07-09",
-    "title": "Menu du 3 juillet au 9 juillet",
+    "id": "menu-actuel-juillet-2026",
+    "title": "Menu actuel",
     "start_date": "2026-07-03",
     "end_date": "2026-07-09",
-    "description": "Commande minimale de 35 $ et plus. Délais de préparation de 48 h à 72 h.",
+    "description": "Commande minimale de 35 $ et plus. Délais de préparation de 48 h à 72 h. Commande par Messenger.",
     "active": true,
     "delivery_days": [],
     "item_ids": [
-      "pates-strogonoff",
-      "boulettes-sauce-asiatique-riz-legumes",
-      "riz-mexicain",
-      "rotini-sauce-rosee-parmesan",
-      "spaghetti-sauce-tomate-boulettes-italiennes",
-      "poulet-champignons-riz",
-      "penne-alfredo-bacon"
+      "poulet-chasseur-riz",
+      "nouille-saute-legumes",
+      "sandwich-porc-mexicain",
+      "couscous-mediterraneen",
+      "macaroni-fromage-bacon",
+      "macaroni-chinois-poulet",
+      "lasagne-viande-sauce-rosee"
     ],
     "extra_ids": [
-      "soupe-legumes",
+      "soupe-poulet-nouilles",
       "salade-du-chef",
-      "sous-marin-jambon-fromage"
+      "sous-marins-pepperoni-jambon",
+      "muffin-pepites-chocolat"
     ]
   },
   "archive": []
