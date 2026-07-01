@@ -1,8 +1,8 @@
 {
   "items": [
     {
-      "id": "pates-strogonoff",
-      "title": "Pâtes strogonoff",
+      "id": "poulet-chasseur-riz",
+      "title": "Poulet chasseur avec riz",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -10,15 +10,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "boulettes-sauce-asiatique-riz-legumes",
-      "title": "Boulettes sauce asiatique avec riz et légumes",
+      "id": "nouille-saute-legumes",
+      "title": "Nouille Sauté de légumes",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -26,15 +26,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "riz-mexicain",
-      "title": "Riz mexicain",
+      "id": "sandwich-porc-mexicain",
+      "title": "Sandwich au porc mexicain",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -42,15 +42,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "rotini-sauce-rosee-parmesan",
-      "title": "Rotini sauce rosée et parmesan",
+      "id": "couscous-mediterraneen",
+      "title": "Couscous méditerranéen",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -58,15 +58,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "spaghetti-sauce-tomate-boulettes-italiennes",
-      "title": "Spaghetti sauce tomate et boulettes italiennes",
+      "id": "macaroni-fromage-bacon",
+      "title": "Macaroni au fromage bacon",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -74,15 +74,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "poulet-champignons-riz",
-      "title": "Poulet aux champignons avec riz",
+      "id": "macaroni-chinois-poulet",
+      "title": "Macaroni chinois au poulet",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -90,15 +90,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "penne-alfredo-bacon",
-      "title": "Penne alfredo bacon",
+      "id": "lasagne-viande-sauce-rosee",
+      "title": "Lasagne à la viande sauce rosée",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -106,15 +106,15 @@
       "image": "",
       "pricing": {
         "petit": 6,
-        "grand": 10,
+        "grand": 12,
         "familial": 23
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "soupe-legumes",
-      "title": "Soupe aux légumes",
+      "id": "soupe-poulet-nouilles",
+      "title": "Soupe poulet et Nouilles",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -141,8 +141,8 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-jambon-fromage",
-      "title": "Sous-marin jambon fromage",
+      "id": "sous-marins-pepperoni-jambon",
+      "title": "Sous-marins pepperoni jambon",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -150,6 +150,20 @@
       "image": "",
       "pricing": {
         "standard": 7
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "muffin-pepites-chocolat",
+      "title": "Muffin pépites de chocolat",
+      "description": "",
+      "category": "Accompagnements & extras",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 3
       },
       "tags": [],
       "showcase": false

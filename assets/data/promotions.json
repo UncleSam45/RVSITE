@@ -1,13 +1,13 @@
 {
   "active": [
     {
-      "id": "grand-format-special",
-      "title": "Spécial sur le grand format",
-      "description": "Grand format habituellement 12 $.",
+      "id": "petit-format-special",
+      "title": "Spécial sur le petit format",
+      "description": "Petit format à 6 $ (habituellement 8 $).",
       "type": "portion_discount",
-      "portion": "grand",
-      "original_price": 12,
-      "active_price": 10,
+      "portion": "petit",
+      "original_price": 8,
+      "active_price": 6,
       "enabled": true
     }
   ]
