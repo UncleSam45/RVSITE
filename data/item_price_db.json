@@ -4,7 +4,7 @@
       "title": "Pâtes strogonoff",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },
@@ -14,7 +14,7 @@
       "title": "Boulettes sauce asiatique avec riz et légumes",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },
@@ -24,7 +24,7 @@
       "title": "Riz mexicain",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },
@@ -34,7 +34,7 @@
       "title": "Rotini sauce rosée et parmesan",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },
@@ -44,7 +44,7 @@
       "title": "Spaghetti sauce tomate et boulettes italiennes",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },
@@ -54,7 +54,7 @@
       "title": "Poulet aux champignons avec riz",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },
@@ -64,7 +64,7 @@
       "title": "Penne alfredo bacon",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 8,
+        "small_meal": 6,
         "large_meal": 10,
         "family_format": 23
       },

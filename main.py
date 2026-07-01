@@ -111,7 +111,7 @@ def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
 def build_ui(port: int) -> None:
     from nicegui import app, ui
 
-    ui.page_title("La cuisine de Rosalie | Menu de la semaine du 30 juin au 6 juillet")
+    ui.page_title("La cuisine de Rosalie | Menu de la semaine du 3 juillet au 9 juillet")
 
     ui.add_head_html("""
     <style>
