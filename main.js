@@ -108,6 +108,11 @@
     return { settings, menus, items: items.items || [], delivery, promotions, content, gallery };
   }
 
+
+  function orderNoticeText(includeAdvance = true) {
+    return includeAdvance ? '48 h à 72 h à l’avance' : '48 h à 72 h';
+  }
+
   function formatCurrency(value) {
     return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: state.data?.settings?.ordering?.currency || 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(Number(value) || 0).replace(/\u00a0/g, ' ');
   }
@@ -504,7 +509,7 @@
           <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison livrés dans votre secteur')}</h1>
           <p class="lead">${escapeHtml(state.data.content.home?.subheadline || 'Une cuisine simple, généreuse et préparée avec soin pour simplifier vos repas de semaine.')}</p>
           <div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button></div>
-          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span><span class="chip">Commande ${rules.order_notice_hours || 48} h à l’avance</span><span class="chip">Portions Petit / Grand / Familial</span></div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span></div>
         </div>
         <div class="hero-visual">
           <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
@@ -513,7 +518,7 @@
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
         <span><strong>Période:</strong> ${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}</span>
-        <span><strong>Préavis:</strong> ${rules.order_notice_hours || 48} h</span>
+        <span><strong>Préavis:</strong> ${orderNoticeText(false)}</span>
         <span><strong>Zones:</strong> ${escapeHtml(zones || 'à confirmer')}</span>
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>
       </section>
@@ -526,7 +531,7 @@
         ${['Choisissez vos plats', 'Sélectionnez Petit, Grand ou Familial', 'Planifiez votre livraison', 'Savourez vos repas faits maison'].map((text, index) => `<div class="card mini-card"><strong>${index + 1}. ${text}</strong><p>Un parcours simple, pensé pour commander rapidement sur téléphone.</p></div>`).join('')}
       </section>
       <section class="section container panel emotional-card">
-        <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${rules.order_notice_hours || 48} h et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
+        <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
       </section>
       <section class="section container panel catering-callout"><div><div class="kicker">Demandes spéciales</div><h2>Vous avez vu un plat qui vous intéresse?</h2><p>Écrivez-nous pour une demande spéciale ou un événement. Les créations passées de la galerie peuvent inspirer votre prochaine commande traiteur.</p></div><button class="btn btn-primary" data-page="contact">Faire une demande</button></section>
       <section class="section container panel final-cta"><div class="kicker">Prêt à commander?</div><h2>Voir le menu de la semaine</h2><p>Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.</p><div class="cta-row" style="justify-content:center"><button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button></div></section>`;
@@ -560,7 +565,7 @@
           <section class="menu-header">
             <div class="kicker">Menu en rotation</div><h1>${escapeHtml(menu.title || 'Menu de la semaine')}</h1><span class="status-badge ${isOpen ? '' : 'closed'}">${isOpen ? 'Commande ouverte' : 'Commandes fermées'}</span>
             <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p>
-            <div class="chip-row"><span class="chip">Commande ${rules.order_notice_hours || 48} h à l’avance</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Familial</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
+            <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Familial</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
           </section>
           ${!menu.active ? `<section class="section menu-empty">Le prochain menu arrive bientôt.</section>` : ''}${menu.active && !isOpen ? `<section class="section menu-empty">Les commandes pour ce menu sont maintenant fermées. Le prochain menu arrive bientôt.</section>` : ''}${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
           ${menuSectionHtml('Plats principaux', getMenuItems('items'))}
@@ -637,7 +642,7 @@
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
-    return `<p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date disponible dans la période du menu avec le délai de 48 h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
+    return `<p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date disponible dans la période du menu avec le délai de 48 h à 72 h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
   }
 
   function customerFormHtml() {
@@ -660,17 +665,17 @@
   function livraisonHtml() {
     const rules = getSettingRules();
     const zones = getEnabledZones();
-    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Nous desservons plusieurs municipalités.</h1><p>Les commandes doivent être placées au moins ${rules.order_notice_hours || 48} h à l’avance afin de garantir la préparation.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
+    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Nous desservons plusieurs municipalités.</h1><p>Les commandes doivent être placées 48 h à 72 h à l’avance afin de garantir la préparation.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
   }
 
   function contactHtml() {
     const business = state.data.settings.business;
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
-    return `<section class="container grid grid-2"><div class="panel"><div class="kicker">Contact</div><h1 class="page-title">Une question ou une commande spéciale?</h1><p>Réponse locale et humaine pour vos repas de la semaine, formats familiaux et demandes traiteur.</p><div class="grid"><a class="btn btn-primary" href="tel:${escapeHtml(business.phone)}">Téléphone: ${escapeHtml(business.phone)}</a><a class="btn btn-secondary" href="${escapeHtml(business.facebook_url)}" target="_blank" rel="noopener">Facebook</a><a class="btn btn-secondary" href="${escapeHtml(business.messenger_url || business.facebook_url)}" target="_blank" rel="noopener">Messenger</a></div></div><div class="panel"><h2>Informations utiles</h2><p><strong>Zones:</strong> ${escapeHtml(zones)}.</p><p><strong>Commande:</strong> au moins ${getSettingRules().order_notice_hours || 48} h à l’avance.</p><p><strong>Confiance:</strong> ${escapeHtml(state.data.settings.trust.hygiene_statement)}</p><p class="notice success-note">Merci de soutenir une entreprise locale.</p></div></section>`;
+    return `<section class="container grid grid-2"><div class="panel"><div class="kicker">Contact</div><h1 class="page-title">Une question ou une commande spéciale?</h1><p>Réponse locale et humaine pour vos repas de la semaine, formats familiaux et demandes traiteur.</p><div class="grid"><a class="btn btn-primary" href="tel:${escapeHtml(business.phone)}">Téléphone: ${escapeHtml(business.phone)}</a><a class="btn btn-secondary" href="${escapeHtml(business.facebook_url)}" target="_blank" rel="noopener">Facebook</a><a class="btn btn-secondary" href="${escapeHtml(business.messenger_url || business.facebook_url)}" target="_blank" rel="noopener">Messenger</a></div></div><div class="panel"><h2>Informations utiles</h2><p><strong>Zones:</strong> ${escapeHtml(zones)}.</p><p><strong>Commande:</strong> ${orderNoticeText()}.</p><p><strong>Confiance:</strong> ${escapeHtml(state.data.settings.trust.hygiene_statement)}</p><p class="notice success-note">Merci de soutenir une entreprise locale.</p></div></section>`;
   }
 
   function footerHtml() {
-    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>48 h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
+    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>48 h à 72 h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
   }
 
   function mobileCartBarHtml() {
@@ -712,8 +717,7 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const noticeHours = getSettingRules().order_notice_hours || 48;
-        const messages = { too_soon: `Cette date n’est pas disponible, car les commandes doivent être placées ${noticeHours} h à l’avance.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date n’est pas disponible, car les commandes doivent être placées 48 h à 72 h à l’avance.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
