@@ -799,7 +799,7 @@ def build_ui(store: DataStore) -> None:
                 item_form: dict[str, Any] = {}
 
                 def empty_item() -> dict[str, Any]:
-                    return {"id": "", "title": "", "description": "", "category": "Plats principaux", "available": True, "featured": False, "showcase": False, "image": "", "images": {}, "pricing": {"petit": 8, "grand": 10, "familial": 23}, "tags": []}
+                    return {"id": "", "title": "", "description": "", "category": "Plats principaux", "available": True, "featured": False, "showcase": False, "image": "", "images": {}, "pricing": {"petit": 6, "grand": 10, "familial": 23}, "tags": []}
 
                 def fill_item_form(item: dict[str, Any]) -> None:
                     item_form["id"].value = item.get("id", "")
