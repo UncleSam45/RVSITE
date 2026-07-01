@@ -1,82 +1,82 @@
 {
   "items": [
     {
-      "title": "Pâtes strogonoff",
+      "title": "Poulet chasseur avec riz",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "pates-strogonoff"
+      "last_seen_id": "poulet-chasseur-riz"
     },
     {
-      "title": "Boulettes sauce asiatique avec riz et légumes",
+      "title": "Nouille Sauté de légumes",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "boulettes-sauce-asiatique-riz-legumes"
+      "last_seen_id": "nouille-saute-legumes"
     },
     {
-      "title": "Riz mexicain",
+      "title": "Sandwich au porc mexicain",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "riz-mexicain"
+      "last_seen_id": "sandwich-porc-mexicain"
     },
     {
-      "title": "Rotini sauce rosée et parmesan",
+      "title": "Couscous méditerranéen",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "rotini-sauce-rosee-parmesan"
+      "last_seen_id": "couscous-mediterraneen"
     },
     {
-      "title": "Spaghetti sauce tomate et boulettes italiennes",
+      "title": "Macaroni au fromage bacon",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "spaghetti-sauce-tomate-boulettes-italiennes"
+      "last_seen_id": "macaroni-fromage-bacon"
     },
     {
-      "title": "Poulet aux champignons avec riz",
+      "title": "Macaroni chinois au poulet",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "poulet-champignons-riz"
+      "last_seen_id": "macaroni-chinois-poulet"
     },
     {
-      "title": "Penne alfredo bacon",
+      "title": "Lasagne à la viande sauce rosée",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 6,
-        "large_meal": 10,
+        "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "penne-alfredo-bacon"
+      "last_seen_id": "lasagne-viande-sauce-rosee"
     },
     {
-      "title": "Soupe aux légumes",
+      "title": "Soupe poulet et Nouilles",
       "type": "extra",
       "pricing": {
         "standard": 4
       },
-      "last_seen_id": "soupe-legumes"
+      "last_seen_id": "soupe-poulet-nouilles"
     },
     {
       "title": "Salade du chef",
@@ -87,12 +87,20 @@
       "last_seen_id": "salade-du-chef"
     },
     {
-      "title": "Sous-marin jambon fromage",
+      "title": "Sous-marins pepperoni jambon",
       "type": "extra",
       "pricing": {
         "standard": 7
       },
-      "last_seen_id": "sous-marin-jambon-fromage"
+      "last_seen_id": "sous-marins-pepperoni-jambon"
+    },
+    {
+      "title": "Muffin pépites de chocolat",
+      "type": "extra",
+      "pricing": {
+        "standard": 3
+      },
+      "last_seen_id": "muffin-pepites-chocolat"
     }
   ]
 }
