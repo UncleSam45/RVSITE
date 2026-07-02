@@ -11,6 +11,16 @@
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
 
+  async function clearLegacyBrowserCaches() {
+    if (!('caches' in window)) return;
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+    } catch (error) {
+      console.warn('[La cuisine de Rosalie] Impossible de vider les caches navigateur hérités:', error);
+    }
+  }
+
   function localAssetPath(path) {
     if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path;
     return `${STATIC_ASSET_BASE}${path}`;
@@ -776,6 +786,7 @@
 
   async function init() {
     injectStyles();
+    await clearLegacyBrowserCaches();
     loadCart();
     state.data = await loadData();
     setSeo(state.data.content);

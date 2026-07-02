@@ -33,7 +33,11 @@ la compatibilité/audit local; la page publique ne les utilise pas.
 
 Le JavaScript ajoute aussi un paramètre cache-buster quand il charge les JSON de
 `assets/data/` afin d’éviter qu’un navigateur ou un CDN conserve une ancienne
-version des menus après un déploiement.
+version des menus après un déploiement. Le fichier `_headers` demande aussi aux
+hébergeurs compatibles (Netlify, Cloudflare Pages, etc.) de ne pas conserver
+`index.html`, `main.js` ni les JSON de données en cache permanent. Les
+informations de livraison saisies par un client restent sauvegardées dans le
+`localStorage` du navigateur, ce qui est séparé du cache HTTP du site.
 
 ## Site statique
 
