@@ -49,6 +49,8 @@ Then open `http://127.0.0.1:8000/`.
 
 The workflow `.github/workflows/pages.yml` runs on pushes to `main` or `master`, and can also be started manually with `workflow_dispatch`.
 
+The workflow intentionally publishes the static artifact directly to the `gh-pages` branch instead of using `actions/deploy-pages`, because the Pages deployment action can become stuck polling `deployment_queued`. After publishing the branch, the workflow configures GitHub Pages to serve from `gh-pages` at `/`.
+
 During deployment, the workflow prepares `_site` by copying:
 
 - `index.html`
@@ -64,7 +66,7 @@ The workflow also verifies the deploy artifact before upload. It checks that:
 - `_site/index.html` contains `Nous ouvrons le 8 juillet.`
 - `_site/index.html` contains the cache-busted script reference `main.js?v=20260702-opening-gate`
 
-If GitHub Pages gets stuck at `deployment_queued`, the workflow is configured with `cancel-in-progress: true` so newer deploy runs cancel stale queued/in-progress runs.
+If GitHub Actions has stale runs, the workflow is configured with `cancel-in-progress: true` so newer runs cancel older queued/in-progress runs.
 
 ## Updating public content
 
