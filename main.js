@@ -248,11 +248,18 @@
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
+  function deliveryNoticeThreshold(menu, noticeHours) {
+    const now = Date.now();
+    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0).getTime() : now;
+    const noticeStart = Math.max(now, menuStart);
+    return new Date(noticeStart + noticeHours * 60 * 60 * 1000);
+  }
+
   function isDateAvailable(date) {
     const rules = getSettingRules();
     const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = new Date(Date.now() + noticeHours * 60 * 60 * 1000);
+    const threshold = deliveryNoticeThreshold(menu, noticeHours);
     if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
