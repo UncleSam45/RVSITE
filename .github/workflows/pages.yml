@@ -6,19 +6,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
-  id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,20 +23,30 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html main.js _site/
+          cp index.html main.js CNAME _site/
           cp _headers _site/ 2>/dev/null || true
           cp -R assets _site/assets
           cp logo.png banner.png _site/ 2>/dev/null || true
           touch _site/.nojekyll
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Verify static gate artifact
+        run: |
+          test "$(cat _site/CNAME)" = "lacuisinederosalie.ca"
+          grep -F "Nous ouvrons le 8 juillet." _site/index.html
+          grep -F "main.js?v=20260702-opening-gate" _site/index.html
 
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish static site to gh-pages branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          deploy_dir="$(mktemp -d)"
+          cp -R _site/. "${deploy_dir}/"
+          cd "${deploy_dir}"
+          git init
+          git checkout -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy static site ${GITHUB_SHA}"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPO}.git" gh-pages
