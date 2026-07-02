@@ -49,7 +49,7 @@ Then open `http://127.0.0.1:8000/`.
 
 The workflow `.github/workflows/pages.yml` runs on pushes to `main` or `master`, and can also be started manually with `workflow_dispatch`.
 
-The workflow intentionally publishes the static artifact directly to the `gh-pages` branch instead of using `actions/deploy-pages`, because the Pages deployment action can become stuck polling `deployment_queued`. After publishing the branch, the workflow configures GitHub Pages to serve from `gh-pages` at `/`.
+The workflow intentionally publishes the static artifact directly to the `gh-pages` branch instead of using `actions/deploy-pages`, because the Pages deployment action can become stuck polling `deployment_queued`. GitHub Pages should be configured once in repository settings to serve from the `gh-pages` branch at `/`.
 
 During deployment, the workflow prepares `_site` by copying:
 
