@@ -1,8 +1,8 @@
 {
   "items": [
     {
-      "id": "poulet-chasseur-riz",
-      "title": "Poulet chasseur avec riz",
+      "id": "poulet_parmesan_spaghetti_20260710",
+      "title": "Poulet parmesan avec spaghetti",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -17,8 +17,8 @@
       "showcase": false
     },
     {
-      "id": "nouille-saute-legumes",
-      "title": "Nouille Sauté de légumes",
+      "id": "pate_chinois_20260710",
+      "title": "Pâté chinois",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -33,8 +33,8 @@
       "showcase": false
     },
     {
-      "id": "sandwich-porc-mexicain",
-      "title": "Sandwich au porc mexicain",
+      "id": "penne_alfredo_bacon_20260710",
+      "title": "Penne Alfredo bacon",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -49,8 +49,8 @@
       "showcase": false
     },
     {
-      "id": "couscous-mediterraneen",
-      "title": "Couscous méditerranéen",
+      "id": "boulettes_bbq_patates_pilees_20260710",
+      "title": "Boulettes BBQ avec patates pilées",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -65,8 +65,8 @@
       "showcase": false
     },
     {
-      "id": "macaroni-fromage-bacon",
-      "title": "Macaroni au fromage bacon",
+      "id": "macaroni_viande_20260710",
+      "title": "Macaroni à la viande",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -81,8 +81,8 @@
       "showcase": false
     },
     {
-      "id": "macaroni-chinois-poulet",
-      "title": "Macaroni chinois au poulet",
+      "id": "burritos_20260710",
+      "title": "Burritos",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -97,8 +97,8 @@
       "showcase": false
     },
     {
-      "id": "lasagne-viande-sauce-rosee",
-      "title": "Lasagne à la viande sauce rosée",
+      "id": "porc_coreen_riz_legumes_20260710",
+      "title": "Tranches de porc coréen, riz et légumes",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -113,8 +113,8 @@
       "showcase": false
     },
     {
-      "id": "soupe-poulet-nouilles",
-      "title": "Soupe poulet et Nouilles",
+      "id": "potage_legumes_20260710",
+      "title": "Potage de légumes",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -127,8 +127,8 @@
       "showcase": false
     },
     {
-      "id": "salade-du-chef",
-      "title": "Salade du chef",
+      "id": "salade_cesar_20260710",
+      "title": "Salade César",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -141,8 +141,8 @@
       "showcase": false
     },
     {
-      "id": "sous-marins-pepperoni-jambon",
-      "title": "Sous-marins pepperoni jambon",
+      "id": "sous_marin_pizza_20260710",
+      "title": "Sous-marin pizza",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -150,20 +150,6 @@
       "image": "",
       "pricing": {
         "standard": 7
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "muffin-pepites-chocolat",
-      "title": "Muffin pépites de chocolat",
-      "description": "",
-      "category": "Accompagnements & extras",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 3
       },
       "tags": [],
       "showcase": false

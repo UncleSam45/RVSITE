@@ -13,7 +13,7 @@
   },
   "ordering": {
     "enabled": true,
-    "order_notice_hours": 72.0,
+    "order_notice_hours": 72,
     "minimum_order": 35,
     "free_delivery_threshold": 35,
     "currency": "CAD",
