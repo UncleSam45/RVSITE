@@ -1,26 +1,25 @@
 {
   "current_menu": {
-    "id": "menu-actuel-juillet-2026",
-    "title": "Menu actuel",
-    "start_date": "2026-07-03",
-    "end_date": "2026-07-09",
-    "description": "Commande minimale de 35 $ et plus. Délai de préparation de 72h. Commande par Messenger.",
     "active": true,
-    "delivery_days": [],
+    "title": "Menu du 10 juillet",
+    "description": "Menu disponible pour commandes planifiées.",
+    "start_date": "2026-07-10",
+    "end_date": "2026-07-15",
+    "order_open_at": "2026-07-10T01:00:00-04:00",
+    "order_close_at": "2026-07-15T23:59:59-04:00",
     "item_ids": [
-      "poulet-chasseur-riz",
-      "nouille-saute-legumes",
-      "sandwich-porc-mexicain",
-      "couscous-mediterraneen",
-      "macaroni-fromage-bacon",
-      "macaroni-chinois-poulet",
-      "lasagne-viande-sauce-rosee"
+      "poulet_parmesan_spaghetti_20260710",
+      "pate_chinois_20260710",
+      "penne_alfredo_bacon_20260710",
+      "boulettes_bbq_patates_pilees_20260710",
+      "macaroni_viande_20260710",
+      "burritos_20260710",
+      "porc_coreen_riz_legumes_20260710"
     ],
     "extra_ids": [
-      "soupe-poulet-nouilles",
-      "salade-du-chef",
-      "sous-marins-pepperoni-jambon",
-      "muffin-pepites-chocolat"
+      "potage_legumes_20260710",
+      "salade_cesar_20260710",
+      "sous_marin_pizza_20260710"
     ]
   },
   "archive": []

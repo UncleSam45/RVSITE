@@ -49,6 +49,10 @@
     cart: {
       items: [],
       deliveryDate: '',
+      deliveryWindow1: '',
+      deliveryWindow2: '',
+      coolerAvailable: false,
+      deliveryInstructions: '',
       customer: {
         name: '', phone: '', email: '', streetNumber: '', streetName: '', apartment: '', city: '', province: 'QC', postalCode: '', notes: '',
       },
@@ -245,6 +249,10 @@
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed.items)) state.cart.items = parsed.items.filter((line) => line.itemId && line.portion && Number(line.qty) > 0);
       if (typeof parsed.deliveryDate === 'string') state.cart.deliveryDate = parsed.deliveryDate;
+      if (typeof parsed.deliveryWindow1 === 'string') state.cart.deliveryWindow1 = parsed.deliveryWindow1;
+      if (typeof parsed.deliveryWindow2 === 'string') state.cart.deliveryWindow2 = parsed.deliveryWindow2;
+      if (typeof parsed.coolerAvailable === 'boolean') state.cart.coolerAvailable = parsed.coolerAvailable;
+      if (typeof parsed.deliveryInstructions === 'string') state.cart.deliveryInstructions = parsed.deliveryInstructions;
       if (parsed.customer && typeof parsed.customer === 'object') state.cart.customer = { ...state.cart.customer, ...parsed.customer };
     } catch (error) {
       console.warn('Panier local illisible.', error);
@@ -253,7 +261,7 @@
 
   function addToCart(item, portionKey, qty = 1) {
     const portion = getPortions(item).find((option) => option.key === portionKey);
-    if (!portion || item.available === false) return;
+    if (!portion || item.available === false || !getMenuOrderStatus().open) { showToast(menuOrderStatusMessage()); return; }
     const existing = state.cart.items.find((line) => line.itemId === item.id && line.portion === portion.key);
     if (existing) existing.qty += qty;
     else state.cart.items.push({ itemId: item.id, title: item.title, portion: portion.key, portionLabel: portion.label, price: portion.price, qty });
@@ -289,6 +297,31 @@
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
+  function getMenuOrderStatus(now = new Date()) {
+    const menu = getCurrentMenu();
+    if (menu.active === false) return { open: false, state: 'inactive' };
+    const time = now.getTime();
+    if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return { open: false, state: 'before' };
+    if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
+    return { open: true, state: 'open' };
+  }
+
+  function menuOrderStatusMessage() {
+    const status = getMenuOrderStatus();
+    if (status.state === 'before') return 'Les commandes pour ce menu ouvriront vendredi 10 juillet à 1h.';
+    if (status.state === 'after') return 'Les commandes pour ce menu sont maintenant fermées.';
+    if (status.state === 'inactive') return 'Les commandes pour ce menu sont maintenant fermées.';
+    return 'Commandes ouvertes pour ce menu jusqu’au 15 juillet.';
+  }
+
+  function deliveryWindows() {
+    return state.data?.delivery?.delivery_windows || ['13h à 15h', '15h à 17h', '17h à 19h', '19h à 21h'];
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+  }
+
   function deliveryNoticeThreshold(menu, noticeHours) {
     const now = Date.now();
     const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0).getTime() : now;
@@ -301,6 +334,7 @@
     const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
     const threshold = deliveryNoticeThreshold(menu, noticeHours);
+    if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
     if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
@@ -332,27 +366,51 @@
     const rules = getSettingRules();
     const totals = cartTotals();
     const customer = state.cart.customer;
+    if (!getMenuOrderStatus().open) errors.push(menuOrderStatusMessage());
     if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
     if (totals.subtotal < Number(rules.minimum_order || 0)) errors.push(`Minimum de commande: ${formatCurrency(rules.minimum_order || 0)}.`);
-    if (!state.cart.deliveryDate || !isDateAvailable(parseLocalDate(state.cart.deliveryDate)).ok) errors.push('Choisissez une date de livraison disponible.');
+    if (!state.cart.deliveryDate) errors.push('Choisissez une date de livraison disponible.');
+    else {
+      const dateStatus = isDateAvailable(parseLocalDate(state.cart.deliveryDate));
+      if (!dateStatus.ok && dateStatus.reason === 'too_soon') errors.push('Cette date ne respecte pas le délai minimal de préparation de 72h.');
+      else if (!dateStatus.ok) errors.push('Choisissez une date de livraison disponible.');
+    }
     if (!customer.name.trim()) errors.push('Le nom complet est requis.');
     if (!customer.phone.trim()) errors.push('Le téléphone est requis.');
+    if (!customer.email.trim()) errors.push('Le courriel est requis afin que Rosalie puisse vous contacter au besoin concernant votre commande.');
+    else if (!isValidEmail(customer.email)) errors.push('Veuillez inscrire un courriel valide.');
     if (!customer.streetNumber.trim() || !customer.streetName.trim()) errors.push('L’adresse de livraison est requise.');
     if (!customer.city.trim()) errors.push('La ville est requise.');
     const allowed = getEnabledZones().map((zone) => zone.city.toLowerCase());
     if (customer.city && !allowed.includes(customer.city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
+    if (!state.cart.deliveryWindow1 || !state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires de livraison.');
+    else if (state.cart.deliveryWindow1 === state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires différentes.');
     return errors;
   }
 
   function buildCheckoutPayload() {
     const customer = state.cart.customer;
+    const preferenceBlock = [
+      '---',
+      'Préférences de livraison:',
+      `Plage horaire 1: ${state.cart.deliveryWindow1}`,
+      `Plage horaire 2: ${state.cart.deliveryWindow2}`,
+      `Glacière disponible: ${state.cart.coolerAvailable ? 'Oui' : 'Non'}`,
+      `Instructions livraison/glacière: ${state.cart.deliveryInstructions || 'Aucune'}`,
+      '---',
+    ].join('\n');
+    const notes = [customer.notes || '', preferenceBlock].filter(Boolean).join('\n\n');
     return {
       items: state.cart.items.map((line) => ({ item_id: line.itemId, portion: line.portion, qty: line.qty })),
       delivery_date: state.cart.deliveryDate,
+      delivery_window_1: state.cart.deliveryWindow1,
+      delivery_window_2: state.cart.deliveryWindow2,
+      cooler_available: state.cart.coolerAvailable,
+      delivery_instructions: state.cart.deliveryInstructions,
       customer: {
         name: customer.name, phone: customer.phone, email: customer.email, street_number: customer.streetNumber,
         street_name: customer.streetName, apartment: customer.apartment, city: customer.city, province: customer.province || 'QC',
-        postal_code: (customer.postalCode || '').toUpperCase(), notes: customer.notes,
+        postal_code: (customer.postalCode || '').toUpperCase(), notes,
       },
     };
   }
@@ -605,17 +663,18 @@
     const menu = getCurrentMenu();
     const rules = getSettingRules();
     const promos = (state.data.promotions.active || []).filter((promo) => promo.enabled);
-    const isOpen = Boolean(menu.active) && Boolean(firstAvailableDate());
+    const orderStatus = getMenuOrderStatus();
+    const isOpen = orderStatus.open && Boolean(firstAvailableDate());
     return `
       <div class="container menu-layout">
         <div>
           ${menuBannerHtml()}
           <section class="menu-header">
             <div class="kicker">Menu en rotation</div><h1>${escapeHtml(menu.title || 'Menu de la semaine')}</h1><span class="status-badge ${isOpen ? '' : 'closed'}">${isOpen ? 'Commande ouverte' : 'Commandes fermées'}</span>
-            <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p>
+            <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p><p class="notice ${isOpen ? 'success-note' : ''}">${menuOrderStatusMessage()}</p>
             <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Familial</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
           </section>
-          ${!menu.active ? `<section class="section menu-empty">Le prochain menu arrive bientôt.</section>` : ''}${menu.active && !isOpen ? `<section class="section menu-empty">Les commandes pour ce menu sont maintenant fermées. Le prochain menu arrive bientôt.</section>` : ''}${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
+          ${!menu.active ? `<section class="section menu-empty">Le prochain menu arrive bientôt.</section>` : ''}${menu.active && !isOpen ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
           ${menuSectionHtml('Plats principaux', getMenuItems('items'))}
           ${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}
         </div>
@@ -641,7 +700,7 @@
         </div>
         <div class="item-actions">
           <div class="qty" aria-label="Quantité"><button data-menu-qty="${item.id}:-1" aria-label="Réduire">−</button><span>${qty}</span><button data-menu-qty="${item.id}:1" aria-label="Augmenter">+</button></div>
-          <button class="btn btn-primary ${state.lastAddedKey === `${item.id}:${selected}` ? 'added' : ''}" data-add="${item.id}" ${item.available === false ? 'disabled' : ''}>${state.lastAddedKey === `${item.id}:${selected}` ? 'Ajouté ✓' : 'Ajouter au panier'}</button>
+          <button class="btn btn-primary ${state.lastAddedKey === `${item.id}:${selected}` ? 'added' : ''}" data-add="${item.id}" ${(item.available === false || !getMenuOrderStatus().open) ? 'disabled' : ''}>${state.lastAddedKey === `${item.id}:${selected}` ? 'Ajouté ✓' : 'Ajouter au panier'}</button>
         </div>
       </div>
     </article>`;
@@ -658,7 +717,7 @@
       <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
       ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
       ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
-      ${includeButton ? `<button class="btn btn-primary" data-page="commander" style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
+      ${includeButton ? `<button class="btn btn-primary" data-page="commander" ${!getMenuOrderStatus().open ? 'disabled' : ''} style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
     </aside>`;
   }
 
@@ -673,10 +732,10 @@
     return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
       <div class="grid">
         <section class="card step"><h2><span class="step-number">1</span>Votre commande</h2>${cartPanelHtml(false)}</section>
-        <section class="card step"><h2><span class="step-number">2</span>Date de livraison</h2>${dateSelectorHtml()}</section>
+        <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
         <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
       </div>
-      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2><p class="line-meta">Date: ${state.cart.deliveryDate ? formatDate(state.cart.deliveryDate) : 'Aucune date disponible'}</p><div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
+      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
     </div>`;
   }
 
@@ -690,7 +749,7 @@
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
-    return `<p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date disponible dans la période du menu avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
+    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date disponible dans la période du menu avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
   }
 
   function customerFormHtml() {
@@ -698,11 +757,33 @@
     const zones = getEnabledZones();
     const input = (key, label, attrs = '') => `<div class="field"><label for="${key}">${label}</label><input id="${key}" data-customer="${key}" value="${escapeHtml(c[key] || '')}" ${attrs}></div>`;
     return `<div class="form-grid">
-      ${input('name', 'Nom complet', 'autocomplete="name"')}${input('phone', 'Téléphone', 'autocomplete="tel"')}${input('email', 'Courriel (optionnel)', 'autocomplete="email" type="email"')}${input('streetNumber', 'Numéro civique')}${input('streetName', 'Rue', 'autocomplete="address-line1"')}${input('apartment', 'Appartement')}
+      ${input('name', 'Nom complet', 'autocomplete="name"')}${input('phone', 'Téléphone', 'autocomplete="tel"')}${input('email', 'Courriel', 'autocomplete="email" type="email" required')}<p class="line-meta">Le courriel est requis afin que Rosalie puisse vous contacter au besoin concernant votre commande.</p>${input('streetNumber', 'Numéro civique')}${input('streetName', 'Rue', 'autocomplete="address-line1"')}${input('apartment', 'Appartement')}
       <div class="field"><label for="city">Ville</label><select id="city" data-customer="city"><option value="">Choisir une ville</option>${zones.map((zone) => `<option value="${escapeHtml(zone.city)}" ${c.city === zone.city ? 'selected' : ''}>${escapeHtml(zone.city)}</option>`).join('')}</select></div>
       ${input('postalCode', 'Code postal', 'autocomplete="postal-code"')}
       <div class="field full"><label for="notes">Instructions, allergies ou commentaires</label><textarea id="notes" data-customer="notes">${escapeHtml(c.notes || '')}</textarea></div>
     </div>`;
+  }
+
+
+
+  function deliveryInfoHtml() {
+    return `<div class="notice success-note"><strong>Informations importantes pour la livraison</strong><br>Les livraisons commencent à partir de 13h.<br>Les heures de livraison sont approximatives.<br>Rosalie peut vous contacter par courriel si votre commande est prête à l’avance, si des informations supplémentaires sont nécessaires ou si une modification est requise.<br>Vous pouvez laisser une glacière à l’extérieur si vous ne souhaitez pas être présent au moment de la livraison.</div>`;
+  }
+
+  function deliveryPreferencesHtml() {
+    const selected = (value, window) => value === window ? 'selected' : '';
+    const optionList = (value) => `<option value="">Choisir une plage</option>${deliveryWindows().map((window) => `<option value="${escapeHtml(window)}" ${selected(value, window)}>${escapeHtml(window)}</option>`).join('')}`;
+    return `<div class="form-grid" style="margin-top:14px">
+      <div class="field"><label for="deliveryWindow1">Première plage horaire disponible</label><select id="deliveryWindow1" data-cart-field="deliveryWindow1" required>${optionList(state.cart.deliveryWindow1)}</select></div>
+      <div class="field"><label for="deliveryWindow2">Deuxième plage horaire disponible</label><select id="deliveryWindow2" data-cart-field="deliveryWindow2" required>${optionList(state.cart.deliveryWindow2)}</select></div>
+      <p class="line-meta full">Les livraisons commencent à partir de 13h. Les heures sont approximatives.</p>
+      <label class="field full" style="display:flex;grid-template-columns:auto 1fr;align-items:start;gap:10px;font-weight:900"><input type="checkbox" data-cart-checkbox="coolerAvailable" ${state.cart.coolerAvailable ? 'checked' : ''} style="width:auto;min-height:24px;min-width:24px"> Je peux laisser une glacière à l’extérieur si je ne suis pas présent au moment de la livraison.</label>
+      <div class="field full"><label for="deliveryInstructions">Instructions pour la livraison ou la glacière</label><textarea id="deliveryInstructions" data-cart-field="deliveryInstructions" placeholder="Exemple: glacière sur le balcon, sonner à la porte arrière, etc.">${escapeHtml(state.cart.deliveryInstructions || '')}</textarea></div>
+    </div>`;
+  }
+
+  function checkoutDeliverySummaryHtml() {
+    return `<div class="cart-lines"><p class="line-meta"><strong>Date de livraison:</strong> ${state.cart.deliveryDate ? formatDate(state.cart.deliveryDate) : 'Aucune date disponible'}</p><p class="line-meta"><strong>Première plage horaire disponible:</strong> ${escapeHtml(state.cart.deliveryWindow1 || 'À choisir')}</p><p class="line-meta"><strong>Deuxième plage horaire disponible:</strong> ${escapeHtml(state.cart.deliveryWindow2 || 'À choisir')}</p><p class="line-meta"><strong>Glacière disponible:</strong> ${state.cart.coolerAvailable ? 'Oui' : 'Non'}</p>${state.cart.deliveryInstructions ? `<p class="line-meta"><strong>Instructions de livraison/glacière:</strong> ${escapeHtml(state.cart.deliveryInstructions)}</p>` : ''}</div>`;
   }
 
   function traiteurHtml() {
@@ -799,13 +880,16 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: `Cette date n’est pas disponible, car les commandes doivent être placées 72h à l’avance.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
       }
       state.dateMessage = ''; state.cart.deliveryDate = button.dataset.date; saveCart(); render();
     }));
+    root.querySelectorAll('[data-cart-field]').forEach((field) => field.addEventListener('input', () => { state.cart[field.dataset.cartField] = field.value; saveCart(); }));
+    root.querySelectorAll('[data-cart-field]').forEach((field) => field.addEventListener('change', () => { state.cart[field.dataset.cartField] = field.value; saveCart(); render(); }));
+    root.querySelectorAll('[data-cart-checkbox]').forEach((field) => field.addEventListener('change', () => { state.cart[field.dataset.cartCheckbox] = field.checked; saveCart(); render(); }));
     root.querySelectorAll('[data-customer]').forEach((field) => field.addEventListener('input', () => {
       const key = field.dataset.customer; state.cart.customer[key] = key === 'postalCode' ? field.value.toUpperCase() : field.value; saveCart();
     }));
