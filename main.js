@@ -365,8 +365,8 @@
 
   function firstAvailableDate() {
     const menu = getCurrentMenu();
-    const start = menu.start_date ? parseLocalDate(menu.start_date) : businessToday();
-    const date = new Date(Math.max(start.getTime(), businessToday().getTime()));
+    const rules = getSettingRules();
+    const date = minimumDeliveryDate(menu, Number(rules.order_notice_hours || 48));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
@@ -740,8 +740,18 @@
     return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
   }
 
+  function normalizeDeliveryDate() {
+    const first = firstAvailableDate();
+    if (!first) return;
+    const selectedStatus = state.cart.deliveryDate ? isDateAvailable(parseLocalDate(state.cart.deliveryDate)) : { ok: false };
+    if (!state.cart.deliveryDate || !selectedStatus.ok || state.cart.deliveryDate > first) {
+      state.cart.deliveryDate = first;
+      saveCart();
+    }
+  }
+
   function commanderHtml() {
-    if (!state.cart.deliveryDate) state.cart.deliveryDate = firstAvailableDate();
+    normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();
     return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
