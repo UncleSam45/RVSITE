@@ -168,6 +168,20 @@
     return new Date(year, (month || 1) - 1, day || 1, hour, 0, 0, 0);
   }
 
+  function businessToday(now = new Date()) {
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(now).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return parseLocalDate(`${parts.year}-${parts.month}-${parts.day}`, 0);
+  }
+
   function toLocalIsoDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -324,8 +338,7 @@
 
   function minimumDeliveryDate(menu, noticeHours) {
     const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = businessToday();
     const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
     const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
     minimum.setDate(minimum.getDate() + noticeDays);
@@ -352,8 +365,8 @@
 
   function firstAvailableDate() {
     const menu = getCurrentMenu();
-    const start = menu.start_date ? parseLocalDate(menu.start_date) : new Date();
-    const date = new Date(Math.max(start.getTime(), Date.now()));
+    const rules = getSettingRules();
+    const date = minimumDeliveryDate(menu, Number(rules.order_notice_hours || 48));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
@@ -727,8 +740,18 @@
     return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
   }
 
+  function normalizeDeliveryDate() {
+    const first = firstAvailableDate();
+    if (!first) return;
+    const selectedStatus = state.cart.deliveryDate ? isDateAvailable(parseLocalDate(state.cart.deliveryDate)) : { ok: false };
+    if (!state.cart.deliveryDate || !selectedStatus.ok || state.cart.deliveryDate > first) {
+      state.cart.deliveryDate = first;
+      saveCart();
+    }
+  }
+
   function commanderHtml() {
-    if (!state.cart.deliveryDate) state.cart.deliveryDate = firstAvailableDate();
+    normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();
     return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
