@@ -322,24 +322,26 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function deliveryNoticeThreshold(menu, noticeHours) {
-    const now = Date.now();
-    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0).getTime() : now;
-    const noticeStart = Math.max(now, menuStart);
-    return new Date(noticeStart + noticeHours * 60 * 60 * 1000);
+  function minimumDeliveryDate(menu, noticeHours) {
+    const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
+    const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
+    minimum.setDate(minimum.getDate() + noticeDays);
+    return minimum;
   }
 
   function isDateAvailable(date) {
     const rules = getSettingRules();
     const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = deliveryNoticeThreshold(menu, noticeHours);
+    const threshold = minimumDeliveryDate(menu, noticeHours);
     if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
     if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
     if (menu.start_date && deliveryCutoff < parseLocalDate(menu.start_date, 0)) return { ok: false, reason: 'outside_menu_period' };
-    if (menu.end_date && deliveryCutoff > parseLocalDate(menu.end_date, 23)) return { ok: false, reason: 'outside_menu_period' };
     const weekday = WEEKDAYS[date.getDay()];
     if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return { ok: false, reason: 'no_delivery' };
     const iso = toLocalIsoDate(date);
@@ -664,7 +666,7 @@
     const rules = getSettingRules();
     const promos = (state.data.promotions.active || []).filter((promo) => promo.enabled);
     const orderStatus = getMenuOrderStatus();
-    const isOpen = orderStatus.open && Boolean(firstAvailableDate());
+    const isOpen = orderStatus.open;
     return `
       <div class="container menu-layout">
         <div>
@@ -674,7 +676,7 @@
             <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p><p class="notice ${isOpen ? 'success-note' : ''}">${menuOrderStatusMessage()}</p>
             <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Familial</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
           </section>
-          ${!menu.active ? `<section class="section menu-empty">Le prochain menu arrive bientôt.</section>` : ''}${menu.active && !isOpen ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
+          ${!menu.active ? `<section class="section menu-empty">Le prochain menu arrive bientôt.</section>` : ''}${menu.active && !orderStatus.open ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
           ${menuSectionHtml('Plats principaux', getMenuItems('items'))}
           ${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}
         </div>
@@ -749,7 +751,7 @@
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
-    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date disponible dans la période du menu avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
+    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
   }
 
   function customerFormHtml() {
@@ -880,7 +882,7 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est hors de la période du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est avant le début du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
