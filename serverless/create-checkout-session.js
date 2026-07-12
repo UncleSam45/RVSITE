@@ -41,7 +41,6 @@ function isDeliveryDateAllowed(deliveryDate, settings, menu) {
   const noticeHours = Number(settings.ordering?.order_notice_hours || 48);
   if (date.getTime() < deliveryNoticeThreshold(menu, noticeHours)) return false;
   if (menu.start_date && date < new Date(`${menu.start_date}T00:00:00-04:00`)) return false;
-  if (menu.end_date && date > new Date(`${menu.end_date}T23:59:59-04:00`)) return false;
   if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(WEEKDAYS[date.getDay()])) return false;
   if (Array.isArray(menu.full_dates) && menu.full_dates.includes(deliveryDate)) return false;
   if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(deliveryDate)) return false;
