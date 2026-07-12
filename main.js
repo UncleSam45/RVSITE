@@ -322,18 +322,21 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function deliveryNoticeThreshold(menu, noticeHours) {
-    const now = Date.now();
-    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0).getTime() : now;
-    const noticeStart = Math.max(now, menuStart);
-    return new Date(noticeStart + noticeHours * 60 * 60 * 1000);
+  function minimumDeliveryDate(menu, noticeHours) {
+    const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
+    const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
+    minimum.setDate(minimum.getDate() + noticeDays);
+    return minimum;
   }
 
   function isDateAvailable(date) {
     const rules = getSettingRules();
     const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = deliveryNoticeThreshold(menu, noticeHours);
+    const threshold = minimumDeliveryDate(menu, noticeHours);
     if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
     if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
