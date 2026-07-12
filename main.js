@@ -168,6 +168,20 @@
     return new Date(year, (month || 1) - 1, day || 1, hour, 0, 0, 0);
   }
 
+  function businessToday(now = new Date()) {
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(now).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return parseLocalDate(`${parts.year}-${parts.month}-${parts.day}`, 0);
+  }
+
   function toLocalIsoDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -324,8 +338,7 @@
 
   function minimumDeliveryDate(menu, noticeHours) {
     const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = businessToday();
     const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
     const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
     minimum.setDate(minimum.getDate() + noticeDays);
@@ -352,8 +365,8 @@
 
   function firstAvailableDate() {
     const menu = getCurrentMenu();
-    const start = menu.start_date ? parseLocalDate(menu.start_date) : new Date();
-    const date = new Date(Math.max(start.getTime(), Date.now()));
+    const start = menu.start_date ? parseLocalDate(menu.start_date) : businessToday();
+    const date = new Date(Math.max(start.getTime(), businessToday().getTime()));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
