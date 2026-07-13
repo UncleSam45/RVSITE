@@ -52,6 +52,8 @@ function isDeliveryDateAllowed(deliveryDate, settings, menu) {
 
 function validateOrder(payload, data) {
   const errors = [];
+  const deliveryWindows = Array.isArray(data.delivery.delivery_windows) ? data.delivery.delivery_windows : [];
+  const selectedWindows = [payload.delivery_window_1, payload.delivery_window_2].map((window) => String(window || '').trim());
   const itemsById = new Map(data.items.items.map((item) => [item.id, item]));
   const allowedCities = new Set(data.delivery.zones.filter((zone) => zone.enabled !== false).map((zone) => normalizeCity(zone.city)));
   const requestItems = Array.isArray(payload.items) ? payload.items : [];
@@ -60,6 +62,9 @@ function validateOrder(payload, data) {
   if (!payload.customer?.name || !payload.customer?.phone) errors.push('Le nom et le téléphone sont requis.');
   if (!allowedCities.has(normalizeCity(payload.customer?.city))) errors.push('Ville de livraison non autorisée.');
   if (!isDeliveryDateAllowed(payload.delivery_date, data.settings, data.menus.current_menu)) errors.push('Date de livraison non disponible.');
+  if (!selectedWindows[0] || !selectedWindows[1]) errors.push('Deux plages horaires de livraison sont requises.');
+  else if (selectedWindows[0] === selectedWindows[1]) errors.push('Les deux plages horaires de livraison doivent être différentes.');
+  else if (deliveryWindows.length && selectedWindows.some((window) => !deliveryWindows.includes(window))) errors.push('Plage horaire de livraison invalide.');
 
   const lineItems = [];
   let subtotal = 0;
@@ -92,7 +97,26 @@ function validateOrder(payload, data) {
 
   const minimum = Number(data.settings.ordering?.minimum_order || data.delivery.rules?.minimum_order || 0);
   if (subtotal < minimum) errors.push(`Minimum de commande non atteint (${minimum} $).`);
-  return { errors, lineItems, subtotal };
+  return { errors, lineItems, subtotal, selectedWindows };
+}
+
+function stripeMetadata(payload, subtotal, selectedWindows) {
+  const coolerAvailable = payload.cooler_available ? 'Oui' : 'Non';
+  const deliveryInstructions = String(payload.delivery_instructions || '').trim() || 'Aucune';
+  return {
+    source: 'website',
+    customer_name: payload.customer.name,
+    phone: payload.customer.phone,
+    delivery_date: payload.delivery_date,
+    delivery_window_1: selectedWindows[0],
+    delivery_window_2: selectedWindows[1],
+    delivery_windows: `${selectedWindows[0]} / ${selectedWindows[1]}`,
+    cooler_available: coolerAvailable,
+    delivery_instructions: deliveryInstructions.slice(0, 500),
+    city: payload.customer.city,
+    subtotal: String(subtotal),
+    order_summary: payload.items.map((line) => `${line.qty}x ${line.item_id}/${line.portion}`).join(', ').slice(0, 500),
+  };
 }
 
 exports.handler = async function handler(event) {
@@ -107,8 +131,10 @@ exports.handler = async function handler(event) {
       items: await readJson('items.json'),
       delivery: await readJson('delivery.json'),
     };
-    const { errors, lineItems, subtotal } = validateOrder(payload, data);
+    const { errors, lineItems, subtotal, selectedWindows } = validateOrder(payload, data);
     if (errors.length) return { statusCode: 400, body: JSON.stringify({ error: errors.join(' ') }) };
+
+    const metadata = stripeMetadata(payload, subtotal, selectedWindows);
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -116,15 +142,8 @@ exports.handler = async function handler(event) {
       success_url: `${process.env.PUBLIC_SITE_URL || 'https://example.com'}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.PUBLIC_SITE_URL || 'https://example.com'}/?checkout=cancelled`,
       customer_email: payload.customer.email || undefined,
-      metadata: {
-        source: 'website',
-        customer_name: payload.customer.name,
-        phone: payload.customer.phone,
-        delivery_date: payload.delivery_date,
-        city: payload.customer.city,
-        subtotal: String(subtotal),
-        order_summary: payload.items.map((line) => `${line.qty}x ${line.item_id}/${line.portion}`).join(', ').slice(0, 500),
-      },
+      metadata,
+      payment_intent_data: { metadata },
     });
 
     return { statusCode: 200, body: JSON.stringify({ checkout_url: session.url }) };
