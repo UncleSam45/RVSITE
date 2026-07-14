@@ -33,14 +33,16 @@
 
   const CART_STORAGE_KEY = 'lacuisine_rosalie_cart_v2';
   const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
+  const DEFAULT_DELIVERY_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
   const WEEKDAY_LABELS = {
     sunday: 'dimanche', monday: 'lundi', tuesday: 'mardi', wednesday: 'mercredi',
     thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi',
   };
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
   const DATE_REASONS = {
-    available: 'Disponible', too_soon: 'Trop tôt', outside_menu_period: 'Hors période du menu',
-    no_delivery: 'Pas de livraison', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
+    available: 'Disponible', too_soon: 'Trop tôt',
+    no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
   };
 
   const state = {
@@ -336,26 +338,35 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function minimumDeliveryDate(menu, noticeHours) {
+  function minimumDeliveryDate(noticeHours) {
     const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
     const today = businessToday();
-    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
-    const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
+    const minimum = new Date(today);
     minimum.setDate(minimum.getDate() + noticeDays);
     return minimum;
+  }
+
+  function isWeekendDeliveryDay(date) {
+    return WEEKEND_DAYS.has(WEEKDAYS[date.getDay()]);
+  }
+
+  function deliveryDayLabels() {
+    const menuDays = getCurrentMenu().delivery_days;
+    const days = Array.isArray(menuDays) && menuDays.length ? menuDays.filter((day) => !WEEKEND_DAYS.has(day)) : DEFAULT_DELIVERY_DAYS;
+    return days.map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'lundi à vendredi';
   }
 
   function isDateAvailable(date) {
     const rules = getSettingRules();
     const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = minimumDeliveryDate(menu, noticeHours);
+    const threshold = minimumDeliveryDate(noticeHours);
     if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
     if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
-    if (menu.start_date && deliveryCutoff < parseLocalDate(menu.start_date, 0)) return { ok: false, reason: 'outside_menu_period' };
     const weekday = WEEKDAYS[date.getDay()];
+    if (isWeekendDeliveryDay(date)) return { ok: false, reason: 'weekend' };
     if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return { ok: false, reason: 'no_delivery' };
     const iso = toLocalIsoDate(date);
     if (Array.isArray(menu.full_dates) && menu.full_dates.includes(iso)) return { ok: false, reason: 'full' };
@@ -366,7 +377,7 @@
   function firstAvailableDate() {
     const menu = getCurrentMenu();
     const rules = getSettingRules();
-    const date = minimumDeliveryDate(menu, Number(rules.order_notice_hours || 48));
+    const date = minimumDeliveryDate(Number(rules.order_notice_hours || 48));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
@@ -430,6 +441,29 @@
     };
   }
 
+  function checkoutEndpoints() {
+    const configured = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
+    return Array.from(new Set([configured, '/.netlify/functions/create-checkout-session']));
+  }
+
+  async function requestCheckoutSession(payload) {
+    const endpoints = checkoutEndpoints();
+    let lastError = null;
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data.checkout_url) return data.checkout_url;
+        const message = data.error || `Session Stripe indisponible (${response.status}).`;
+        lastError = new Error(message);
+        if (response.status !== 404) break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('Session Stripe indisponible.');
+  }
+
   async function checkout() {
     const errors = validateOrder();
     if (errors.length) {
@@ -437,15 +471,13 @@
       render();
       return;
     }
-    const endpoint = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
+    const payload = buildCheckoutPayload();
     try {
-      const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(buildCheckoutPayload()) });
-      const payload = await response.json();
-      if (!response.ok || !payload.checkout_url) throw new Error(payload.error || 'Session Stripe indisponible.');
-      window.location.assign(payload.checkout_url);
+      const checkoutUrl = await requestCheckoutSession(payload);
+      window.location.assign(checkoutUrl);
     } catch (error) {
-      showToast('Paiement sécurisé bientôt disponible. La commande est prête à être envoyée.');
-      console.warn('Checkout non configuré:', error, buildCheckoutPayload());
+      showToast(error.message || 'Impossible de créer la session de paiement.');
+      console.warn('Erreur de paiement:', error, payload);
     }
   }
 
@@ -774,7 +806,7 @@
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
-    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
+    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${deliveryDayLabels()}.</p>`;
   }
 
   function customerFormHtml() {
@@ -905,7 +937,7 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est avant le début du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', no_delivery: 'Aucune livraison n’est prévue ce jour-là.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
