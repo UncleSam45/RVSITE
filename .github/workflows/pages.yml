@@ -33,7 +33,7 @@ jobs:
         run: |
           test "$(cat _site/CNAME)" = "lacuisinederosalie.ca"
           grep -F "Nous ouvrons le 8 juillet." _site/index.html
-          grep -F "main.js?v=20260702-opening-gate" _site/index.html
+          grep -F "main.js?v=20260714-delivery-weekdays-v4" _site/index.html
 
       - name: Publish static site to gh-pages branch
         env:
