@@ -45,7 +45,6 @@ function isDeliveryDateAllowed(deliveryDate, settings, menu) {
   if (date < minimumDeliveryDate(noticeHours)) return false;
   const weekday = WEEKDAYS[date.getDay()];
   if (WEEKEND_DAYS.has(weekday)) return false;
-  if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return false;
   if (Array.isArray(menu.full_dates) && menu.full_dates.includes(deliveryDate)) return false;
   if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(deliveryDate)) return false;
   return true;
