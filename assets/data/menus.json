@@ -20,6 +20,13 @@
       "potage_legumes_20260710",
       "salade_cesar_20260710",
       "sous_marin_pizza_20260710"
+    ],
+    "delivery_days": [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday"
     ]
   },
   "archive": []

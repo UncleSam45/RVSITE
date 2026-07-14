@@ -791,7 +791,7 @@ def build_ui(store: DataStore) -> None:
                         ui.input("Start date", value=menu.get("start_date", ""), placeholder="YYYY-MM-DD").bind_value(menu, "start_date")
                         ui.input("End date", value=menu.get("end_date", ""), placeholder="YYYY-MM-DD").bind_value(menu, "end_date")
                         ui.textarea("Description", value=menu.get("description", "")).classes("col-span-2").bind_value(menu, "description")
-                    ui.select(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], value=menu.get("delivery_days", []), multiple=True, label="Delivery days").classes("w-full").bind_value(menu, "delivery_days")
+                    ui.select(["monday", "tuesday", "wednesday", "thursday", "friday"], value=[day for day in menu.get("delivery_days", []) if day not in {"saturday", "sunday"}], multiple=True, label="Delivery days").classes("w-full").bind_value(menu, "delivery_days")
                     ui.select(item_options(), value=menu.get("item_ids", []), multiple=True, label="Active menu items").classes("w-full").bind_value(menu, "item_ids")
                     ui.select(item_options(), value=menu.get("extra_ids", []), multiple=True, label="Active extras").classes("w-full").bind_value(menu, "extra_ids")
 

@@ -17,6 +17,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 const DATA_DIR = path.join(__dirname, '..', 'assets', 'data');
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 
 async function readJson(file) {
   return JSON.parse(await fs.readFile(path.join(DATA_DIR, file), 'utf8'));
@@ -44,7 +45,9 @@ function isDeliveryDateAllowed(deliveryDate, settings, menu) {
   const noticeHours = Number(settings.ordering?.order_notice_hours || 48);
   if (date < minimumDeliveryDate(menu, noticeHours)) return false;
   if (menu.start_date && date < new Date(`${menu.start_date}T00:00:00-04:00`)) return false;
-  if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(WEEKDAYS[date.getDay()])) return false;
+  const weekday = WEEKDAYS[date.getDay()];
+  if (WEEKEND_DAYS.has(weekday)) return false;
+  if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return false;
   if (Array.isArray(menu.full_dates) && menu.full_dates.includes(deliveryDate)) return false;
   if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(deliveryDate)) return false;
   return true;
