@@ -19,7 +19,7 @@
     "currency": "CAD",
     "locale": "fr-CA",
     "timezone": "America/Toronto",
-    "checkout_endpoint": "/api/create-checkout-session"
+    "checkout_endpoint": "/api/create-checkout-session-v2"
   },
   "trust": {
     "hygiene_statement": "Formation en hygiène et salubrité alimentaires.",

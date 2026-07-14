@@ -29,11 +29,11 @@ jobs:
           cp logo.png banner.png _site/ 2>/dev/null || true
           touch _site/.nojekyll
 
-      - name: Verify static gate artifact
+      - name: Verify static artifact
         run: |
           test "$(cat _site/CNAME)" = "lacuisinederosalie.ca"
-          grep -F "Nous ouvrons le 8 juillet." _site/index.html
-          grep -F "main.js?v=20260702-opening-gate" _site/index.html
+          grep -F "Chargement de La cuisine de Rosalie" _site/index.html
+          grep -F "main.js?v=20260714-delivery-weekdays-v6" _site/index.html
 
       - name: Publish static site to gh-pages branch
         env:
