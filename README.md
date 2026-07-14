@@ -4,12 +4,7 @@ Static storefront and local editor/preview tools for **La cuisine de Rosalie**.
 
 ## Current public state
 
-The public website is temporarily held behind a French opening screen until **July 8, 2026**.
-
-The opening gate is implemented in two places:
-
-- `index.html` contains the first-render static landing screen so visitors to the deployed site immediately see the opening message.
-- `main.js` contains a client-side date gate (`SITE_OPENING_DATE`) that prevents the full app from initializing before the opening date.
+The public website loads the storefront directly. `index.html` contains only a short loading placeholder until `main.js` renders the app.
 
 The live custom domain is configured in `CNAME` as:
 
@@ -20,7 +15,7 @@ lacuisinederosalie.ca
 ## Project structure
 
 - `index.html` — public static HTML shell for the deployed site.
-- `main.js` — frontend storefront application and pre-launch gate logic.
+- `main.js` — frontend storefront application logic.
 - `assets/data/*.json` — public menu, business, delivery, promotion, content, and gallery data.
 - `assets/images/**` — public image assets used by the storefront.
 - `editor.py` — local editor for structured static data.
@@ -63,8 +58,8 @@ During deployment, the workflow prepares `_site` by copying:
 The workflow also verifies the deploy artifact before upload. It checks that:
 
 - `_site/CNAME` contains `lacuisinederosalie.ca`
-- `_site/index.html` contains `Nous ouvrons le 8 juillet.`
-- `_site/index.html` contains the cache-busted script reference `main.js?v=20260702-opening-gate`
+- `_site/index.html` contains `Chargement de La cuisine de Rosalie`
+- `_site/index.html` contains the cache-busted script reference `main.js?v=20260714-delivery-weekdays-v5`
 
 If GitHub Actions has stale runs, the workflow is configured with `cancel-in-progress: true` so newer runs cancel older queued/in-progress runs.
 

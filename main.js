@@ -10,12 +10,6 @@
   };
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
-  const SITE_OPENING_DATE = new Date(2026, 6, 8, 0, 0, 0, 0);
-
-  function isBeforeOpeningDate(now = new Date()) {
-    return now.getTime() < SITE_OPENING_DATE.getTime();
-  }
-
   async function clearLegacyBrowserCaches() {
     if (!('caches' in window)) return;
     try {
@@ -33,14 +27,16 @@
 
   const CART_STORAGE_KEY = 'lacuisine_rosalie_cart_v2';
   const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
+  const DEFAULT_DELIVERY_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
   const WEEKDAY_LABELS = {
     sunday: 'dimanche', monday: 'lundi', tuesday: 'mardi', wednesday: 'mercredi',
     thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi',
   };
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
   const DATE_REASONS = {
-    available: 'Disponible', too_soon: 'Trop tôt', outside_menu_period: 'Hors période du menu',
-    no_delivery: 'Pas de livraison', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
+    available: 'Disponible', too_soon: 'Trop tôt',
+    no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
   };
 
   const state = {
@@ -72,14 +68,6 @@
       :root{--bg:#FFF2B8;--card:#FFF6CF;--text:#24382F;--muted:#66766E;--olive:#72A982;--deep-olive:#2F6F55;--gold:#F7CA4D;--brown:#C56E8B;--border:#F1E6B8;--success:#3F8B63;--warning:#D99A25;--error:#B85050;--shadow:0 18px 45px rgba(82,105,69,.10);--soft:0 8px 22px rgba(82,105,69,.08)}
       *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:radial-gradient(circle at 10% 0%,rgba(255,218,234,.78) 0,transparent 30%),radial-gradient(circle at 90% 8%,rgba(201,241,210,.82) 0,transparent 32%),linear-gradient(135deg,#FFF2B8 0,#FFEFA7 45%,#EAF8D7 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased} button,input,select,textarea{font:inherit} button{min-height:44px} a{color:inherit}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-      .opening-gate{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 12% 0%,rgba(255,221,235,.82),transparent 34%),radial-gradient(circle at 88% 10%,rgba(207,239,169,.82),transparent 34%),linear-gradient(135deg,#FFF2B8 0,#FFEFA7 48%,#EAF8D7 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;text-align:center}
-      .opening-card{width:min(760px,100%);padding:clamp(28px,6vw,58px);border:1px solid rgba(232,211,133,.95);border-radius:34px;background:rgba(255,249,218,.95);box-shadow:0 24px 70px rgba(82,105,69,.16)}
-      .opening-logo{display:inline-flex;align-items:center;justify-content:center;width:150px;height:106px;margin-bottom:24px;border-radius:28px;background:linear-gradient(135deg,#F7CA4D,#CFEFA9 52%,#93D7B0);box-shadow:0 16px 30px rgba(247,202,77,.26);overflow:hidden}
-      .opening-logo img{display:block;width:100%;height:100%;object-fit:contain}
-      .opening-kicker{display:inline-flex;margin-bottom:12px;padding:8px 13px;border:1px solid #E8D385;border-radius:999px;background:#FFF4BC;color:var(--deep-olive);font-size:.78rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-      .opening-card h1{margin:0;color:var(--text);font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.35rem,6vw,4.5rem);line-height:1.02}
-      .opening-card p{max-width:58ch;margin:18px auto 0;color:var(--muted);font-size:clamp(1rem,2vw,1.18rem);line-height:1.7}
-      .opening-date{display:inline-flex;align-items:center;justify-content:center;margin-top:24px;padding:14px 22px;border-radius:999px;background:linear-gradient(180deg,#FFE889,#F7CA4D);color:#24382F;font-weight:900;box-shadow:0 14px 26px rgba(247,202,77,.3)}
       .opening-note{margin-top:22px;color:#5E7168;font-size:.95rem;font-weight:700}
       .site{min-height:100vh;padding:12px 12px 92px}.container{width:min(1180px,100%);margin-inline:auto}.topbar{position:sticky;top:10px;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 12px;border:1px solid rgba(228,216,200,.9);border-radius:24px;background:rgba(255,253,248,.92);backdrop-filter:blur(16px);box-shadow:var(--soft)}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:96px;height:68px;flex:0 0 96px;border-radius:20px;background:linear-gradient(135deg,var(--deep-olive),var(--olive));color:#fff;font-family:'Playfair Display',Georgia,serif;font-size:1.2rem;font-weight:700;box-shadow:0 10px 22px rgba(47,66,30,.18);overflow:hidden}.brand-mark img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}.brand-fallback{display:none}.brand-copy{display:block}.brand-name{display:block;font-family:'Playfair Display',Georgia,serif;font-size:1.18rem;font-weight:700;line-height:1.05}.brand-tagline{display:block;color:var(--muted);font-size:.82rem;margin-top:3px}.nav{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap}.nav-btn{border:1px solid transparent;background:transparent;color:var(--muted);border-radius:999px;padding:9px 12px;font-size:.9rem;font-weight:800;cursor:pointer}.nav-btn:hover,.nav-btn[aria-current=true]{background:#f3eadf;border-color:#dccbb7;color:var(--deep-olive)}.cart-nav{background:var(--deep-olive);color:#fff;border-color:var(--deep-olive)}.cart-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;margin-left:5px;padding:0 6px;border-radius:99px;background:var(--gold);color:#fff;font-size:.78rem}.mobile-menu{display:none;border:1px solid var(--border);border-radius:999px;background:#fff;padding:8px 12px;font-weight:800;color:var(--deep-olive)}
       main{padding-top:18px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center;border:1px solid var(--border);border-radius:32px;padding:clamp(22px,4vw,52px);background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(251,245,236,.94));box-shadow:var(--shadow);overflow:hidden}.kicker{color:var(--olive);text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;font-weight:900}.hero h1,.page-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.15rem,5vw,4.65rem);line-height:1.02;margin:10px 0;color:var(--text)}.lead{font-size:clamp(1rem,2vw,1.18rem);line-height:1.75;color:var(--muted);max-width:62ch}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:999px;border:1px solid transparent;padding:12px 18px;font-weight:900;cursor:pointer;text-decoration:none;transition:transform .15s ease,filter .15s ease}.btn:hover{transform:translateY(-1px);filter:brightness(1.03)}.btn-primary{background:linear-gradient(180deg,#c08d50,#9f682f);color:#fff;box-shadow:0 12px 24px rgba(184,132,66,.24)}.btn-secondary{background:#fff;color:var(--deep-olive);border-color:#d8c8b5}.btn-olive{background:var(--deep-olive);color:#fff}.btn-ghost{background:#fff8ef;color:var(--brown);border-color:#ead9c5}.trust-chips,.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fffdf8;border-radius:999px;padding:8px 11px;color:#5f554b;font-size:.88rem;font-weight:700}.hero-visual{position:relative;min-height:390px;border-radius:28px;overflow:hidden;background:linear-gradient(135deg,#efe1cd,#fff)}.hero-visual img{width:100%;height:100%;min-height:390px;object-fit:cover;display:block}.hero-card{position:absolute;left:18px;right:18px;bottom:18px;border:1px solid rgba(255,255,255,.72);border-radius:22px;padding:16px;background:rgba(255,253,248,.9);backdrop-filter:blur(12px);box-shadow:var(--soft)}.hero-card strong{display:block;font-family:'Playfair Display',Georgia,serif;font-size:1.35rem}.section{margin-top:26px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:14px}.section h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.7rem,3vw,2.6rem);margin:0}.section p{color:var(--muted);line-height:1.65}.grid{display:grid;gap:16px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.card,.panel{border:1px solid var(--border);border-radius:24px;background:rgba(255,255,255,.94);box-shadow:var(--soft)}.panel{padding:20px}.mini-card{padding:18px}.mini-card strong{display:block;margin-bottom:6px;color:var(--deep-olive)}.menu-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}.menu-header{border:1px solid #dac6ad;border-radius:28px;padding:24px;background:linear-gradient(135deg,#fff8ef,#fff);box-shadow:var(--soft)}.menu-header h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2rem,4vw,3.4rem);margin:4px 0}.promo{border-left:5px solid var(--gold);background:#fff7eb}.menu-section-title{display:flex;align-items:center;gap:10px;margin:24px 0 12px}.menu-section-title h2{font-size:1.7rem}.menu-card{display:grid;grid-template-columns:160px 1fr;overflow:hidden}.menu-card img{width:100%;height:100%;min-height:210px;object-fit:cover;background:#eee0d2}.menu-card-body{padding:18px;display:grid;gap:12px}.badge{width:fit-content;padding:5px 9px;border-radius:999px;background:#edf2e7;color:var(--deep-olive);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;font-weight:900}.menu-card h3{margin:0;font-size:1.25rem}.menu-card p{margin:0;color:var(--muted);line-height:1.55}.portion-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.portion-btn{border:1px solid #d8c8b6;border-radius:16px;background:#fffdf8;padding:10px 8px;cursor:pointer;text-align:center;color:var(--text);font-weight:900}.portion-btn small{display:block;color:var(--muted);font-weight:800;margin-top:2px}.portion-btn.active{background:var(--deep-olive);border-color:var(--deep-olive);color:#fff}.portion-btn.active small{color:#efe6d9}.item-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.qty{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:#fff}.qty button{border:0;background:transparent;width:42px;cursor:pointer;font-weight:900;color:var(--deep-olive)}.qty span{min-width:34px;text-align:center;font-weight:900}.unavailable{opacity:.62}.unavailable .btn,.unavailable .portion-btn{pointer-events:none}.cart-panel{position:sticky;top:108px;padding:18px}.cart-panel h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.55rem,5vw,2.15rem);line-height:1.08;margin:0 0 10px;overflow-wrap:anywhere;hyphens:auto}.cart-empty{padding:14px;border:1px dashed #d8c8b6;border-radius:16px;color:var(--muted);background:#fffaf2}.cart-lines{display:grid;gap:10px}.cart-line{border:1px solid #eadfd2;border-radius:16px;padding:12px;background:#fffdf8}.line-top{display:flex;justify-content:space-between;gap:10px}.line-title{font-weight:900}.line-meta{color:var(--muted);font-size:.86rem;margin-top:2px}.line-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}.remove-btn{border:0;background:transparent;color:var(--error);font-weight:900;cursor:pointer}.cart-total,.summary-row{display:flex;justify-content:space-between;gap:12px;padding-top:12px;margin-top:12px;border-top:1px dashed #d7c7b6;font-weight:900}.notice{padding:12px;border-radius:16px;border:1px solid #efd9b8;background:#fff8e9;color:var(--warning);font-weight:800;line-height:1.45}.success-note{border-color:#cfe2d5;background:#f0f8f2;color:var(--success)}.checkout-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}.step{padding:20px}.step h2{display:flex;gap:10px;align-items:center;margin:0 0 12px;font-size:1.3rem}.step-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--deep-olive);color:#fff;font-size:.9rem}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:.88rem;font-weight:900;color:#4b3a2a}.field input,.field select,.field textarea{width:100%;min-height:46px;border:1px solid #d9cab8;border-radius:14px;background:#fffdf8;padding:10px 12px;color:var(--text)}.field textarea{min-height:96px;resize:vertical}.date-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.date-btn{border:1px solid var(--border);border-radius:16px;background:#fffdf8;padding:10px 4px;cursor:pointer;color:var(--text)}.date-btn strong{display:block}.date-btn span{display:block;font-size:.73rem;color:var(--muted);margin-top:2px}.date-btn.disabled{background:#f0e6d9;color:#8a7b6d;cursor:not-allowed}.date-btn.selected{background:var(--deep-olive);border-color:var(--deep-olive);color:#fff}.date-btn.selected span{color:#f1e7d8}.quote-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.quote-item{padding:16px;border:1px solid var(--border);border-radius:18px;background:#fffdf8;font-weight:900;color:var(--deep-olive)}.zone-map{min-height:300px;border-radius:28px;background:radial-gradient(circle at 50% 45%,rgba(184,132,66,.45),transparent 24%),radial-gradient(circle at 35% 35%,rgba(80,107,47,.35),transparent 18%),linear-gradient(135deg,#f4e7d6,#fffaf2);display:grid;place-items:center;text-align:center;padding:24px;color:var(--deep-olive);font-weight:900}.footer{margin-top:30px;padding:24px;color:#f8f3ea;background:linear-gradient(135deg,var(--deep-olive),#203015);border-radius:28px}.footer-grid{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:18px}.footer a{color:#fff}.toast{position:fixed;right:18px;bottom:86px;z-index:80;background:var(--deep-olive);color:#fff;border-radius:999px;padding:12px 16px;box-shadow:var(--shadow);font-weight:900;transform:translateY(16px);opacity:0;pointer-events:none;transition:.2s}.toast.show{transform:translateY(0);opacity:1}.mobile-cart-bar{position:fixed;left:12px;right:12px;bottom:12px;z-index:75;display:none;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:var(--deep-olive);color:#fff;padding:10px 12px 10px 16px;box-shadow:var(--shadow);font-weight:900}.mobile-cart-bar button{border:0;border-radius:999px;background:var(--gold);color:#fff;padding:9px 14px;font-weight:900;cursor:pointer}.mobile-cart-bar.empty{display:none}.final-cta{background:linear-gradient(135deg,var(--deep-olive),#273816);color:#fff;text-align:center;overflow:hidden}.final-cta h2{color:#fff}.final-cta p{color:#efe3d4;margin-inline:auto}.emotional-card{background:linear-gradient(135deg,#fffdf8,#f4e5d2)}.stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}.step-pill{border:1px solid var(--border);border-radius:999px;background:#fffdf8;padding:10px 12px;font-weight:900;color:var(--muted);text-align:center;line-height:1.2;overflow-wrap:anywhere;hyphens:auto}.step-pill.active{background:var(--deep-olive);color:#fff;border-color:var(--deep-olive)}.status-badge{display:inline-flex;align-items:center;border-radius:999px;padding:8px 12px;font-weight:900;background:#edf7ef;color:var(--success);border:1px solid #cfe2d5}.status-badge.closed{background:#fff0e9;color:var(--error);border-color:#edc8bd}.food-placeholder{min-height:210px;display:grid;place-items:center;text-align:center;background:linear-gradient(135deg,#f4e5d2,#fffaf2);color:var(--olive);font-weight:900}.food-placeholder span{display:block;font-family:'Playfair Display',Georgia,serif;font-size:1.35rem}.btn[disabled]{opacity:.55;cursor:not-allowed;filter:saturate(.6)}.btn[disabled]:hover{transform:none}.btn.added{animation:pulse .45s ease;background:var(--success)}@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.035)}100%{transform:scale(1)}}.date-btn.disabled{cursor:pointer}.date-feedback{margin-top:10px}.menu-empty{padding:18px;border:1px dashed var(--border);border-radius:18px;background:#fffdf8;color:var(--muted);font-weight:800}.availability-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px;padding:14px;border:1px solid var(--border);border-radius:22px;background:rgba(255,253,248,.92);box-shadow:var(--soft)}.availability-strip span{padding:10px 12px;border-radius:16px;background:#fffaf2;color:var(--muted)}.availability-strip strong{color:var(--deep-olive)}.showcase-carousel{position:relative}.showcase-carousel .section-head p{max-width:760px}.showcase-shell{position:relative;overflow:hidden;border-radius:32px;background:radial-gradient(circle at 20% 0,rgba(184,132,66,.28),transparent 38%),linear-gradient(135deg,#fffaf2,#f0dfcb);border:1px solid var(--border);box-shadow:var(--shadow);padding:14px}.showcase-track{display:flex;transition:transform .55s cubic-bezier(.22,1,.36,1);will-change:transform}.showcase-slide{min-width:100%;padding:4px;opacity:.72;transform:scale(.985);transition:opacity .35s ease,transform .35s ease}.showcase-slide.active{opacity:1;transform:scale(1)}.showcase-image-wrap{position:relative;min-height:520px;border-radius:26px;overflow:hidden;background:#eadccc}.showcase-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.showcase-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(36,26,18,.76),rgba(36,26,18,.28) 48%,rgba(36,26,18,.08)),linear-gradient(0deg,rgba(36,26,18,.5),transparent 50%)}.showcase-badge{position:absolute;top:22px;left:22px;z-index:2;display:inline-flex;padding:9px 13px;border-radius:999px;background:rgba(255,253,248,.92);color:var(--deep-olive);font-weight:900;border:1px solid rgba(255,255,255,.5)}.showcase-copy{position:absolute;left:clamp(22px,5vw,58px);right:clamp(22px,5vw,58px);bottom:clamp(24px,5vw,58px);z-index:2;color:#fff;max-width:680px}.showcase-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2rem,4vw,4rem);line-height:1;margin:0 0 10px}.showcase-subtitle{font-size:1.08rem;line-height:1.65;color:#fff3e4;margin:0 0 18px}.showcase-controls{position:absolute;inset:50% 24px auto;display:flex;justify-content:space-between;transform:translateY(-50%);pointer-events:none}.showcase-controls button{pointer-events:auto;width:52px;height:52px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(255,253,248,.9);color:var(--deep-olive);font-size:2rem;font-weight:900;cursor:pointer;box-shadow:var(--soft)}.showcase-dots{position:absolute;left:0;right:0;bottom:24px;display:flex;justify-content:center;gap:8px;z-index:3}.showcase-dots button{width:11px;height:11px;min-height:11px;padding:0;border-radius:99px;border:0;background:rgba(255,255,255,.55);cursor:pointer}.showcase-dots button[aria-selected=true]{width:30px;background:#fff}.showcase-slide.image-missing .showcase-image{display:none}.catering-callout{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(135deg,#fffdf8,#f7e8d4)}.contact-hero{align-items:stretch}.contact-hero .panel{padding:clamp(20px,3vw,30px)}.contact-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}.identity-card{background:linear-gradient(135deg,#fffef4,#fff4bc 58%,#eafbe3)}.identity-list{display:grid;gap:12px;margin-top:18px}.identity-row{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:start;padding:13px 14px;border:1px solid #E8D385;border-radius:18px;background:rgba(255,253,248,.68)}.identity-label{color:var(--muted);font-size:.82rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.identity-value{font-weight:900;color:var(--text)}.identity-value.legal{font-family:'Playfair Display',Georgia,serif;font-size:1.35rem;color:var(--deep-olive)}.mapaq-badge{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;padding:16px;border-radius:20px;border:1px solid #cfe2d5;background:#f0f8f2;color:var(--success)}.mapaq-badge strong{display:block;color:var(--deep-olive);font-size:1.05rem}.contact-details{margin-top:16px}.detail-card{padding:16px;border:1px solid #E8D385;border-radius:18px;background:rgba(255,253,248,.72)}.detail-card strong{display:block;margin-bottom:6px;color:var(--deep-olive)}
@@ -93,21 +81,6 @@
     document.head.appendChild(style);
   }
 
-  function renderOpeningGate() {
-    const root = document.getElementById('webframe-root');
-    document.title = 'La cuisine de Rosalie | Ouverture le 8 juillet';
-    upsertMeta('description', 'La cuisine de Rosalie ouvre son site web le 8 juillet. Merci de votre patience.');
-    root.innerHTML = `<main class="opening-gate" aria-labelledby="opening-title">
-      <section class="opening-card">
-        <span class="opening-logo"><img src="./logo.png" alt="La cuisine de Rosalie"></span>
-        <div class="opening-kicker">Ouverture bientôt</div>
-        <h1 id="opening-title">Nous ouvrons le 8 juillet.</h1>
-        <p>Notre site est temporairement en préparation afin de vous accueillir avec une expérience soignée, simple et professionnelle.</p>
-        <div class="opening-date">Rendez-vous le mercredi 8 juillet 2026</div>
-        <div class="opening-note">Merci de votre patience et à très bientôt.</div>
-      </section>
-    </main>`;
-  }
 
   function setSeo(content) {
     const seo = content?.seo || {};
@@ -336,37 +309,36 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function minimumDeliveryDate(menu, noticeHours) {
+  function minimumDeliveryDate(noticeHours) {
     const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
     const today = businessToday();
-    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
-    const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
+    const minimum = new Date(today);
     minimum.setDate(minimum.getDate() + noticeDays);
     return minimum;
   }
 
+  function isWeekendDeliveryDay(date) {
+    return WEEKEND_DAYS.has(WEEKDAYS[date.getDay()]);
+  }
+
+  function deliveryDayLabels() {
+    return DEFAULT_DELIVERY_DAYS.map((day) => WEEKDAY_LABELS[day] || day).join(', ');
+  }
+
   function isDateAvailable(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return { ok: false, reason: 'invalid' };
     const rules = getSettingRules();
-    const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = minimumDeliveryDate(menu, noticeHours);
-    if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
-    if (menu.active === false) return { ok: false, reason: 'closed' };
+    const threshold = minimumDeliveryDate(noticeHours);
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
-    if (menu.start_date && deliveryCutoff < parseLocalDate(menu.start_date, 0)) return { ok: false, reason: 'outside_menu_period' };
-    const weekday = WEEKDAYS[date.getDay()];
-    if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return { ok: false, reason: 'no_delivery' };
-    const iso = toLocalIsoDate(date);
-    if (Array.isArray(menu.full_dates) && menu.full_dates.includes(iso)) return { ok: false, reason: 'full' };
-    if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(iso)) return { ok: false, reason: 'closed' };
+    if (isWeekendDeliveryDay(date)) return { ok: false, reason: 'weekend' };
     return { ok: true, reason: 'available' };
   }
 
   function firstAvailableDate() {
-    const menu = getCurrentMenu();
     const rules = getSettingRules();
-    const date = minimumDeliveryDate(menu, Number(rules.order_notice_hours || 48));
+    const date = minimumDeliveryDate(Number(rules.order_notice_hours || 48));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
@@ -430,6 +402,29 @@
     };
   }
 
+  function checkoutEndpoints() {
+    const configured = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
+    return Array.from(new Set([configured, '/.netlify/functions/create-checkout-session']));
+  }
+
+  async function requestCheckoutSession(payload) {
+    const endpoints = checkoutEndpoints();
+    let lastError = null;
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data.checkout_url) return data.checkout_url;
+        const message = data.error || `Session Stripe indisponible (${response.status}).`;
+        lastError = new Error(message);
+        if (response.status !== 404) break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error('Session Stripe indisponible.');
+  }
+
   async function checkout() {
     const errors = validateOrder();
     if (errors.length) {
@@ -437,15 +432,13 @@
       render();
       return;
     }
-    const endpoint = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
+    const payload = buildCheckoutPayload();
     try {
-      const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(buildCheckoutPayload()) });
-      const payload = await response.json();
-      if (!response.ok || !payload.checkout_url) throw new Error(payload.error || 'Session Stripe indisponible.');
-      window.location.assign(payload.checkout_url);
+      const checkoutUrl = await requestCheckoutSession(payload);
+      window.location.assign(checkoutUrl);
     } catch (error) {
-      showToast('Paiement sécurisé bientôt disponible. La commande est prête à être envoyée.');
-      console.warn('Checkout non configuré:', error, buildCheckoutPayload());
+      showToast(error.message || 'Impossible de créer la session de paiement.');
+      console.warn('Erreur de paiement:', error, payload);
     }
   }
 
@@ -744,7 +737,7 @@
     const first = firstAvailableDate();
     if (!first) return;
     const selectedStatus = state.cart.deliveryDate ? isDateAvailable(parseLocalDate(state.cart.deliveryDate)) : { ok: false };
-    if (!state.cart.deliveryDate || !selectedStatus.ok || state.cart.deliveryDate > first) {
+    if (!state.cart.deliveryDate || !selectedStatus.ok) {
       state.cart.deliveryDate = first;
       saveCart();
     }
@@ -774,7 +767,7 @@
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
-    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${(getCurrentMenu().delivery_days || []).map((day) => WEEKDAY_LABELS[day] || day).join(', ') || 'à confirmer'}.</p>`;
+    return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${deliveryDayLabels()}.</p>`;
   }
 
   function customerFormHtml() {
@@ -905,7 +898,7 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est avant le début du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', invalid: 'Cette date n’est pas disponible.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
@@ -927,10 +920,6 @@
   async function init() {
     injectStyles();
     await clearLegacyBrowserCaches();
-    if (isBeforeOpeningDate()) {
-      renderOpeningGate();
-      return;
-    }
     loadCart();
     state.data = await loadData();
     setSeo(state.data.content);
