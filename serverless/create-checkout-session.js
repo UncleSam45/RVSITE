@@ -27,12 +27,11 @@ function normalizeCity(city) {
   return String(city || '').trim().toLocaleLowerCase('fr-CA');
 }
 
-function minimumDeliveryDate(menu, noticeHours) {
+function minimumDeliveryDate(noticeHours) {
   const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
   const now = new Date();
   const today = new Date(`${now.toLocaleDateString('en-CA', { timeZone: 'America/Toronto' })}T00:00:00-04:00`);
-  const menuStart = menu.start_date ? new Date(`${menu.start_date}T00:00:00-04:00`) : today;
-  const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
+  const minimum = new Date(today);
   minimum.setDate(minimum.getDate() + noticeDays);
   return minimum;
 }
@@ -43,8 +42,7 @@ function isDeliveryDateAllowed(deliveryDate, settings, menu) {
   if (menu.active === false) return false;
 
   const noticeHours = Number(settings.ordering?.order_notice_hours || 48);
-  if (date < minimumDeliveryDate(menu, noticeHours)) return false;
-  if (menu.start_date && date < new Date(`${menu.start_date}T00:00:00-04:00`)) return false;
+  if (date < minimumDeliveryDate(noticeHours)) return false;
   const weekday = WEEKDAYS[date.getDay()];
   if (WEEKEND_DAYS.has(weekday)) return false;
   if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return false;

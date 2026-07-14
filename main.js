@@ -41,7 +41,7 @@
   };
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
   const DATE_REASONS = {
-    available: 'Disponible', too_soon: 'Trop tôt', outside_menu_period: 'Hors période du menu',
+    available: 'Disponible', too_soon: 'Trop tôt',
     no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
   };
 
@@ -338,11 +338,10 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function minimumDeliveryDate(menu, noticeHours) {
+  function minimumDeliveryDate(noticeHours) {
     const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
     const today = businessToday();
-    const menuStart = menu.start_date ? parseLocalDate(menu.start_date, 0) : today;
-    const minimum = new Date(Math.max(today.getTime(), menuStart.getTime()));
+    const minimum = new Date(today);
     minimum.setDate(minimum.getDate() + noticeDays);
     return minimum;
   }
@@ -361,12 +360,11 @@
     const rules = getSettingRules();
     const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = minimumDeliveryDate(menu, noticeHours);
+    const threshold = minimumDeliveryDate(noticeHours);
     if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
     if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
-    if (menu.start_date && deliveryCutoff < parseLocalDate(menu.start_date, 0)) return { ok: false, reason: 'outside_menu_period' };
     const weekday = WEEKDAYS[date.getDay()];
     if (isWeekendDeliveryDay(date)) return { ok: false, reason: 'weekend' };
     if (Array.isArray(menu.delivery_days) && menu.delivery_days.length && !menu.delivery_days.includes(weekday)) return { ok: false, reason: 'no_delivery' };
@@ -379,7 +377,7 @@
   function firstAvailableDate() {
     const menu = getCurrentMenu();
     const rules = getSettingRules();
-    const date = minimumDeliveryDate(menu, Number(rules.order_notice_hours || 48));
+    const date = minimumDeliveryDate(Number(rules.order_notice_hours || 48));
     date.setHours(12, 0, 0, 0);
     for (let i = 0; i < 45; i += 1) {
       const candidate = new Date(date);
@@ -939,7 +937,7 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', no_delivery: 'Aucune livraison n’est prévue ce jour-là.', outside_menu_period: 'Cette date est avant le début du menu actuel.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', no_delivery: 'Aucune livraison n’est prévue ce jour-là.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;
