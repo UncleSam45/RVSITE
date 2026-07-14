@@ -776,7 +776,7 @@
     const first = firstAvailableDate();
     if (!first) return;
     const selectedStatus = state.cart.deliveryDate ? isDateAvailable(parseLocalDate(state.cart.deliveryDate)) : { ok: false };
-    if (!state.cart.deliveryDate || !selectedStatus.ok || state.cart.deliveryDate > first) {
+    if (!state.cart.deliveryDate || !selectedStatus.ok) {
       state.cart.deliveryDate = first;
       saveCart();
     }
