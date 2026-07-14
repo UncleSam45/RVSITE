@@ -326,19 +326,13 @@
   }
 
   function isDateAvailable(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return { ok: false, reason: 'invalid' };
     const rules = getSettingRules();
-    const menu = getCurrentMenu();
     const noticeHours = Number(rules.order_notice_hours || 48);
     const threshold = minimumDeliveryDate(noticeHours);
-    if (!getMenuOrderStatus().open) return { ok: false, reason: 'closed' };
-    if (menu.active === false) return { ok: false, reason: 'closed' };
     const deliveryCutoff = parseLocalDate(date);
     if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
-    const weekday = WEEKDAYS[date.getDay()];
     if (isWeekendDeliveryDay(date)) return { ok: false, reason: 'weekend' };
-    const iso = toLocalIsoDate(date);
-    if (Array.isArray(menu.full_dates) && menu.full_dates.includes(iso)) return { ok: false, reason: 'full' };
-    if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(iso)) return { ok: false, reason: 'closed' };
     return { ok: true, reason: 'available' };
   }
 
@@ -904,7 +898,7 @@
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
       const status = isDateAvailable(parseLocalDate(button.dataset.date));
       if (!status.ok) {
-        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', no_delivery: 'Aucune livraison n’est prévue ce jour-là.', full: 'Cette date est complète.', closed: 'Les commandes sont fermées pour ce menu.' };
+        const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', invalid: 'Cette date n’est pas disponible.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
         render();
         return;

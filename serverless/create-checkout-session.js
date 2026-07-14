@@ -36,17 +36,22 @@ function minimumDeliveryDate(noticeHours) {
   return minimum;
 }
 
-function isDeliveryDateAllowed(deliveryDate, settings, menu) {
+function isDeliveryDateAllowed(deliveryDate, settings) {
   const date = new Date(`${deliveryDate}T12:00:00-04:00`);
   if (Number.isNaN(date.getTime())) return false;
-  if (menu.active === false) return false;
 
   const noticeHours = Number(settings.ordering?.order_notice_hours || 48);
   if (date < minimumDeliveryDate(noticeHours)) return false;
   const weekday = WEEKDAYS[date.getDay()];
   if (WEEKEND_DAYS.has(weekday)) return false;
-  if (Array.isArray(menu.full_dates) && menu.full_dates.includes(deliveryDate)) return false;
-  if (Array.isArray(menu.closed_dates) && menu.closed_dates.includes(deliveryDate)) return false;
+  return true;
+}
+
+function isMenuOrderingOpen(menu, now = new Date()) {
+  if (menu.active === false) return false;
+  const time = now.getTime();
+  if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return false;
+  if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return false;
   return true;
 }
 
@@ -61,7 +66,8 @@ function validateOrder(payload, data) {
   if (!requestItems.length) errors.push('Le panier est vide.');
   if (!payload.customer?.name || !payload.customer?.phone) errors.push('Le nom et le téléphone sont requis.');
   if (!allowedCities.has(normalizeCity(payload.customer?.city))) errors.push('Ville de livraison non autorisée.');
-  if (!isDeliveryDateAllowed(payload.delivery_date, data.settings, data.menus.current_menu)) errors.push('Date de livraison non disponible.');
+  if (!isMenuOrderingOpen(data.menus.current_menu)) errors.push('Les commandes pour ce menu sont fermées.');
+  if (!isDeliveryDateAllowed(payload.delivery_date, data.settings)) errors.push('Date de livraison non disponible.');
   if (!selectedWindows[0] || !selectedWindows[1]) errors.push('Deux plages horaires de livraison sont requises.');
   else if (selectedWindows[0] === selectedWindows[1]) errors.push('Les deux plages horaires de livraison doivent être différentes.');
   else if (deliveryWindows.length && selectedWindows.some((window) => !deliveryWindows.includes(window))) errors.push('Plage horaire de livraison invalide.');
