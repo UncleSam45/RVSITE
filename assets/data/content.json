@@ -1,13 +1,13 @@
 {
   "seo": {
-    "title": "La cuisine de Rosalie | Menu actuel",
-    "description": "Menu actuel: plats faits maison dès 6 $, grand format à 12 $, format familial à 23 $, soupes, salades, sous-marins et muffins."
+    "title": "La cuisine de Rosalie | Nouveau menu lundi",
+    "description": "Le menu actuel est terminé. La cuisine de Rosalie sera de retour lundi avec un nouveau menu de plats faits maison."
   },
   "home": {
     "headline": "Repas faits maison livrés dans votre secteur",
-    "subheadline": "Menu actuel, portions Petit / Grand / Familial, commandes 72h à l’avance.",
-    "primary_cta": "Voir le menu de la semaine",
-    "secondary_cta": "Planifier ma commande"
+    "subheadline": "Le menu actuel est terminé. Nous serons de retour lundi avec un nouveau menu.",
+    "primary_cta": "Voir les créations maison",
+    "secondary_cta": "Nous contacter"
   },
   "business_rules_to_confirm": [
     "Minimum de commande exact: 30 $ ou 35 $?",
