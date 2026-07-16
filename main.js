@@ -208,6 +208,7 @@
 
   function currentMenuIds() {
     const menu = getCurrentMenu();
+    if (menu.active === false) return new Set();
     return new Set([...(menu.item_ids || []), ...(menu.extra_ids || [])]);
   }
 
@@ -297,7 +298,7 @@
     const status = getMenuOrderStatus();
     if (status.state === 'before') return 'Les commandes pour ce menu ouvriront vendredi 10 juillet à 1h.';
     if (status.state === 'after') return 'Les commandes pour ce menu sont maintenant fermées.';
-    if (status.state === 'inactive') return 'Les commandes pour ce menu sont maintenant fermées.';
+    if (status.state === 'inactive') return 'Le menu est terminé. Nous serons de retour lundi avec un nouveau menu.';
     return 'Commandes ouvertes pour ce menu jusqu’au 15 juillet.';
   }
 
@@ -609,7 +610,8 @@
   function homeHtml() {
     const menu = getCurrentMenu();
     const rules = getSettingRules();
-    const currentAvailableItems = getMenuItems().filter((item) => item.available !== false);
+    const menuIsActive = menu.active !== false;
+    const currentAvailableItems = menuIsActive ? getMenuItems().filter((item) => item.available !== false) : [];
     const featuredItems = currentAvailableItems.filter((item) => item.featured === true);
     const menuItems = (featuredItems.length ? featuredItems : currentAvailableItems).slice(0, 3);
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
@@ -619,20 +621,20 @@
     return `
       <section class="hero container">
         <div>
-          <div class="kicker">Menu de la semaine • Livraison locale</div>
+          <div class="kicker">${menuIsActive ? 'Menu de la semaine • Livraison locale' : 'À bientôt • Livraison locale'}</div>
           <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison livrés dans votre secteur')}</h1>
           <p class="lead">${escapeHtml(state.data.content.home?.subheadline || 'Une cuisine simple, généreuse et préparée avec soin pour simplifier vos repas de semaine.')}</p>
-          <div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button></div>
-          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span></div>
+          <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Nouveau menu lundi</span>'}</div>
         </div>
         <div class="hero-visual">
           <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(activeHeroItem?.title || menu.title || 'Menu de la semaine')}</strong><span>${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client</span></div>
+          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Nouveau menu lundi')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Le menu actuel est terminé. Revenez lundi pour découvrir les nouveaux plats.'}</span></div>
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
-        <span><strong>Période:</strong> ${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}</span>
-        <span><strong>Préavis:</strong> ${orderNoticeText(false)}</span>
+        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}` : 'Nouveau menu lundi'}</span>
+        <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> ${menuIsActive ? orderNoticeText(false) : 'Commandes fermées'}</span>
         <span><strong>Zones:</strong> ${escapeHtml(zones || 'à confirmer')}</span>
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>
       </section>
@@ -648,7 +650,7 @@
         <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
       </section>
       <section class="section container panel catering-callout"><div><div class="kicker">Demandes spéciales</div><h2>Vous avez vu un plat qui vous intéresse?</h2><p>Écrivez-nous pour une demande spéciale ou un événement. Les créations passées de la galerie peuvent inspirer votre prochaine commande traiteur.</p></div><button class="btn btn-primary" data-page="contact">Faire une demande</button></section>
-      <section class="section container panel final-cta"><div class="kicker">Prêt à commander?</div><h2>Voir le menu de la semaine</h2><p>Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.</p><div class="cta-row" style="justify-content:center"><button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button></div></section>`;
+      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Un nouveau menu arrive lundi'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Le menu du 10 juillet est terminé. Revenez lundi pour découvrir les nouveaux plats.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
   }
 
   function itemImageHtml(item) {
@@ -682,9 +684,8 @@
             <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p><p class="notice ${isOpen ? 'success-note' : ''}">${menuOrderStatusMessage()}</p>
             <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Familial</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
           </section>
-          ${!menu.active ? `<section class="section menu-empty">Le prochain menu arrive bientôt.</section>` : ''}${menu.active && !orderStatus.open ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
-          ${menuSectionHtml('Plats principaux', getMenuItems('items'))}
-          ${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}
+          ${!menu.active ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${menu.active && !orderStatus.open ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${menu.active && promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
+          ${menu.active ? `${menuSectionHtml('Plats principaux', getMenuItems('items'))}${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}` : ''}
         </div>
         ${cartPanelHtml(true)}
       </div>`;
@@ -744,6 +745,9 @@
   }
 
   function commanderHtml() {
+    if (!getMenuOrderStatus().open) {
+      return `<section class="container section panel"><div class="kicker">Commandes fermées</div><h1 class="page-title">Nouveau menu lundi</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
+    }
     normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();

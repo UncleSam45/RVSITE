@@ -8,7 +8,7 @@
       "portion": "petit",
       "original_price": 8,
       "active_price": 6,
-      "enabled": true
+      "enabled": false
     }
   ]
 }

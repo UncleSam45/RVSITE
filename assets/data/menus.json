@@ -1,12 +1,12 @@
 {
   "current_menu": {
-    "active": true,
-    "title": "Menu du 10 juillet",
-    "description": "Menu disponible pour commandes planifiées.",
+    "active": false,
+    "title": "Nouveau menu lundi",
+    "description": "Le menu du 10 juillet est terminé. Nous serons de retour lundi avec un nouveau menu.",
     "start_date": "2026-07-10",
     "end_date": "2026-07-15",
     "order_open_at": "2026-07-10T01:00:00-04:00",
-    "order_close_at": "2026-07-15T23:59:59-04:00",
+    "order_close_at": "2026-07-15T12:00:00-04:00",
     "item_ids": [
       "poulet_parmesan_spaghetti_20260710",
       "pate_chinois_20260710",
