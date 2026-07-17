@@ -285,21 +285,43 @@
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
-  function getMenuOrderStatus(now = new Date()) {
-    const menu = getCurrentMenu();
-    if (menu.active === false) return { open: false, state: 'inactive' };
-    const time = now.getTime();
-    if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return { open: false, state: 'before' };
-    if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
-    return { open: true, state: 'open' };
+  function getMontrealNow(now = new Date()) {
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(now).reduce((result, part) => ({ ...result, [part.type]: part.value }), {});
+    return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day), hour: Number(parts.hour), minute: Number(parts.minute), second: Number(parts.second), weekday: new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day))).getUTCDay(), timestamp: now.getTime() };
   }
 
-  function menuOrderStatusMessage() {
-    const status = getMenuOrderStatus();
-    if (status.state === 'before') return 'Les commandes pour ce menu ouvriront vendredi 10 juillet à 1h.';
-    if (status.state === 'after') return 'Les commandes pour ce menu sont maintenant fermées.';
-    if (status.state === 'inactive') return 'Le menu est terminé. Nous serons de retour vendredi 17 juillet avec un nouveau menu.';
-    return 'Commandes ouvertes pour ce menu jusqu’au 15 juillet.';
+  function getCurrentOrderWindow(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const weekStart = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day - ((montreal.weekday + 2) % 7), 1));
+    const weekEnd = new Date(weekStart); weekEnd.setUTCDate(weekEnd.getUTCDate() + 5); weekEnd.setUTCHours(12);
+    return { opened_at: weekStart, closes_at: weekEnd };
+  }
+
+  function getNextOrderOpening(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const daysUntilFriday = (5 - montreal.weekday + 7) % 7;
+    const opening = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day + daysUntilFriday, 1));
+    if (daysUntilFriday === 0 && (montreal.hour > 1 || (montreal.hour === 1 && (montreal.minute > 0 || montreal.second > 0)))) opening.setUTCDate(opening.getUTCDate() + 7);
+    return opening;
+  }
+
+  function isOrderingOpen(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const minuteOfWeek = montreal.weekday * 1440 + montreal.hour * 60 + montreal.minute;
+    return minuteOfWeek >= (5 * 1440 + 60) || minuteOfWeek < (3 * 1440 + 720);
+  }
+
+  function getMenuOrderStatus(now = new Date()) {
+    if (getCurrentMenu().active === false) return { open: false, state: 'inactive' };
+    return isOrderingOpen(now) ? { open: true, state: 'open' } : { open: false, state: 'closed' };
+  }
+
+  function menuOrderStatusMessage(now = new Date()) {
+    if (getCurrentMenu().active === false) return 'Le menu de la semaine est présentement indisponible.';
+    if (isOrderingOpen(now)) return 'Commandes ouvertes. Commandez avant mercredi à midi.';
+    const opening = getNextOrderOpening(now);
+    return `Commandes fermées. Réouverture ${formatDate(toLocalIsoDate(opening))} à 1 h.`;
   }
 
   function deliveryWindows() {
@@ -310,57 +332,64 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function minimumDeliveryDate(noticeHours) {
-    const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
-    const today = businessToday();
-    const minimum = new Date(today);
-    minimum.setDate(minimum.getDate() + noticeDays);
-    return minimum;
+  function getMinimumDeliveryTimestamp(now = new Date()) {
+    return new Date(now.getTime() + Number(getSettingRules().order_notice_hours || 72) * 60 * 60 * 1000);
   }
 
-  function isWeekendDeliveryDay(date) {
-    return WEEKEND_DAYS.has(WEEKDAYS[date.getDay()]);
+  function isDeliveryWeekday(date) {
+    const weekday = WEEKDAYS[new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()];
+    return (getSettingRules().delivery_days || DEFAULT_DELIVERY_DAYS).includes(weekday);
   }
 
-  function deliveryDayLabels() {
-    return DEFAULT_DELIVERY_DAYS.map((day) => WEEKDAY_LABELS[day] || day).join(', ');
+  function deliveryCandidateTimestamp(isoDate) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ''));
+    if (!match) return null;
+    // 13 h Montréal is the configured first delivery time and is shared with the Worker.
+    const [year, month, day] = match.slice(1).map(Number); const cutoff = String(getSettingRules().delivery_cutoff_time || '13:00').split(':').map(Number);
+    const pseudo = Date.UTC(year, month - 1, day, cutoff[0], cutoff[1] || 0);
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const offset = (value) => { const name = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'shortOffset' }).formatToParts(new Date(value)).find((part) => part.type === 'timeZoneName')?.value || 'GMT-0'; const m = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(name); return m ? (m[1] === '+' ? 1 : -1) * (Number(m[2]) * 60 + Number(m[3] || 0)) * 60000 : 0; };
+    let timestamp = pseudo - offset(pseudo); timestamp = pseudo - offset(timestamp);
+    return new Date(timestamp);
   }
 
-  function isDateAvailable(date) {
-    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return { ok: false, reason: 'invalid' };
-    const rules = getSettingRules();
-    const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = minimumDeliveryDate(noticeHours);
-    const deliveryCutoff = parseLocalDate(date);
-    if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
-    if (isWeekendDeliveryDay(date)) return { ok: false, reason: 'weekend' };
+  function isDateAvailable(dateLike, now = new Date()) {
+    const iso = typeof dateLike === 'string' ? dateLike : toLocalIsoDate(dateLike);
+    const candidate = deliveryCandidateTimestamp(iso);
+    if (!candidate || Number.isNaN(candidate.getTime())) return { ok: false, reason: 'invalid' };
+    if (candidate < getMinimumDeliveryTimestamp(now)) return { ok: false, reason: 'too_soon' };
+    const [year, month, day] = iso.split('-').map(Number);
+    if (!isDeliveryWeekday({ year, month, day })) return { ok: false, reason: 'weekend' };
+    const menu = getCurrentMenu();
+    if ((menu.closed_dates || []).includes(iso)) return { ok: false, reason: 'closed' };
+    if ((menu.full_dates || []).includes(iso)) return { ok: false, reason: 'full' };
     return { ok: true, reason: 'available' };
   }
 
-  function firstAvailableDate() {
-    const rules = getSettingRules();
-    const date = minimumDeliveryDate(Number(rules.order_notice_hours || 48));
-    date.setHours(12, 0, 0, 0);
-    for (let i = 0; i < 45; i += 1) {
-      const candidate = new Date(date);
-      candidate.setDate(date.getDate() + i);
-      if (isDateAvailable(candidate).ok) return toLocalIsoDate(candidate);
-    }
+  function getFirstAvailableDeliveryDate(now = new Date()) {
+    const montreal = getMontrealNow(now); const start = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
+    for (let i = 0; i < 45; i += 1) { const candidate = new Date(start); candidate.setUTCDate(start.getUTCDate() + i); const iso = candidate.toISOString().slice(0, 10); if (isDateAvailable(iso, now).ok) return iso; }
     return '';
   }
+
+  function firstAvailableDate() { return getFirstAvailableDeliveryDate(); }
 
   function validateOrder() {
     const errors = [];
     const rules = getSettingRules();
     const totals = cartTotals();
     const customer = state.cart.customer;
-    if (!getMenuOrderStatus().open) errors.push(menuOrderStatusMessage());
+    if (!isOrderingOpen()) errors.push('Les commandes sont actuellement fermées. Elles rouvriront vendredi à 1 h.');
     if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
+    const currentIds = currentMenuIds();
+    if (state.cart.items.some((line) => { const item = getItemById(line.itemId); return !currentIds.has(line.itemId) || !item || item.available === false || !Object.hasOwn(item.pricing || {}, line.portion); })) errors.push('Un article de votre panier n’est plus disponible dans le menu actuel.');
     if (totals.subtotal < Number(rules.minimum_order || 0)) errors.push(`Minimum de commande: ${formatCurrency(rules.minimum_order || 0)}.`);
     if (!state.cart.deliveryDate) errors.push('Choisissez une date de livraison disponible.');
     else {
-      const dateStatus = isDateAvailable(parseLocalDate(state.cart.deliveryDate));
-      if (!dateStatus.ok && dateStatus.reason === 'too_soon') errors.push('Cette date ne respecte pas le délai minimal de préparation de 72h.');
+      const dateStatus = isDateAvailable(state.cart.deliveryDate);
+      if (!dateStatus.ok && dateStatus.reason === 'too_soon') errors.push('Cette date ne respecte pas le délai minimal de 72 heures.');
+      else if (!dateStatus.ok && dateStatus.reason === 'weekend') errors.push('La livraison n’est pas offerte le samedi ni le dimanche.');
+      else if (!dateStatus.ok && dateStatus.reason === 'full') errors.push('Cette date de livraison est complète.');
       else if (!dateStatus.ok) errors.push('Choisissez une date de livraison disponible.');
     }
     if (!customer.name.trim()) errors.push('Le nom complet est requis.');
@@ -633,8 +662,8 @@
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
-        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}` : 'Nouveau menu vendredi 17 juillet'}</span>
-        <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> ${menuIsActive ? orderNoticeText(false) : 'Commandes fermées'}</span>
+        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuOrderStatusMessage()}</span>
+        <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> Les commandes doivent être placées au moins 72 heures à l’avance. La livraison n’est pas offerte le samedi ni le dimanche.</span>
         <span><strong>Zones:</strong> ${escapeHtml(zones || 'à confirmer')}</span>
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>
       </section>
@@ -705,7 +734,7 @@
         <span class="badge">${item.available === false ? 'De retour bientôt' : escapeHtml(item.category)}</span>
         <h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>
         <div class="portion-grid" role="group" aria-label="Portions pour ${escapeHtml(item.title)}">
-          ${portions.map((portion) => `<button class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}</small></button>`).join('')}
+          ${portions.map((portion) => { const compare = item.compare_at_pricing?.[portion.key]; return `<button class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}${compare ? ` <s>Habituellement ${formatCurrency(compare)}</s>` : ''}</small></button>`; }).join('')}
         </div>
         <div class="item-actions">
           <div class="qty" aria-label="Quantité"><button data-menu-qty="${item.id}:-1" aria-label="Réduire">−</button><span>${qty}</span><button data-menu-qty="${item.id}:1" aria-label="Augmenter">+</button></div>
@@ -737,7 +766,7 @@
   function normalizeDeliveryDate() {
     const first = firstAvailableDate();
     if (!first) return;
-    const selectedStatus = state.cart.deliveryDate ? isDateAvailable(parseLocalDate(state.cart.deliveryDate)) : { ok: false };
+    const selectedStatus = state.cart.deliveryDate ? isDateAvailable(state.cart.deliveryDate) : { ok: false };
     if (!state.cart.deliveryDate || !selectedStatus.ok) {
       state.cart.deliveryDate = first;
       saveCart();
@@ -763,11 +792,11 @@
 
   function dateSelectorHtml() {
     const first = firstAvailableDate();
-    const start = first ? parseLocalDate(first) : new Date();
+    const montreal = getMontrealNow(); const start = first ? new Date(`${first}T00:00:00Z`) : new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
     const buttons = [];
     for (let i = 0; i < 14; i += 1) {
       const date = new Date(start); date.setDate(start.getDate() + i);
-      const iso = toLocalIsoDate(date);
+      const iso = date.toISOString().slice(0, 10);
       const status = isDateAvailable(date);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
@@ -816,7 +845,7 @@
   function livraisonHtml() {
     const rules = getSettingRules();
     const zones = getEnabledZones();
-    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Nous desservons plusieurs municipalités.</h1><p>Les commandes doivent être placées 72h à l’avance afin de garantir la préparation.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
+    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Nous desservons plusieurs municipalités.</h1><p>Les commandes doivent être placées au moins 72 heures à l’avance. La livraison n’est pas offerte le samedi ni le dimanche.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
   }
 
   function contactHtml() {
@@ -860,7 +889,7 @@
   }
 
   function footerHtml() {
-    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>72h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
+    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>72 h à l’avance<br>Du vendredi à 1 h au mercredi à midi<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
   }
 
   function mobileCartBarHtml() {
@@ -900,7 +929,7 @@
       const [itemId, portion] = button.dataset.remove.split(':'); removeLine(itemId, portion);
     }));
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
-      const status = isDateAvailable(parseLocalDate(button.dataset.date));
+      const status = isDateAvailable(button.dataset.date);
       if (!status.ok) {
         const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', invalid: 'Cette date n’est pas disponible.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
