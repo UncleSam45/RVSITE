@@ -608,14 +608,16 @@ class DataStore:
         item_ids = {item.get("id") for item in items}
         if not menu.get("title"):
             warnings.append("Le menu courant n’a pas de titre.")
-        if not menu.get("start_date") or not menu.get("end_date"):
-            warnings.append("Le menu courant doit avoir une date de début et de fin.")
+        cycle_start = menu.get("cycle_start_date")
+        if not cycle_start:
+            warnings.append("Le menu courant doit avoir une date de cycle (vendredi).")
         else:
             try:
-                if datetime.fromisoformat(menu["start_date"]) > datetime.fromisoformat(menu["end_date"]):
-                    warnings.append("La période du menu est invalide: début après la fin.")
+                cycle_date = datetime.fromisoformat(cycle_start)
+                if cycle_date.weekday() != 4:
+                    warnings.append("La date de cycle doit être un vendredi.")
             except ValueError:
-                warnings.append("Les dates du menu doivent être au format YYYY-MM-DD.")
+                warnings.append("La date de cycle doit être au format YYYY-MM-DD.")
         if menu.get("active", True) and not menu.get("item_ids"):
             warnings.append("Le menu actif n’a aucun plat principal sélectionné.")
         for selected_id in menu.get("item_ids", []) + menu.get("extra_ids", []):
@@ -778,7 +780,7 @@ def build_ui(store: DataStore) -> None:
                     ui.input("Facebook URL", value=business.get("facebook_url", "")).bind_value(business, "facebook_url")
                     ui.input("Messenger URL", value=business.get("messenger_url", "")).bind_value(business, "messenger_url")
                     ui.input("Main CTA text", value=store.payloads["content"].setdefault("home", {}).get("primary_cta", "Voir le menu de la semaine")).bind_value(store.payloads["content"]["home"], "primary_cta")
-                    ui.number("Order notice hours", value=ordering.get("order_notice_hours", 48), min=0, precision=0).bind_value(ordering, "order_notice_hours")
+                    ui.number("Order notice hours", value=ordering.get("order_notice_hours", 72), min=0, precision=0).bind_value(ordering, "order_notice_hours")
                     ui.number("Minimum order", value=ordering.get("minimum_order", 35), min=0, precision=0).bind_value(ordering, "minimum_order")
                     ui.number("Free delivery threshold", value=ordering.get("free_delivery_threshold", 35), min=0, precision=0).bind_value(ordering, "free_delivery_threshold")
                     ui.input("Hygiene/MAPAQ statement", value=trust.get("hygiene_statement", "")).classes("col-span-2").bind_value(trust, "hygiene_statement")
@@ -788,8 +790,8 @@ def build_ui(store: DataStore) -> None:
                     with ui.grid(columns=2).classes("w-full").style("gap:12px"):
                         ui.input("Menu title", value=menu.get("title", "")).bind_value(menu, "title")
                         ui.switch("Active", value=menu.get("active", True)).bind_value(menu, "active")
-                        ui.input("Start date", value=menu.get("start_date", ""), placeholder="YYYY-MM-DD").bind_value(menu, "start_date")
-                        ui.input("End date", value=menu.get("end_date", ""), placeholder="YYYY-MM-DD").bind_value(menu, "end_date")
+                        ui.input("Cycle start date (Friday)", value=menu.get("cycle_start_date", ""), placeholder="YYYY-MM-DD").bind_value(menu, "cycle_start_date")
+                        ui.label("Cette date identifie le vendredi du menu et empêche un ancien menu de rouvrir.").classes("muted")
                         ui.textarea("Description", value=menu.get("description", "")).classes("col-span-2").bind_value(menu, "description")
                     ui.select(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"], value=menu.get("delivery_days", []), multiple=True, label="Delivery days").classes("w-full").bind_value(menu, "delivery_days")
                     ui.select(item_options(), value=menu.get("item_ids", []), multiple=True, label="Active menu items").classes("w-full").bind_value(menu, "item_ids")
@@ -988,7 +990,7 @@ def build_ui(store: DataStore) -> None:
                 with ui.column().classes("card w-full").style("gap:12px"):
                     rules = delivery.setdefault("rules", {})
                     with ui.grid(columns=3).classes("w-full").style("gap:12px"):
-                        ui.number("Order notice hours", value=rules.get("order_notice_hours", 48), min=0, precision=0).bind_value(rules, "order_notice_hours")
+                        ui.number("Order notice hours", value=rules.get("order_notice_hours", 72), min=0, precision=0).bind_value(rules, "order_notice_hours")
                         ui.number("Minimum order", value=rules.get("minimum_order", 35), min=0, precision=0).bind_value(rules, "minimum_order")
                         ui.number("Free delivery threshold", value=rules.get("free_delivery_threshold", 35), min=0, precision=0).bind_value(rules, "free_delivery_threshold")
                     ui.input("Delivery notes", value=rules.get("scheduling_note", "")).classes("w-full").bind_value(rules, "scheduling_note")
