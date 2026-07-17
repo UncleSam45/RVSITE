@@ -7,6 +7,7 @@ Features:
 - Ensures `data/items.json` exists for editor compatibility.
 - Serves the public site directly from committed `assets/data/*.json` files.
 - Injects the frontend JavaScript into the page.
+- Forwards browser console output and uncaught JavaScript errors to this console.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ import socket
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 
 REQUIRED_PACKAGES = ["nicegui"]
@@ -46,6 +47,65 @@ window.webframe = {
 window.addEventListener('DOMContentLoaded', () => {
   window.webframe?.init();
 });
+"""
+
+# This script must be loaded before ``main.js``. It preserves the browser's native
+# console behaviour while mirroring console calls and uncaught errors to the local
+# NiceGUI process, where they are visible alongside the application's Python logs.
+CONSOLE_FORWARDER_JS = r"""
+(() => {
+  const endpoint = '/__frontend-console';
+  const maxMessageLength = 8_000;
+
+  const formatValue = (value) => {
+    if (value instanceof Error) return value.stack || `${value.name}: ${value.message}`;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'undefined') return 'undefined';
+    try {
+      const serialized = JSON.stringify(value, (key, item) =>
+        typeof item === 'bigint' ? `${item}n` : item,
+      );
+      return serialized === undefined ? String(value) : serialized;
+    } catch (_) {
+      return String(value);
+    }
+  };
+
+  const forward = (level, values) => {
+    const message = values.map(formatValue).join(' ').slice(0, maxMessageLength);
+    const payload = JSON.stringify({ level, message, page: window.location.href });
+
+    // keepalive lets messages survive a page navigation; fetch is used first so
+    // the request has a JSON content type and remains easy to inspect locally.
+    if (window.fetch) {
+      window.fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    } else if (navigator.sendBeacon) {
+      navigator.sendBeacon(endpoint, new Blob([payload], { type: 'application/json' }));
+    }
+  };
+
+  for (const level of ['log', 'info', 'warn', 'error', 'debug']) {
+    const nativeMethod = console[level];
+    console[level] = (...values) => {
+      nativeMethod.apply(console, values);
+      forward(level, values);
+    };
+  }
+
+  window.addEventListener('error', (event) => {
+    const error = event.error;
+    const location = event.filename ? ` (${event.filename}:${event.lineno}:${event.colno})` : '';
+    forward('error', [error || event.message || 'Uncaught JavaScript error', location]);
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    forward('error', ['Unhandled promise rejection:', event.reason]);
+  });
+})();
 """
 
 
@@ -108,8 +168,36 @@ def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
     )
 
 
+def format_frontend_console_message(payload: Any, client_host: str | None) -> str:
+    """Create a bounded, one-line message for browser output received by the API."""
+    if not isinstance(payload, dict):
+        return "[frontend:error] Invalid console payload received"
+
+    level = str(payload.get("level", "log")).lower()
+    if level not in {"log", "info", "warn", "error", "debug"}:
+        level = "log"
+
+    message = str(payload.get("message", "")).replace("\x00", "")[:8_000]
+    page = str(payload.get("page", ""))[:2_000]
+    source = f" [{client_host}]" if client_host else ""
+    page_suffix = f" <{page}>" if page else ""
+    return f"[frontend:{level}]{source}{page_suffix} {message}"
+
+
 def build_ui(port: int) -> None:
     from nicegui import app, ui
+    from fastapi import Request
+
+    @app.post("/__frontend-console")
+    async def receive_frontend_console(request: Request) -> dict[str, bool]:
+        """Print browser console messages posted by the injected forwarding script."""
+        try:
+            payload = await request.json()
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            payload = None
+        client_host = request.client.host if request.client else None
+        print(format_frontend_console_message(payload, client_host), flush=True)
+        return {"ok": True}
 
     ui.page_title("La cuisine de Rosalie | Menu de la semaine du 3 juillet au 9 juillet")
 
@@ -124,6 +212,7 @@ def build_ui(port: int) -> None:
     app_js_version = int(JS_FILE.stat().st_mtime) if JS_FILE.exists() else 0
     app.add_static_files('/assets', str(BASE_DIR / 'assets'))
     app.add_static_files('/static', str(BASE_DIR))
+    ui.add_body_html(f"<script>{CONSOLE_FORWARDER_JS}</script>")
     ui.add_body_html(f'<script src="/static/main.js?v={app_js_version}"></script>')
 
     ui.run(host="0.0.0.0", port=port, reload=False, show=False)
