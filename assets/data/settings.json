@@ -25,7 +25,8 @@
       "open_time": "01:00",
       "close_day": "wednesday",
       "close_time": "12:00"
-    }
+    },
+    "manual_override": null
   },
   "trust": {
     "hygiene_statement": "Formation en hygiène et salubrité alimentaires.",
