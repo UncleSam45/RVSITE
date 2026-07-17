@@ -36,8 +36,8 @@
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
   const PAGES = new Set(['home', 'menu', 'commander', 'traiteur', 'livraison', 'contact']);
   const DATE_REASONS = {
-    available: 'Disponible', too_soon: 'Trop tôt',
-    no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
+    available: 'Disponible', too_soon: 'Trop tôt', insufficient_delivery_windows: 'Plages insuffisantes',
+    not_configured_delivery_day: 'Jour non desservi', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
   };
 
   const state = {
@@ -60,6 +60,7 @@
     lastAddedKey: '',
     dateMessage: '',
     carousel: { index: 0, timer: null, paused: false, touchStartX: 0 },
+    business: { orderStatus: null, lastRefreshAt: null, refreshInProgress: null, scheduleTimer: null, dataRefreshTimer: null, configurationError: null },
   };
 
   function injectStyles() {
@@ -140,20 +141,6 @@
     if (dateLike instanceof Date) return new Date(dateLike.getFullYear(), dateLike.getMonth(), dateLike.getDate(), hour, 0, 0, 0);
     const [year, month, day] = String(dateLike || '').split('-').map(Number);
     return new Date(year, (month || 1) - 1, day || 1, hour, 0, 0, 0);
-  }
-
-  function businessToday(now = new Date()) {
-    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: timezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).formatToParts(now).reduce((acc, part) => {
-      acc[part.type] = part.value;
-      return acc;
-    }, {});
-    return parseLocalDate(`${parts.year}-${parts.month}-${parts.day}`, 0);
   }
 
   function toLocalIsoDate(date) {
@@ -422,6 +409,7 @@
     if (city && !allowed.includes(city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
     if (!state.cart.deliveryWindow1 || !state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires de livraison.');
     else if (state.cart.deliveryWindow1 === state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires différentes.');
+    else { const eligible = new Set(getEligibleDeliveryWindows(state.cart.deliveryDate).map((window) => window.id)); if (!eligible.has(state.cart.deliveryWindow1) || !eligible.has(state.cart.deliveryWindow2)) errors.push('Une plage horaire ne respecte plus le délai de livraison.'); }
     return errors;
   }
 
@@ -476,20 +464,20 @@
   }
 
   async function checkout() {
-    const errors = validateOrder();
-    if (errors.length) {
-      showToast(errors[0]);
-      render();
-      return;
-    }
-    const payload = buildCheckoutPayload();
+    if (state.checkoutInProgress) return;
+    state.checkoutInProgress = true;
+    render();
     try {
+      await refreshBusinessState({ renderPage: false });
+      const errors = validateOrder();
+      if (errors.length) { showToast(errors[0]); return; }
+      const payload = buildCheckoutPayload();
       const checkoutUrl = await requestCheckoutSession(payload);
       window.location.assign(checkoutUrl);
     } catch (error) {
       showToast(error.message || 'Impossible de créer la session de paiement.');
-      console.warn('Erreur de paiement:', error, payload);
-    }
+      console.warn('Erreur de paiement:', error);
+    } finally { state.checkoutInProgress = false; render(); }
   }
 
   function showToast(message) {
@@ -674,11 +662,11 @@
           <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison livrés dans votre secteur')}</h1>
           <p class="lead">${escapeHtml(state.data.content.home?.subheadline || 'Une cuisine simple, généreuse et préparée avec soin pour simplifier vos repas de semaine.')}</p>
           <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
-          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Nouveau menu vendredi 17 juillet</span>'}</div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Menu à venir</span>'}</div>
         </div>
         <div class="hero-visual">
           <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Nouveau menu vendredi 17 juillet')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Le menu actuel est terminé. Revenez vendredi 17 juillet pour découvrir les nouveaux plats.'}</span></div>
+          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu à venir')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Le prochain menu sera affiché dès sa publication.'}</span></div>
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
@@ -699,7 +687,7 @@
         <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
       </section>
       <section class="section container panel catering-callout"><div><div class="kicker">Demandes spéciales</div><h2>Vous avez vu un plat qui vous intéresse?</h2><p>Écrivez-nous pour une demande spéciale ou un événement. Les créations passées de la galerie peuvent inspirer votre prochaine commande traiteur.</p></div><button class="btn btn-primary" data-page="contact">Faire une demande</button></section>
-      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Un nouveau menu arrive vendredi 17 juillet'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Le menu du 10 juillet est terminé. Revenez vendredi 17 juillet pour découvrir les nouveaux plats.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
+      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Le prochain menu arrive bientôt'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Le prochain menu sera affiché dès sa publication.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
   }
 
   function itemImageHtml(item) {
@@ -804,7 +792,7 @@
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
         <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
       </div>
-      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
+      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">${state.checkoutInProgress ? 'Vérification de la commande…' : 'Passer au paiement sécurisé'}</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
     </div>`;
   }
 
@@ -841,7 +829,7 @@
 
   function deliveryPreferencesHtml() {
     const selected = (value, window) => value === window ? 'selected' : '';
-    const optionList = (value) => `<option value="">Choisir une plage</option>${deliveryWindows().map((window) => `<option value="${escapeHtml(window)}" ${selected(value, window)}>${escapeHtml(window)}</option>`).join('')}`;
+    const optionList = (value) => `<option value="">Choisir une plage</option>${(state.cart.deliveryDate ? getEligibleDeliveryWindows(state.cart.deliveryDate) : deliveryWindows()).map((window) => `<option value="${escapeHtml(window.id)}" ${selected(value, window.id)}>${escapeHtml(window.label)}</option>`).join('')}`;
     return `<div class="form-grid" style="margin-top:14px">
       <div class="field"><label for="deliveryWindow1">Première plage horaire disponible</label><select id="deliveryWindow1" data-cart-field="deliveryWindow1" required>${optionList(state.cart.deliveryWindow1)}</select></div>
       <div class="field"><label for="deliveryWindow2">Deuxième plage horaire disponible</label><select id="deliveryWindow2" data-cart-field="deliveryWindow2" required>${optionList(state.cart.deliveryWindow2)}</select></div>
@@ -982,13 +970,14 @@
 
   async function init() {
     injectStyles();
-    await clearLegacyBrowserCaches();
     loadCart();
-    state.data = await loadData();
-    setSeo(state.data.content);
+    await refreshBusinessState({ renderPage: false });
     const first = firstAvailableDate();
     if (!state.cart.deliveryDate && first) state.cart.deliveryDate = first;
     render();
+    startBusinessWatchers();
+    window.addEventListener('focus', () => refreshBusinessState());
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshBusinessState(); });
   }
 
   window.addEventListener('error', (event) => { console.error('[RVSITE runtime error]', { message: event.message, source: event.filename, line: event.lineno, column: event.colno, error: event.error, page: state.page }); });
