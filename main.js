@@ -285,21 +285,38 @@
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
+  function formatOrderTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return '';
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    return new Intl.DateTimeFormat('fr-CA', {
+      timeZone: timezone,
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: 'numeric',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).format(date).replace(' h 00', ' h');
+  }
+
   function getMenuOrderStatus(now = new Date()) {
     const menu = getCurrentMenu();
     if (menu.active === false) return { open: false, state: 'inactive' };
     const time = now.getTime();
     if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return { open: false, state: 'before' };
-    if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
+    if (menu.order_close_at && time >= new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
     return { open: true, state: 'open' };
   }
 
   function menuOrderStatusMessage() {
+    const menu = getCurrentMenu();
     const status = getMenuOrderStatus();
-    if (status.state === 'before') return 'Les commandes pour ce menu ouvriront vendredi 10 juillet à 1h.';
-    if (status.state === 'after') return 'Les commandes pour ce menu sont maintenant fermées.';
-    if (status.state === 'inactive') return 'Le menu est terminé. Nous serons de retour vendredi 17 juillet avec un nouveau menu.';
-    return 'Commandes ouvertes pour ce menu jusqu’au 15 juillet.';
+    if (status.state === 'before') return `Les commandes pour ce menu ouvriront ${formatOrderTimestamp(menu.order_open_at)} (heure de Montréal).`;
+    if (status.state === 'after') return 'Commandes fermées';
+    if (status.state === 'inactive') return 'Commandes fermées';
+    return `Commandes ouvertes jusqu’au ${formatOrderTimestamp(menu.order_close_at)} (heure de Montréal).`;
   }
 
   function deliveryWindows() {
@@ -745,8 +762,10 @@
   }
 
   function commanderHtml() {
-    if (!getMenuOrderStatus().open) {
-      return `<section class="container section panel"><div class="kicker">Commandes fermées</div><h1 class="page-title">Nouveau menu vendredi 17 juillet</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
+    const orderStatus = getMenuOrderStatus();
+    if (!orderStatus.open) {
+      const title = orderStatus.state === 'before' ? 'Commandes bientôt ouvertes' : 'Commandes fermées';
+      return `<section class="container section panel"><div class="kicker">${title}</div><h1 class="page-title">${title}</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
     }
     normalizeDeliveryDate();
     const errors = validateOrder();

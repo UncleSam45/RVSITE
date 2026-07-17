@@ -1,12 +1,12 @@
 {
   "current_menu": {
-    "active": false,
-    "title": "Nouveau menu vendredi 17 juillet",
-    "description": "Le menu du 10 juillet est terminé. Nous serons de retour vendredi 17 juillet avec un nouveau menu.",
-    "start_date": "2026-07-10",
-    "end_date": "2026-07-15",
-    "order_open_at": "2026-07-10T01:00:00-04:00",
-    "order_close_at": "2026-07-15T12:00:00-04:00",
+    "active": true,
+    "title": "Menu de la semaine",
+    "description": "Commandes ouvertes du vendredi 17 juillet à 1 h au mercredi 22 juillet à midi (heure de Montréal).",
+    "start_date": "2026-07-17",
+    "end_date": "2026-07-22",
+    "order_open_at": "2026-07-17T01:00:00-04:00",
+    "order_close_at": "2026-07-22T12:00:00-04:00",
     "item_ids": [
       "poulet_parmesan_spaghetti_20260710",
       "pate_chinois_20260710",
