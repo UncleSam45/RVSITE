@@ -59,7 +59,7 @@ The workflow also verifies the deploy artifact before upload. It checks that:
 
 - `_site/CNAME` contains `lacuisinederosalie.ca`
 - `_site/index.html` contains `Chargement de La cuisine de Rosalie`
-- `_site/index.html` contains the cache-busted script reference `main.js?v=20260714-delivery-weekdays-v5`
+- `_site/index.html` contains a cache-busted `main.js?v=…` script reference
 
 If GitHub Actions has stale runs, the workflow is configured with `cancel-in-progress: true` so newer runs cancel older queued/in-progress runs.
 
