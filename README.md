@@ -30,6 +30,10 @@ Run the local preview with:
 python main.py
 ```
 
+When using this preview, browser `console.log`, `console.info`, `console.warn`,
+and `console.error` messages from `main.js`, plus uncaught JavaScript errors and
+unhandled promise rejections, are printed in the terminal running `main.py`.
+
 The local NiceGUI preview is separate from the static GitHub Pages deployment. The live `.ca` site is deployed from the static artifact prepared by `.github/workflows/pages.yml`.
 
 For a quick static preview, you can also run:
