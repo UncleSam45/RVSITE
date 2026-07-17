@@ -35,8 +35,8 @@
   };
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
   const DATE_REASONS = {
-    available: 'Disponible', too_soon: 'Trop tôt',
-    no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
+    available: 'Disponible', too_soon: 'Trop tôt', insufficient_delivery_windows: 'Plages insuffisantes',
+    not_configured_delivery_day: 'Jour non desservi', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
   };
 
   const state = {
@@ -59,6 +59,7 @@
     lastAddedKey: '',
     dateMessage: '',
     carousel: { index: 0, timer: null, paused: false, touchStartX: 0 },
+    business: { orderStatus: null, lastRefreshAt: null, refreshInProgress: null, scheduleTimer: null, dataRefreshTimer: null, configurationError: null },
   };
 
   function injectStyles() {
@@ -139,20 +140,6 @@
     if (dateLike instanceof Date) return new Date(dateLike.getFullYear(), dateLike.getMonth(), dateLike.getDate(), hour, 0, 0, 0);
     const [year, month, day] = String(dateLike || '').split('-').map(Number);
     return new Date(year, (month || 1) - 1, day || 1, hour, 0, 0, 0);
-  }
-
-  function businessToday(now = new Date()) {
-    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: timezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).formatToParts(now).reduce((acc, part) => {
-      acc[part.type] = part.value;
-      return acc;
-    }, {});
-    return parseLocalDate(`${parts.year}-${parts.month}-${parts.day}`, 0);
   }
 
   function toLocalIsoDate(date) {
@@ -275,8 +262,11 @@
     render();
   }
 
+  const PAGES = new Set(['home', 'menu', 'commander', 'traiteur', 'livraison', 'contact']);
   function setPage(page) {
+    if (!PAGES.has(page)) return;
     state.page = page;
+    window.location.hash = page === 'home' ? '' : `#${page}`;
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -285,101 +275,43 @@
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
-  function getMontrealNow(now = new Date()) {
-    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
-    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(now).reduce((result, part) => ({ ...result, [part.type]: part.value }), {});
-    return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day), hour: Number(parts.hour), minute: Number(parts.minute), second: Number(parts.second), weekday: new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day))).getUTCDay(), timestamp: now.getTime() };
+  function getBusinessTimeParts(now = new Date()) {
+    const timezone = state.data?.settings?.ordering?.timezone;
+    if (timezone !== 'America/Toronto') return null;
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(now).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+    const weekday = WEEKDAYS[new Date(Date.UTC(+p.year, +p.month - 1, +p.day)).getUTCDay()];
+    return { year:+p.year, month:+p.month, day:+p.day, hour:+p.hour, minute:+p.minute, second:+p.second, weekday };
   }
-
-  function getCurrentOrderWindow(now = new Date()) {
-    const montreal = getMontrealNow(now);
-    const weekStart = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day - ((montreal.weekday + 2) % 7), 1));
-    const weekEnd = new Date(weekStart); weekEnd.setUTCDate(weekEnd.getUTCDate() + 5); weekEnd.setUTCHours(12);
-    return { opened_at: weekStart, closes_at: weekEnd };
-  }
-
-  function getNextOrderOpening(now = new Date()) {
-    const montreal = getMontrealNow(now);
-    const daysUntilFriday = (5 - montreal.weekday + 7) % 7;
-    const opening = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day + daysUntilFriday, 1));
-    if (daysUntilFriday === 0 && (montreal.hour > 1 || (montreal.hour === 1 && (montreal.minute > 0 || montreal.second > 0)))) opening.setUTCDate(opening.getUTCDate() + 7);
-    return opening;
-  }
-
-  function isOrderingOpen(now = new Date()) {
-    const montreal = getMontrealNow(now);
-    const minuteOfWeek = montreal.weekday * 1440 + montreal.hour * 60 + montreal.minute;
-    return minuteOfWeek >= (5 * 1440 + 60) || minuteOfWeek < (3 * 1440 + 720);
-  }
-
+  function getBusinessCalendarDate(now = new Date()) { const p = getBusinessTimeParts(now); return p && `${p.year}-${String(p.month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`; }
+  function getOrderingCycle(now = new Date()) { const p = getBusinessTimeParts(now); if (!p) return ''; const d = new Date(Date.UTC(p.year,p.month-1,p.day-((WEEKDAYS.indexOf(p.weekday)-5+7)%7))); return d.toISOString().slice(0,10); }
+  function validOrderingConfiguration() { const o=state.data?.settings?.ordering, w=o?.weekly_order_window; return o?.timezone==='America/Toronto' && Number(o.order_notice_hours)===72 && w?.open_day==='friday' && w?.open_time==='01:00' && w?.close_day==='wednesday' && w?.close_time==='12:00' && [null,'open','closed'].includes(o.manual_override ?? null); }
+  function isInsideWeeklyOrderWindow(now = new Date()) { const p=getBusinessTimeParts(now); if(!p) return false; const minute=p.hour*60+p.minute; return ['saturday','sunday','monday','tuesday'].includes(p.weekday)||(p.weekday==='friday'&&minute>=60)||(p.weekday==='wednesday'&&minute<720); }
   function getMenuOrderStatus(now = new Date()) {
-    if (getCurrentMenu().active === false) return { open: false, state: 'inactive' };
-    return isOrderingOpen(now) ? { open: true, state: 'open' } : { open: false, state: 'closed' };
+    if (!validOrderingConfiguration()) return {open:false,reason:'invalid_configuration'};
+    const override=state.data.settings.ordering.manual_override, menu=getCurrentMenu(), cycle=getOrderingCycle(now);
+    if (override==='closed') return {open:false,reason:'manual_override_closed'};
+    if (override==='open') return {open:true,reason:'manual_override_open',cycle_start_date:cycle};
+    if (menu.active!==true) return {open:false,reason:'menu_inactive'};
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(menu.cycle_start_date||'') || menu.cycle_start_date!==cycle) return {open:false,reason:'menu_cycle_mismatch'};
+    return {open:isInsideWeeklyOrderWindow(now),reason:isInsideWeeklyOrderWindow(now)?'weekly_window_open':'weekly_window_closed',cycle_start_date:cycle};
   }
-
-  function menuOrderStatusMessage(now = new Date()) {
-    if (getCurrentMenu().active === false) return 'Le menu de la semaine est présentement indisponible.';
-    if (isOrderingOpen(now)) return 'Commandes ouvertes. Commandez avant mercredi à midi.';
-    const opening = getNextOrderOpening(now);
-    return `Commandes fermées. Réouverture ${formatDate(toLocalIsoDate(opening))} à 1 h.`;
-  }
-
-  function deliveryWindows() {
-    return state.data?.delivery?.delivery_windows || ['13h à 15h', '15h à 17h', '17h à 19h', '19h à 21h'];
-  }
-
-  function isValidEmail(value) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
-  }
-
-  function getMinimumDeliveryTimestamp(now = new Date()) {
-    return new Date(now.getTime() + Number(getSettingRules().order_notice_hours || 72) * 60 * 60 * 1000);
-  }
-
-  function isDeliveryWeekday(date) {
-    const weekday = WEEKDAYS[new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()];
-    return (getSettingRules().delivery_days || DEFAULT_DELIVERY_DAYS).includes(weekday);
-  }
-
-  function deliveryCandidateTimestamp(isoDate) {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ''));
-    if (!match) return null;
-    // 13 h Montréal is the configured first delivery time and is shared with the Worker.
-    const [year, month, day] = match.slice(1).map(Number); const cutoff = String(getSettingRules().delivery_cutoff_time || '13:00').split(':').map(Number);
-    const pseudo = Date.UTC(year, month - 1, day, cutoff[0], cutoff[1] || 0);
-    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
-    const offset = (value) => { const name = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'shortOffset' }).formatToParts(new Date(value)).find((part) => part.type === 'timeZoneName')?.value || 'GMT-0'; const m = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(name); return m ? (m[1] === '+' ? 1 : -1) * (Number(m[2]) * 60 + Number(m[3] || 0)) * 60000 : 0; };
-    let timestamp = pseudo - offset(pseudo); timestamp = pseudo - offset(timestamp);
-    return new Date(timestamp);
-  }
-
-  function isDateAvailable(dateLike, now = new Date()) {
-    const iso = typeof dateLike === 'string' ? dateLike : toLocalIsoDate(dateLike);
-    const candidate = deliveryCandidateTimestamp(iso);
-    if (!candidate || Number.isNaN(candidate.getTime())) return { ok: false, reason: 'invalid' };
-    if (candidate < getMinimumDeliveryTimestamp(now)) return { ok: false, reason: 'too_soon' };
-    const [year, month, day] = iso.split('-').map(Number);
-    if (!isDeliveryWeekday({ year, month, day })) return { ok: false, reason: 'weekend' };
-    const menu = getCurrentMenu();
-    if ((menu.closed_dates || []).includes(iso)) return { ok: false, reason: 'closed' };
-    if ((menu.full_dates || []).includes(iso)) return { ok: false, reason: 'full' };
-    return { ok: true, reason: 'available' };
-  }
-
-  function getFirstAvailableDeliveryDate(now = new Date()) {
-    const montreal = getMontrealNow(now); const start = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
-    for (let i = 0; i < 45; i += 1) { const candidate = new Date(start); candidate.setUTCDate(start.getUTCDate() + i); const iso = candidate.toISOString().slice(0, 10); if (isDateAvailable(iso, now).ok) return iso; }
-    return '';
-  }
-
-  function firstAvailableDate() { return getFirstAvailableDeliveryDate(); }
-
+  function menuOrderStatusMessage(now = new Date()) { const status=getMenuOrderStatus(now); if(status.open) return 'Commandes ouvertes jusqu’à mercredi à midi.'; if(['menu_inactive','menu_cycle_mismatch'].includes(status.reason)) return 'Le prochain menu n’est pas encore disponible.'; if(status.reason==='invalid_configuration') return 'La prise de commandes est temporairement indisponible.'; return 'Commandes fermées. Réouverture vendredi à 1 h.'; }
+  function deliveryWindows() { return (state.data?.delivery?.delivery_windows||[]).filter((w)=>w && w.enabled!==false && w.id && /^\d{2}:\d{2}$/.test(w.start_time||'')); }
+  function getMinimumDeliveryInstant(now = new Date()) { return new Date(now.getTime()+72*60*60*1000); }
+  function deliveryWindowInstant(date, window) { const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(date||''); if(!m||!window) return null; const [h,min]=window.start_time.split(':').map(Number), pseudo=Date.UTC(+m[1],+m[2]-1,+m[3],h,min); const offset=(v)=>{const z=new Intl.DateTimeFormat('en-US',{timeZone:'America/Toronto',timeZoneName:'shortOffset'}).formatToParts(new Date(v)).find(x=>x.type==='timeZoneName')?.value||'GMT';const x=/GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(z);return x?(x[1]==='+'?1:-1)*(+x[2]*60 + +(x[3]||0))*60000:0}; let v=pseudo-offset(pseudo);v=pseudo-offset(v);return new Date(v); }
+  function getEligibleDeliveryWindows(date, now = new Date()) { return deliveryWindows().filter((w)=>deliveryWindowInstant(date,w)?.getTime()>=getMinimumDeliveryInstant(now).getTime()); }
+  function isDateAvailable(iso, now = new Date()) { if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||'')) return {ok:false,reason:'invalid'}; const day=WEEKDAYS[new Date(`${iso}T12:00:00Z`).getUTCDay()], rules=state.data?.delivery?.rules||{}, menu=getCurrentMenu(); if(WEEKEND_DAYS.has(day))return {ok:false,reason:'weekend'}; if(!(rules.delivery_days||DEFAULT_DELIVERY_DAYS).includes(day))return {ok:false,reason:'not_configured_delivery_day'}; if((menu.closed_dates||[]).includes(iso))return {ok:false,reason:'closed'};if((menu.full_dates||[]).includes(iso))return {ok:false,reason:'full'};const windows=getEligibleDeliveryWindows(iso,now);return windows.length>=2?{ok:true,reason:'available',windows}:{ok:false,reason:windows.length?'insufficient_delivery_windows':'too_soon',windows}; }
+  function getFirstAvailableDeliveryDate(now = new Date()) { const today=getBusinessCalendarDate(now); if(!today)return ''; const start=new Date(`${today}T12:00:00Z`);for(let i=0;i<45;i++){const d=new Date(start);d.setUTCDate(start.getUTCDate()+i);const iso=d.toISOString().slice(0,10);if(isDateAvailable(iso,now).ok)return iso;}return ''; }
+  function firstAvailableDate(){return getFirstAvailableDeliveryDate();}
+  function normalizeCart() { if(!state.data)return; const ids=currentMenuIds(); state.cart.items=state.cart.items.flatMap((line)=>{const item=getItemById(line.itemId), portion=item&&getPortions(item).find(p=>p.key===line.portion),qty=Math.floor(Number(line.qty));return ids.has(line.itemId)&&item?.available!==false&&portion&&qty>0?[{...line,title:item.title,portionLabel:portion.label,price:portion.price,qty}]:[];}); const date=isDateAvailable(state.cart.deliveryDate); if(state.cart.deliveryDate&&!date.ok){state.cart.deliveryDate='';state.cart.deliveryWindow1='';state.cart.deliveryWindow2='';state.dateMessage='Votre date de livraison n’est plus disponible; veuillez en choisir une autre.';} const allowed=new Set(getEligibleDeliveryWindows(state.cart.deliveryDate).map(w=>w.id)); if(!allowed.has(state.cart.deliveryWindow1))state.cart.deliveryWindow1='';if(!allowed.has(state.cart.deliveryWindow2)||state.cart.deliveryWindow2===state.cart.deliveryWindow1)state.cart.deliveryWindow2=''; saveCart(); }
+  async function refreshBusinessState({renderPage=true}={}) { if(state.business.refreshInProgress)return state.business.refreshInProgress; state.business.refreshInProgress=(async()=>{try{const data=await loadData();state.data=data;state.business.configurationError=validOrderingConfiguration()?null:'Configuration de commandes invalide.';state.business.orderStatus=getMenuOrderStatus();state.business.lastRefreshAt=Date.now();normalizeCart();setSeo(data.content);if(renderPage)render();}catch(e){state.business.configurationError='Impossible de confirmer les données de commande.';state.business.orderStatus={open:false,reason:'invalid_configuration'};if(renderPage)render();throw e;}finally{state.business.refreshInProgress=null;}})();return state.business.refreshInProgress; }
+  function startBusinessWatchers(){clearTimeout(state.business.scheduleTimer);clearInterval(state.business.dataRefreshTimer);const delay=60*1000-(Date.now()%60000)+500;state.business.scheduleTimer=setTimeout(async()=>{await refreshBusinessState();startBusinessWatchers();},delay);state.business.dataRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshBusinessState();},5*60*1000);}
   function validateOrder() {
     const errors = [];
     const rules = getSettingRules();
     const totals = cartTotals();
     const customer = state.cart.customer;
-    if (!isOrderingOpen()) errors.push('Les commandes sont actuellement fermées. Elles rouvriront vendredi à 1 h.');
+    if (!getMenuOrderStatus().open || state.business.configurationError) errors.push(menuOrderStatusMessage());
     if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
     const currentIds = currentMenuIds();
     if (state.cart.items.some((line) => { const item = getItemById(line.itemId); return !currentIds.has(line.itemId) || !item || item.available === false || !Object.hasOwn(item.pricing || {}, line.portion); })) errors.push('Un article de votre panier n’est plus disponible dans le menu actuel.');
@@ -402,6 +334,7 @@
     if (customer.city && !allowed.includes(customer.city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
     if (!state.cart.deliveryWindow1 || !state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires de livraison.');
     else if (state.cart.deliveryWindow1 === state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires différentes.');
+    else { const eligible = new Set(getEligibleDeliveryWindows(state.cart.deliveryDate).map((window) => window.id)); if (!eligible.has(state.cart.deliveryWindow1) || !eligible.has(state.cart.deliveryWindow2)) errors.push('Une plage horaire ne respecte plus le délai de livraison.'); }
     return errors;
   }
 
@@ -456,20 +389,20 @@
   }
 
   async function checkout() {
-    const errors = validateOrder();
-    if (errors.length) {
-      showToast(errors[0]);
-      render();
-      return;
-    }
-    const payload = buildCheckoutPayload();
+    if (state.checkoutInProgress) return;
+    state.checkoutInProgress = true;
+    render();
     try {
+      await refreshBusinessState({ renderPage: false });
+      const errors = validateOrder();
+      if (errors.length) { showToast(errors[0]); return; }
+      const payload = buildCheckoutPayload();
       const checkoutUrl = await requestCheckoutSession(payload);
       window.location.assign(checkoutUrl);
     } catch (error) {
       showToast(error.message || 'Impossible de créer la session de paiement.');
-      console.warn('Erreur de paiement:', error, payload);
-    }
+      console.warn('Erreur de paiement:', error);
+    } finally { state.checkoutInProgress = false; render(); }
   }
 
   function showToast(message) {
@@ -493,14 +426,14 @@
     const { count } = cartTotals();
     return `
       <header class="topbar container" id="topbar">
-        <button class="brand" data-page="home" aria-label="Accueil La cuisine de Rosalie" style="border:0;background:transparent;cursor:pointer">
+        <button type="button" class="brand" data-page="home" aria-label="Accueil La cuisine de Rosalie" style="border:0;background:transparent;cursor:pointer">
           ${brandLogoHtml()}
           <span class="brand-copy"><span class="brand-name">${escapeHtml(state.data.settings.business.name || 'La cuisine de Rosalie')}</span><span class="brand-tagline">${escapeHtml(state.data.settings.business.tagline)}</span></span>
         </button>
-        <button class="mobile-menu" data-menu-toggle aria-expanded="false">Menu</button>
+        <button type="button" class="mobile-menu" data-menu-toggle aria-expanded="false">Menu</button>
         <nav class="nav" aria-label="Navigation principale">
-          ${nav.map(([id, label]) => `<button class="nav-btn" data-page="${id}" aria-current="${state.page === id}">${label}</button>`).join('')}
-          <button class="nav-btn cart-nav" data-page="commander" aria-current="${state.page === 'commander'}">Panier <span class="cart-badge">${count}</span></button>
+          ${nav.map(([id, label]) => `<button type="button" class="nav-btn" data-page="${id}" aria-current="${state.page === id}">${label}</button>`).join('')}
+          <button type="button" class="nav-btn cart-nav" data-page="commander" aria-current="${state.page === 'commander'}">Panier <span class="cart-badge">${count}</span></button>
         </nav>
       </header>`;
   }
@@ -579,7 +512,7 @@
                 <img class="showcase-image" src="${escapeHtml(slide.image)}" alt="${escapeHtml(slide.title || badge)}" loading="${index === 0 ? 'eager' : 'lazy'}" onerror="this.closest('.showcase-slide').classList.add('image-missing')">
                 <div class="showcase-overlay"></div>
                 <span class="showcase-badge">${escapeHtml(badge)}</span>
-                <div class="showcase-copy"><h3 class="showcase-title">${escapeHtml(slide.title)}</h3><p class="showcase-subtitle">${escapeHtml(slide.subtitle)}</p>${slide.cta_label && page ? `<button class="btn btn-primary" data-page="${escapeHtml(page)}" data-gallery-cta="${escapeHtml(slide.id)}">${escapeHtml(slide.cta_label)}</button>` : ''}</div>
+                <div class="showcase-copy"><h3 class="showcase-title">${escapeHtml(slide.title)}</h3><p class="showcase-subtitle">${escapeHtml(slide.subtitle)}</p>${slide.cta_label && page ? `<button type="button" class="btn btn-primary" data-page="${escapeHtml(page)}" data-gallery-cta="${escapeHtml(slide.id)}">${escapeHtml(slide.cta_label)}</button>` : ''}</div>
               </div>
             </article>`;
           }).join('')}
@@ -653,12 +586,12 @@
           <div class="kicker">${menuIsActive ? 'Menu de la semaine • Livraison locale' : 'À bientôt • Livraison locale'}</div>
           <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison livrés dans votre secteur')}</h1>
           <p class="lead">${escapeHtml(state.data.content.home?.subheadline || 'Une cuisine simple, généreuse et préparée avec soin pour simplifier vos repas de semaine.')}</p>
-          <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
-          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Nouveau menu vendredi 17 juillet</span>'}</div>
+          <div class="cta-row">${menuIsActive ? '<button type="button" class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button type="button" class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button type="button" class="btn btn-primary" data-page="menu">Voir le message</button><button type="button" class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Menu à venir</span>'}</div>
         </div>
         <div class="hero-visual">
           <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Nouveau menu vendredi 17 juillet')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Le menu actuel est terminé. Revenez vendredi 17 juillet pour découvrir les nouveaux plats.'}</span></div>
+          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu à venir')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Le prochain menu sera affiché dès sa publication.'}</span></div>
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
@@ -668,7 +601,7 @@
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>
       </section>
       ${menuItems.length ? `<section class="section container">
-        <div class="section-head"><div><div class="kicker">À commander maintenant</div><h2>Aperçu du menu actuel</h2><p>Items actifs et disponibles cette semaine. Cliquez pour voir toutes les portions, prix et options.</p></div><button class="btn btn-ghost" data-page="menu">Tout voir le menu</button></div>
+        <div class="section-head"><div><div class="kicker">À commander maintenant</div><h2>Aperçu du menu actuel</h2><p>Items actifs et disponibles cette semaine. Cliquez pour voir toutes les portions, prix et options.</p></div><button type="button" class="btn btn-ghost" data-page="menu">Tout voir le menu</button></div>
         <div class="grid grid-3">${menuItems.map((item) => itemPreviewHtml(item)).join('')}</div>
       </section>` : ''}
       ${galleryCarouselHtml()}
@@ -676,10 +609,10 @@
         ${['Choisissez vos plats', 'Sélectionnez Petit, Grand ou Familial', 'Planifiez votre livraison', 'Savourez vos repas faits maison'].map((text, index) => `<div class="card mini-card"><strong>${index + 1}. ${text}</strong><p>Un parcours simple, pensé pour commander rapidement sur téléphone.</p></div>`).join('')}
       </section>
       <section class="section container panel emotional-card">
-        <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
+        <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button type="button" class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
       </section>
-      <section class="section container panel catering-callout"><div><div class="kicker">Demandes spéciales</div><h2>Vous avez vu un plat qui vous intéresse?</h2><p>Écrivez-nous pour une demande spéciale ou un événement. Les créations passées de la galerie peuvent inspirer votre prochaine commande traiteur.</p></div><button class="btn btn-primary" data-page="contact">Faire une demande</button></section>
-      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Un nouveau menu arrive vendredi 17 juillet'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Le menu du 10 juillet est terminé. Revenez vendredi 17 juillet pour découvrir les nouveaux plats.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
+      <section class="section container panel catering-callout"><div><div class="kicker">Demandes spéciales</div><h2>Vous avez vu un plat qui vous intéresse?</h2><p>Écrivez-nous pour une demande spéciale ou un événement. Les créations passées de la galerie peuvent inspirer votre prochaine commande traiteur.</p></div><button type="button" class="btn btn-primary" data-page="contact">Faire une demande</button></section>
+      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Le prochain menu arrive bientôt'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Le prochain menu sera affiché dès sa publication.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button type="button" class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button type="button" class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button type="button" class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
   }
 
   function itemImageHtml(item) {
@@ -690,7 +623,7 @@
 
   function itemPreviewHtml(item) {
     const portions = getPortions(item);
-    return `<article class="card menu-card" style="grid-template-columns:1fr">${itemImageHtml(item)}<div class="menu-card-body"><span class="badge">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="chip-row">${portions.map((p) => `<span class="chip">${p.label} ${formatCurrency(p.price)}</span>`).join('')}</div><button class="btn btn-ghost" data-page="menu">Voir dans le menu</button></div></article>`;
+    return `<article class="card menu-card" style="grid-template-columns:1fr">${itemImageHtml(item)}<div class="menu-card-body"><span class="badge">${escapeHtml(item.category)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="chip-row">${portions.map((p) => `<span class="chip">${p.label} ${formatCurrency(p.price)}</span>`).join('')}</div><button type="button" class="btn btn-ghost" data-page="menu">Voir dans le menu</button></div></article>`;
   }
 
   function menuBannerHtml() {
@@ -734,11 +667,11 @@
         <span class="badge">${item.available === false ? 'De retour bientôt' : escapeHtml(item.category)}</span>
         <h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>
         <div class="portion-grid" role="group" aria-label="Portions pour ${escapeHtml(item.title)}">
-          ${portions.map((portion) => { const compare = item.compare_at_pricing?.[portion.key]; return `<button class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}${compare ? ` <s>Habituellement ${formatCurrency(compare)}</s>` : ''}</small></button>`; }).join('')}
+          ${portions.map((portion) => { const compare = item.compare_at_pricing?.[portion.key]; return `<button type="button" class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}${compare ? ` <s>Habituellement ${formatCurrency(compare)}</s>` : ''}</small></button>`; }).join('')}
         </div>
         <div class="item-actions">
           <div class="qty" aria-label="Quantité"><button data-menu-qty="${item.id}:-1" aria-label="Réduire">−</button><span>${qty}</span><button data-menu-qty="${item.id}:1" aria-label="Augmenter">+</button></div>
-          <button class="btn btn-primary ${state.lastAddedKey === `${item.id}:${selected}` ? 'added' : ''}" data-add="${item.id}" ${(item.available === false || !getMenuOrderStatus().open) ? 'disabled' : ''}>${state.lastAddedKey === `${item.id}:${selected}` ? 'Ajouté ✓' : 'Ajouter au panier'}</button>
+          <button type="button" class="btn btn-primary ${state.lastAddedKey === `${item.id}:${selected}` ? 'added' : ''}" data-add="${item.id}" ${(item.available === false || !getMenuOrderStatus().open) ? 'disabled' : ''}>${state.lastAddedKey === `${item.id}:${selected}` ? 'Ajouté ✓' : 'Ajouter au panier'}</button>
         </div>
       </div>
     </article>`;
@@ -755,12 +688,12 @@
       <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
       ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
       ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
-      ${includeButton ? `<button class="btn btn-primary" data-page="commander" ${!getMenuOrderStatus().open ? 'disabled' : ''} style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
+      ${includeButton ? `<button type="button" class="btn btn-primary" data-page="commander" style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
     </aside>`;
   }
 
   function cartLineHtml(line) {
-    return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
+    return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button type="button" class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
   }
 
   function normalizeDeliveryDate() {
@@ -774,8 +707,10 @@
   }
 
   function commanderHtml() {
-    if (!getMenuOrderStatus().open) {
-      return `<section class="container section panel"><div class="kicker">Commandes fermées</div><h1 class="page-title">Nouveau menu vendredi 17 juillet</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
+    const orderStatus = getMenuOrderStatus();
+    if (!orderStatus.open) {
+      const totals = cartTotals();
+      return `<div class="container checkout-grid"><section class="card step"><div class="kicker">Commandes fermées</div><h1 class="page-title">Votre panier</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><p class="notice">Votre panier est conservé. Vous pourrez compléter votre commande lors de la réouverture.</p>${cartPanelHtml(false)}</section><aside class="card cart-panel checkout-confirmation"><h2>Résumé</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div><button type="button" class="btn btn-secondary" data-page="menu" style="width:100%;margin-top:12px">Voir le menu</button></aside></div>`;
     }
     normalizeDeliveryDate();
     const errors = validateOrder();
@@ -786,19 +721,19 @@
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
         <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
       </div>
-      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
+      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button type="button" class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">${state.checkoutInProgress ? 'Vérification de la commande…' : 'Passer au paiement sécurisé'}</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
     </div>`;
   }
 
   function dateSelectorHtml() {
     const first = firstAvailableDate();
-    const montreal = getMontrealNow(); const start = first ? new Date(`${first}T00:00:00Z`) : new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
+    const businessDate = getBusinessCalendarDate(); const start = first ? new Date(`${first}T00:00:00Z`) : new Date(`${businessDate}T00:00:00Z`);
     const buttons = [];
     for (let i = 0; i < 14; i += 1) {
       const date = new Date(start); date.setDate(start.getDate() + i);
       const iso = date.toISOString().slice(0, 10);
-      const status = isDateAvailable(date);
-      buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
+      const status = isDateAvailable(iso);
+      buttons.push(`<button type="button" class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
     return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${deliveryDayLabels()}.</p>`;
   }
@@ -823,7 +758,7 @@
 
   function deliveryPreferencesHtml() {
     const selected = (value, window) => value === window ? 'selected' : '';
-    const optionList = (value) => `<option value="">Choisir une plage</option>${deliveryWindows().map((window) => `<option value="${escapeHtml(window)}" ${selected(value, window)}>${escapeHtml(window)}</option>`).join('')}`;
+    const optionList = (value) => `<option value="">Choisir une plage</option>${(state.cart.deliveryDate ? getEligibleDeliveryWindows(state.cart.deliveryDate) : deliveryWindows()).map((window) => `<option value="${escapeHtml(window.id)}" ${selected(value, window.id)}>${escapeHtml(window.label)}</option>`).join('')}`;
     return `<div class="form-grid" style="margin-top:14px">
       <div class="field"><label for="deliveryWindow1">Première plage horaire disponible</label><select id="deliveryWindow1" data-cart-field="deliveryWindow1" required>${optionList(state.cart.deliveryWindow1)}</select></div>
       <div class="field"><label for="deliveryWindow2">Deuxième plage horaire disponible</label><select id="deliveryWindow2" data-cart-field="deliveryWindow2" required>${optionList(state.cart.deliveryWindow2)}</select></div>
@@ -839,7 +774,7 @@
 
   function traiteurHtml() {
     const services = ['Événements familiaux', 'Petits groupes', 'Repas préparés', 'Plateaux / formats familiaux', 'Menus personnalisés'];
-    return `<section class="container hero"><div><div class="kicker">Traiteur & événements</div><h1>Des repas faits maison pour vos moments importants.</h1><p class="lead">Repas familiaux, événements privés, réunions et repas corporatifs: Rosalie peut préparer une proposition adaptée à votre groupe.</p><div class="quote-list">${services.map((service) => `<div class="quote-item">${service}</div>`).join('')}</div></div><div class="panel"><h2>Demander une soumission</h2><form class="form-grid" action="mailto:${escapeHtml(state.data.settings.business.email || state.data.settings.business.phone)}" method="post" enctype="text/plain"><div class="field"><label>Nom</label><input name="nom"></div><div class="field"><label>Téléphone / courriel</label><input name="contact"></div><div class="field"><label>Date de l’événement</label><input name="date" type="date"></div><div class="field"><label>Nombre de personnes</label><input name="personnes" type="number" min="1"></div><div class="field"><label>Ville</label><input name="ville"></div><div class="field"><label>Type d’événement</label><input name="type"></div><div class="field full"><label>Message</label><textarea name="message"></textarea></div><button class="btn btn-primary" type="submit">Demander une soumission</button></form></div></section>`;
+    return `<section class="container hero"><div><div class="kicker">Traiteur & événements</div><h1>Des repas faits maison pour vos moments importants.</h1><p class="lead">Repas familiaux, événements privés, réunions et repas corporatifs: Rosalie peut préparer une proposition adaptée à votre groupe.</p><div class="quote-list">${services.map((service) => `<div class="quote-item">${service}</div>`).join('')}</div></div><div class="panel"><h2>Demander une soumission</h2><form class="form-grid" action="mailto:${escapeHtml(state.data.settings.business.email || state.data.settings.business.phone)}" method="post" enctype="text/plain"><div class="field"><label>Nom</label><input name="nom"></div><div class="field"><label>Téléphone / courriel</label><input name="contact"></div><div class="field"><label>Date de l’événement</label><input name="date" type="date"></div><div class="field"><label>Nombre de personnes</label><input name="personnes" type="number" min="1"></div><div class="field"><label>Ville</label><input name="ville"></div><div class="field"><label>Type d’événement</label><input name="type"></div><div class="field full"><label>Message</label><textarea name="message"></textarea></div><button type="button" class="btn btn-primary" type="submit">Demander une soumission</button></form></div></section>`;
   }
 
   function livraisonHtml() {
@@ -894,7 +829,7 @@
 
   function mobileCartBarHtml() {
     const totals = cartTotals();
-    return `<div class="mobile-cart-bar ${totals.count ? '' : 'empty'}"><span>${totals.count} article${totals.count > 1 ? 's' : ''} • ${formatCurrency(totals.subtotal)}</span><button data-page="commander">Voir le panier</button></div>`;
+    return `<div class="mobile-cart-bar ${totals.count ? '' : 'empty'}"><span>${totals.count} article${totals.count > 1 ? 's' : ''} • ${formatCurrency(totals.subtotal)}</span><button type="button" data-page="commander">Voir le panier</button></div>`;
   }
 
   function render() {
@@ -906,7 +841,16 @@
   }
 
   function bindEvents(root) {
-    root.querySelectorAll('[data-page]').forEach((button) => button.addEventListener('click', () => setPage(button.dataset.page)));
+    // Delegate page changes from the persistent root so navigation survives every re-render.
+    if (!root.dataset.navigationBound) {
+      root.dataset.navigationBound = 'true';
+      root.addEventListener('click', (event) => {
+        const control = event.target.closest('[data-page]');
+        if (!control || !root.contains(control)) return;
+        event.preventDefault();
+        setPage(control.dataset.page);
+      });
+    }
     root.querySelector('[data-menu-toggle]')?.addEventListener('click', (event) => {
       const topbar = root.querySelector('#topbar');
       topbar.classList.toggle('open');
@@ -952,13 +896,16 @@
 
   async function init() {
     injectStyles();
-    await clearLegacyBrowserCaches();
     loadCart();
-    state.data = await loadData();
-    setSeo(state.data.content);
+    await refreshBusinessState({ renderPage: false });
     const first = firstAvailableDate();
     if (!state.cart.deliveryDate && first) state.cart.deliveryDate = first;
+    const requestedPage = window.location.hash.slice(1);
+    if (PAGES.has(requestedPage)) state.page = requestedPage;
     render();
+    startBusinessWatchers();
+    window.addEventListener('focus', () => refreshBusinessState());
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshBusinessState(); });
   }
 
   window.addEventListener('DOMContentLoaded', init);
