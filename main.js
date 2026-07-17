@@ -285,21 +285,38 @@
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
+  function formatOrderTimestamp(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return '';
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    return new Intl.DateTimeFormat('fr-CA', {
+      timeZone: timezone,
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: 'numeric',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).format(date).replace(' h 00', ' h');
+  }
+
   function getMenuOrderStatus(now = new Date()) {
     const menu = getCurrentMenu();
     if (menu.active === false) return { open: false, state: 'inactive' };
     const time = now.getTime();
     if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return { open: false, state: 'before' };
-    if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
+    if (menu.order_close_at && time >= new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
     return { open: true, state: 'open' };
   }
 
   function menuOrderStatusMessage() {
+    const menu = getCurrentMenu();
     const status = getMenuOrderStatus();
-    if (status.state === 'before') return 'Les commandes pour ce menu ouvriront vendredi 10 juillet à 1h.';
-    if (status.state === 'after') return 'Les commandes pour ce menu sont maintenant fermées.';
-    if (status.state === 'inactive') return 'Le menu est terminé. Nous serons de retour vendredi 17 juillet avec un nouveau menu.';
-    return 'Commandes ouvertes pour ce menu jusqu’au 15 juillet.';
+    if (status.state === 'before') return `Les commandes pour ce menu ouvriront ${formatOrderTimestamp(menu.order_open_at)} (heure de Montréal).`;
+    if (status.state === 'after') return 'Commandes fermées';
+    if (status.state === 'inactive') return 'Commandes fermées';
+    return `Commandes ouvertes jusqu’au ${formatOrderTimestamp(menu.order_close_at)} (heure de Montréal).`;
   }
 
   function deliveryWindows() {
@@ -625,15 +642,15 @@
           <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison livrés dans votre secteur')}</h1>
           <p class="lead">${escapeHtml(state.data.content.home?.subheadline || 'Une cuisine simple, généreuse et préparée avec soin pour simplifier vos repas de semaine.')}</p>
           <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
-          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Nouveau menu vendredi 17 juillet</span>'}</div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Menu de la semaine</span>'}</div>
         </div>
         <div class="hero-visual">
           <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Nouveau menu vendredi 17 juillet')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Le menu actuel est terminé. Revenez vendredi 17 juillet pour découvrir les nouveaux plats.'}</span></div>
+          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu de la semaine')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Les commandes sont fermées pour le moment. Consultez le menu pour connaître la prochaine période de commande.'}</span></div>
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
-        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}` : 'Nouveau menu vendredi 17 juillet'}</span>
+        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}` : 'Menu de la semaine'}</span>
         <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> ${menuIsActive ? orderNoticeText(false) : 'Commandes fermées'}</span>
         <span><strong>Zones:</strong> ${escapeHtml(zones || 'à confirmer')}</span>
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>
@@ -650,7 +667,7 @@
         <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
       </section>
       <section class="section container panel catering-callout"><div><div class="kicker">Demandes spéciales</div><h2>Vous avez vu un plat qui vous intéresse?</h2><p>Écrivez-nous pour une demande spéciale ou un événement. Les créations passées de la galerie peuvent inspirer votre prochaine commande traiteur.</p></div><button class="btn btn-primary" data-page="contact">Faire une demande</button></section>
-      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Un nouveau menu arrive vendredi 17 juillet'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Le menu du 10 juillet est terminé. Revenez vendredi 17 juillet pour découvrir les nouveaux plats.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
+      <section class="section container panel final-cta"><div class="kicker">${menuIsActive ? 'Prêt à commander?' : 'À bientôt'}</div><h2>${menuIsActive ? 'Voir le menu de la semaine' : 'Consultez le menu de la semaine'}</h2><p>${menuIsActive ? 'Le menu actuel affiche les plats disponibles, les portions, les prix et les dates de livraison.' : 'Les commandes sont fermées pour le moment. Consultez le menu pour connaître la prochaine période de commande.'}</p><div class="cta-row" style="justify-content:center">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="contact">Nous contacter</button>'}</div></section>`;
   }
 
   function itemImageHtml(item) {
@@ -745,8 +762,10 @@
   }
 
   function commanderHtml() {
-    if (!getMenuOrderStatus().open) {
-      return `<section class="container section panel"><div class="kicker">Commandes fermées</div><h1 class="page-title">Nouveau menu vendredi 17 juillet</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
+    const orderStatus = getMenuOrderStatus();
+    if (!orderStatus.open) {
+      const title = orderStatus.state === 'before' ? 'Commandes bientôt ouvertes' : 'Commandes fermées';
+      return `<section class="container section panel"><div class="kicker">${title}</div><h1 class="page-title">${title}</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
     }
     normalizeDeliveryDate();
     const errors = validateOrder();
