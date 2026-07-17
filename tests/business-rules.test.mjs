@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { isOrderingOpen, deliveryStatus } from '../worker/src/index.js';
+const at = (value) => new Date(value);
+assert.equal(isOrderingOpen(at('2026-07-17T04:59:59Z')), false, 'Friday 00:59 Montreal is closed');
+assert.equal(isOrderingOpen(at('2026-07-17T05:00:00Z')), true, 'Friday 01:00 Montreal is open');
+assert.equal(isOrderingOpen(at('2026-07-18T16:00:00Z')), true, 'Saturday is open');
+assert.equal(isOrderingOpen(at('2026-07-19T16:00:00Z')), true, 'Sunday is open');
+assert.equal(isOrderingOpen(at('2026-07-15T15:59:59Z')), true, 'Wednesday 11:59 Montreal is open');
+assert.equal(isOrderingOpen(at('2026-07-15T16:00:00Z')), false, 'Wednesday noon Montreal is closed');
+assert.equal(isOrderingOpen(at('2026-07-16T16:00:00Z')), false, 'Thursday is closed');
+const wednesday = at('2026-07-15T15:00:00Z');
+assert.equal(deliveryStatus('2026-07-18', wednesday), 'weekend');
+assert.equal(deliveryStatus('2026-07-19', wednesday), 'weekend');
+assert.equal(deliveryStatus('2026-07-20', wednesday), 'available');
+assert.equal(deliveryStatus('2026-07-17', at('2026-07-17T16:00:00Z')), 'too_soon');
+console.log('Business schedule boundary tests passed.');

@@ -34,6 +34,7 @@
     thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi',
   };
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
+  const PAGES = new Set(['home', 'menu', 'commander', 'traiteur', 'livraison', 'contact']);
   const DATE_REASONS = {
     available: 'Disponible', too_soon: 'Trop tôt',
     no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
@@ -276,101 +277,149 @@
   }
 
   function setPage(page) {
+    if (!PAGES.has(page)) return;
+    const previousPage = state.page;
     state.page = page;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      render();
+      window.location.hash = page === 'home' ? '' : `#${page}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error(`[La cuisine de Rosalie] Navigation vers ${page} impossible:`, error);
+      state.page = previousPage;
+      try { render(); } catch (recoveryError) { console.error('[La cuisine de Rosalie] Échec du rendu de récupération:', recoveryError); }
+      showToast('Cette section est temporairement indisponible.');
+    }
   }
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
-  function getMenuOrderStatus(now = new Date()) {
-    const menu = getCurrentMenu();
-    if (menu.active === false) return { open: false, state: 'inactive' };
-    const time = now.getTime();
-    if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return { open: false, state: 'before' };
-    if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
-    return { open: true, state: 'open' };
+  function getMontrealNow(now = new Date()) {
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(now).reduce((result, part) => ({ ...result, [part.type]: part.value }), {});
+    return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day), hour: Number(parts.hour), minute: Number(parts.minute), second: Number(parts.second), weekday: new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day))).getUTCDay(), timestamp: now.getTime() };
   }
 
-  function menuOrderStatusMessage() {
-    const status = getMenuOrderStatus();
-    if (status.state === 'before') return 'Les commandes pour ce menu ouvriront vendredi 10 juillet à 1h.';
-    if (status.state === 'after') return 'Les commandes pour ce menu sont maintenant fermées.';
-    if (status.state === 'inactive') return 'Le menu est terminé. Nous serons de retour vendredi 17 juillet avec un nouveau menu.';
-    return 'Commandes ouvertes pour ce menu jusqu’au 15 juillet.';
+  function getCurrentOrderWindow(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const weekStart = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day - ((montreal.weekday + 2) % 7), 1));
+    const weekEnd = new Date(weekStart); weekEnd.setUTCDate(weekEnd.getUTCDate() + 5); weekEnd.setUTCHours(12);
+    return { opened_at: weekStart, closes_at: weekEnd };
+  }
+
+  function getNextOrderOpening(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const daysUntilFriday = (5 - montreal.weekday + 7) % 7;
+    const opening = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day + daysUntilFriday, 1));
+    if (daysUntilFriday === 0 && (montreal.hour > 1 || (montreal.hour === 1 && (montreal.minute > 0 || montreal.second > 0)))) opening.setUTCDate(opening.getUTCDate() + 7);
+    return opening;
+  }
+
+  function isOrderingOpen(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const minuteOfWeek = montreal.weekday * 1440 + montreal.hour * 60 + montreal.minute;
+    return minuteOfWeek >= (5 * 1440 + 60) || minuteOfWeek < (3 * 1440 + 720);
+  }
+
+  function getMenuOrderStatus(now = new Date()) {
+    if (getCurrentMenu().active === false) return { open: false, state: 'inactive' };
+    return isOrderingOpen(now) ? { open: true, state: 'open' } : { open: false, state: 'closed' };
+  }
+
+  function menuOrderStatusMessage(now = new Date()) {
+    if (getCurrentMenu().active === false) return 'Le menu de la semaine est présentement indisponible.';
+    if (isOrderingOpen(now)) return 'Commandes ouvertes. Commandez avant mercredi à midi.';
+    const opening = getNextOrderOpening(now);
+    return `Commandes fermées. Réouverture ${formatDate(toLocalIsoDate(opening))} à 1 h.`;
   }
 
   function deliveryWindows() {
-    return state.data?.delivery?.delivery_windows || ['13h à 15h', '15h à 17h', '17h à 19h', '19h à 21h'];
+    return Array.isArray(state.data?.delivery?.delivery_windows) ? state.data.delivery.delivery_windows : [];
+  }
+
+  function deliveryDayLabels() {
+    const rules = state.data?.delivery?.rules || {};
+    const configuredDays = Array.isArray(rules.delivery_days) ? rules.delivery_days : DEFAULT_DELIVERY_DAYS;
+    return configuredDays.filter((day) => WEEKDAY_LABELS[day]).map((day) => WEEKDAY_LABELS[day]).join(', ');
   }
 
   function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
   }
 
-  function minimumDeliveryDate(noticeHours) {
-    const noticeDays = Math.ceil(Number(noticeHours || 0) / 24);
-    const today = businessToday();
-    const minimum = new Date(today);
-    minimum.setDate(minimum.getDate() + noticeDays);
-    return minimum;
+  function getMinimumDeliveryTimestamp(now = new Date()) {
+    return new Date(now.getTime() + Number(getSettingRules().order_notice_hours || 72) * 60 * 60 * 1000);
   }
 
-  function isWeekendDeliveryDay(date) {
-    return WEEKEND_DAYS.has(WEEKDAYS[date.getDay()]);
+  function isDeliveryWeekday(date) {
+    const weekday = WEEKDAYS[new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()];
+    return (getSettingRules().delivery_days || DEFAULT_DELIVERY_DAYS).includes(weekday);
   }
 
-  function deliveryDayLabels() {
-    return DEFAULT_DELIVERY_DAYS.map((day) => WEEKDAY_LABELS[day] || day).join(', ');
+  function deliveryCandidateTimestamp(isoDate) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ''));
+    if (!match) return null;
+    // 13 h Montréal is the configured first delivery time and is shared with the Worker.
+    const [year, month, day] = match.slice(1).map(Number); const cutoff = String(getSettingRules().delivery_cutoff_time || '13:00').split(':').map(Number);
+    const pseudo = Date.UTC(year, month - 1, day, cutoff[0], cutoff[1] || 0);
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const offset = (value) => { const name = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'shortOffset' }).formatToParts(new Date(value)).find((part) => part.type === 'timeZoneName')?.value || 'GMT-0'; const m = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(name); return m ? (m[1] === '+' ? 1 : -1) * (Number(m[2]) * 60 + Number(m[3] || 0)) * 60000 : 0; };
+    let timestamp = pseudo - offset(pseudo); timestamp = pseudo - offset(timestamp);
+    return new Date(timestamp);
   }
 
-  function isDateAvailable(date) {
-    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return { ok: false, reason: 'invalid' };
-    const rules = getSettingRules();
-    const noticeHours = Number(rules.order_notice_hours || 48);
-    const threshold = minimumDeliveryDate(noticeHours);
-    const deliveryCutoff = parseLocalDate(date);
-    if (deliveryCutoff < threshold) return { ok: false, reason: 'too_soon' };
-    if (isWeekendDeliveryDay(date)) return { ok: false, reason: 'weekend' };
+  function isDateAvailable(dateLike, now = new Date()) {
+    const iso = typeof dateLike === 'string' ? dateLike : toLocalIsoDate(dateLike);
+    const candidate = deliveryCandidateTimestamp(iso);
+    if (!candidate || Number.isNaN(candidate.getTime())) return { ok: false, reason: 'invalid' };
+    if (candidate < getMinimumDeliveryTimestamp(now)) return { ok: false, reason: 'too_soon' };
+    const [year, month, day] = iso.split('-').map(Number);
+    if (!isDeliveryWeekday({ year, month, day })) return { ok: false, reason: 'weekend' };
+    const menu = getCurrentMenu();
+    if ((menu.closed_dates || []).includes(iso)) return { ok: false, reason: 'closed' };
+    if ((menu.full_dates || []).includes(iso)) return { ok: false, reason: 'full' };
     return { ok: true, reason: 'available' };
   }
 
-  function firstAvailableDate() {
-    const rules = getSettingRules();
-    const date = minimumDeliveryDate(Number(rules.order_notice_hours || 48));
-    date.setHours(12, 0, 0, 0);
-    for (let i = 0; i < 45; i += 1) {
-      const candidate = new Date(date);
-      candidate.setDate(date.getDate() + i);
-      if (isDateAvailable(candidate).ok) return toLocalIsoDate(candidate);
-    }
+  function getFirstAvailableDeliveryDate(now = new Date()) {
+    const montreal = getMontrealNow(now); const start = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
+    for (let i = 0; i < 45; i += 1) { const candidate = new Date(start); candidate.setUTCDate(start.getUTCDate() + i); const iso = candidate.toISOString().slice(0, 10); if (isDateAvailable(iso, now).ok) return iso; }
     return '';
   }
+
+  function firstAvailableDate() { return getFirstAvailableDeliveryDate(); }
 
   function validateOrder() {
     const errors = [];
     const rules = getSettingRules();
     const totals = cartTotals();
-    const customer = state.cart.customer;
-    if (!getMenuOrderStatus().open) errors.push(menuOrderStatusMessage());
+    const customer = state.cart.customer && typeof state.cart.customer === 'object' ? state.cart.customer : {};
+    const name = String(customer.name || '').trim(); const phone = String(customer.phone || '').trim();
+    const email = String(customer.email || '').trim(); const streetNumber = String(customer.streetNumber || '').trim();
+    const streetName = String(customer.streetName || '').trim(); const city = String(customer.city || '').trim();
+    if (!isOrderingOpen()) errors.push('Les commandes sont actuellement fermées. Elles rouvriront vendredi à 1 h.');
     if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
+    const currentIds = currentMenuIds();
+    if (state.cart.items.some((line) => { const item = getItemById(line.itemId); return !currentIds.has(line.itemId) || !item || item.available === false || !Object.hasOwn(item.pricing || {}, line.portion); })) errors.push('Un article de votre panier n’est plus disponible dans le menu actuel.');
     if (totals.subtotal < Number(rules.minimum_order || 0)) errors.push(`Minimum de commande: ${formatCurrency(rules.minimum_order || 0)}.`);
     if (!state.cart.deliveryDate) errors.push('Choisissez une date de livraison disponible.');
     else {
-      const dateStatus = isDateAvailable(parseLocalDate(state.cart.deliveryDate));
-      if (!dateStatus.ok && dateStatus.reason === 'too_soon') errors.push('Cette date ne respecte pas le délai minimal de préparation de 72h.');
+      const dateStatus = isDateAvailable(state.cart.deliveryDate);
+      if (!dateStatus.ok && dateStatus.reason === 'too_soon') errors.push('Cette date ne respecte pas le délai minimal de 72 heures.');
+      else if (!dateStatus.ok && dateStatus.reason === 'weekend') errors.push('La livraison n’est pas offerte le samedi ni le dimanche.');
+      else if (!dateStatus.ok && dateStatus.reason === 'full') errors.push('Cette date de livraison est complète.');
       else if (!dateStatus.ok) errors.push('Choisissez une date de livraison disponible.');
     }
-    if (!customer.name.trim()) errors.push('Le nom complet est requis.');
-    if (!customer.phone.trim()) errors.push('Le téléphone est requis.');
-    if (!customer.email.trim()) errors.push('Le courriel est requis afin que Rosalie puisse vous contacter au besoin concernant votre commande.');
-    else if (!isValidEmail(customer.email)) errors.push('Veuillez inscrire un courriel valide.');
-    if (!customer.streetNumber.trim() || !customer.streetName.trim()) errors.push('L’adresse de livraison est requise.');
-    if (!customer.city.trim()) errors.push('La ville est requise.');
-    const allowed = getEnabledZones().map((zone) => zone.city.toLowerCase());
-    if (customer.city && !allowed.includes(customer.city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
+    if (!name) errors.push('Le nom complet est requis.');
+    if (!phone) errors.push('Le téléphone est requis.');
+    if (!email) errors.push('Le courriel est requis afin que Rosalie puisse vous contacter au besoin concernant votre commande.');
+    else if (!isValidEmail(email)) errors.push('Veuillez inscrire un courriel valide.');
+    if (!streetNumber || !streetName) errors.push('L’adresse de livraison est requise.');
+    if (!city) errors.push('La ville est requise.');
+    const allowed = getEnabledZones().map((zone) => String(zone.city || '').toLowerCase());
+    if (city && !allowed.includes(city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
     if (!state.cart.deliveryWindow1 || !state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires de livraison.');
     else if (state.cart.deliveryWindow1 === state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires différentes.');
     return errors;
@@ -633,8 +682,8 @@
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
-        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}` : 'Nouveau menu vendredi 17 juillet'}</span>
-        <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> ${menuIsActive ? orderNoticeText(false) : 'Commandes fermées'}</span>
+        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuOrderStatusMessage()}</span>
+        <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> Les commandes doivent être placées au moins 72 heures à l’avance. La livraison n’est pas offerte le samedi ni le dimanche.</span>
         <span><strong>Zones:</strong> ${escapeHtml(zones || 'à confirmer')}</span>
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>
       </section>
@@ -705,7 +754,7 @@
         <span class="badge">${item.available === false ? 'De retour bientôt' : escapeHtml(item.category)}</span>
         <h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>
         <div class="portion-grid" role="group" aria-label="Portions pour ${escapeHtml(item.title)}">
-          ${portions.map((portion) => `<button class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}</small></button>`).join('')}
+          ${portions.map((portion) => { const compare = item.compare_at_pricing?.[portion.key]; return `<button class="portion-btn ${selected === portion.key ? 'active' : ''}" data-portion="${item.id}:${portion.key}">${portion.label}<small>${formatCurrency(portion.price)}${compare ? ` <s>Habituellement ${formatCurrency(compare)}</s>` : ''}</small></button>`; }).join('')}
         </div>
         <div class="item-actions">
           <div class="qty" aria-label="Quantité"><button data-menu-qty="${item.id}:-1" aria-label="Réduire">−</button><span>${qty}</span><button data-menu-qty="${item.id}:1" aria-label="Augmenter">+</button></div>
@@ -726,7 +775,7 @@
       <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
       ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
       ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
-      ${includeButton ? `<button class="btn btn-primary" data-page="commander" ${!getMenuOrderStatus().open ? 'disabled' : ''} style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
+      ${includeButton ? `<button class="btn btn-primary" data-page="commander" style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
     </aside>`;
   }
 
@@ -737,7 +786,7 @@
   function normalizeDeliveryDate() {
     const first = firstAvailableDate();
     if (!first) return;
-    const selectedStatus = state.cart.deliveryDate ? isDateAvailable(parseLocalDate(state.cart.deliveryDate)) : { ok: false };
+    const selectedStatus = state.cart.deliveryDate ? isDateAvailable(state.cart.deliveryDate) : { ok: false };
     if (!state.cart.deliveryDate || !selectedStatus.ok) {
       state.cart.deliveryDate = first;
       saveCart();
@@ -745,13 +794,11 @@
   }
 
   function commanderHtml() {
-    if (!getMenuOrderStatus().open) {
-      return `<section class="container section panel"><div class="kicker">Commandes fermées</div><h1 class="page-title">Nouveau menu vendredi 17 juillet</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
-    }
-    normalizeDeliveryDate();
+    const orderingOpen = getMenuOrderStatus().open;
+    if (orderingOpen) normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();
-    return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
+    return `${orderingOpen ? '' : `<section class="container section panel"><div class="kicker">Commandes fermées</div><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><p class="notice">Votre panier et vos coordonnées restent accessibles; le paiement est temporairement désactivé.</p></section>`}<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
       <div class="grid">
         <section class="card step"><h2><span class="step-number">1</span>Votre commande</h2>${cartPanelHtml(false)}</section>
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
@@ -763,19 +810,19 @@
 
   function dateSelectorHtml() {
     const first = firstAvailableDate();
-    const start = first ? parseLocalDate(first) : new Date();
+    const montreal = getMontrealNow(); const start = first ? new Date(`${first}T00:00:00Z`) : new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
     const buttons = [];
     for (let i = 0; i < 14; i += 1) {
       const date = new Date(start); date.setDate(start.getDate() + i);
-      const iso = toLocalIsoDate(date);
-      const status = isDateAvailable(date);
+      const iso = date.toISOString().slice(0, 10);
+      const status = isDateAvailable(iso);
       buttons.push(`<button class="date-btn ${status.ok ? '' : 'disabled'} ${state.cart.deliveryDate === iso ? 'selected' : ''}" data-date="${iso}" data-date-reason="${status.reason}" aria-disabled="${status.ok ? 'false' : 'true'}"><strong>${new Intl.DateTimeFormat('fr-CA', { day: 'numeric', month: 'short' }).format(date)}</strong><span>${DATE_REASONS[status.reason]}</span></button>`);
     }
     return `<p>Les dates de livraison disponibles respectent un délai minimal de préparation de 72h après votre commande.</p><p>${first ? `Prochaine livraison disponible: <strong>${formatDate(first)}</strong>.` : 'Aucune date de livraison disponible avec le délai de 72h.'}</p><div class="date-grid">${buttons.join('')}</div>${state.dateMessage ? `<p class="notice date-feedback">${escapeHtml(state.dateMessage)}</p>` : ''}<p class="line-meta">Les dates affichées respectent le délai minimal de préparation de 72h. Les livraisons commencent à partir de 13h. Les heures de livraison sont approximatives.</p><p class="line-meta">Jours de livraison: ${deliveryDayLabels()}.</p>`;
   }
 
   function customerFormHtml() {
-    const c = state.cart.customer;
+    const c = state.cart.customer && typeof state.cart.customer === 'object' ? state.cart.customer : {};
     const zones = getEnabledZones();
     const input = (key, label, attrs = '') => `<div class="field"><label for="${key}">${label}</label><input id="${key}" data-customer="${key}" value="${escapeHtml(c[key] || '')}" ${attrs}></div>`;
     return `<div class="form-grid">
@@ -816,7 +863,7 @@
   function livraisonHtml() {
     const rules = getSettingRules();
     const zones = getEnabledZones();
-    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Nous desservons plusieurs municipalités.</h1><p>Les commandes doivent être placées 72h à l’avance afin de garantir la préparation.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
+    return `<div class="container grid grid-2"><section class="panel"><div class="kicker">Livraison</div><h1 class="page-title">Nous desservons plusieurs municipalités.</h1><p>Les commandes doivent être placées au moins 72 heures à l’avance. La livraison n’est pas offerte le samedi ni le dimanche.</p><div class="grid grid-2">${zones.map((zone) => `<div class="mini-card card"><strong>${escapeHtml(zone.city)}</strong><span>${escapeHtml(zone.province)}</span></div>`).join('')}</div><div class="chip-row"><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span><span class="chip">Livraison gratuite ${formatCurrency(rules.free_delivery_threshold || 35)} et plus</span><span class="chip">Livraison à céduler avec le client</span></div></section><aside class="zone-map"><div>Zone locale<br><span style="font-size:2.4rem">Contrecoeur • Sorel • Varennes • Verchères</span><br>Saint-Roch-de-Richelieu</div></aside></div>`;
   }
 
   function contactHtml() {
@@ -860,7 +907,7 @@
   }
 
   function footerHtml() {
-    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>72h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
+    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>72 h à l’avance<br>Du vendredi à 1 h au mercredi à midi<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
   }
 
   function mobileCartBarHtml() {
@@ -868,16 +915,28 @@
     return `<div class="mobile-cart-bar ${totals.count ? '' : 'empty'}"><span>${totals.count} article${totals.count > 1 ? 's' : ''} • ${formatCurrency(totals.subtotal)}</span><button data-page="commander">Voir le panier</button></div>`;
   }
 
+  function renderPageFailureHtml(page) {
+    const commanderActions = page === 'commander' ? '<button class="btn btn-primary" data-page="menu">Retour au menu</button><button class="btn btn-secondary" onclick="window.location.reload()">Actualiser la page</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>' : '<button class="btn btn-primary" data-page="home">Retour à l’accueil</button>';
+    return `<section class="container section panel"><h1 class="page-title">Section indisponible</h1><p class="lead">Cette section est temporairement indisponible. Veuillez actualiser la page ou réessayer dans quelques instants.</p><div class="cta-row">${commanderActions}</div></section>`;
+  }
+
+  function renderCurrentPage() {
+    const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml };
+    try { return (pages[state.page] || homeHtml)(); } catch (error) { console.error(`[La cuisine de Rosalie] Échec du rendu de la page ${state.page}:`, error); return renderPageFailureHtml(state.page); }
+  }
+
   function render() {
     const root = document.getElementById('webframe-root');
-    const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml };
-    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
-    bindEvents(root);
-    bindGalleryEvents(root);
+    if (!root) { console.error('[La cuisine de Rosalie] Élément #webframe-root introuvable.'); return; }
+    root.innerHTML = `<div class="site">${navHtml()}<main>${renderCurrentPage()}</main>${footerHtml()}${mobileCartBarHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
+    bindEvents(root); bindGalleryEvents(root);
   }
 
   function bindEvents(root) {
-    root.querySelectorAll('[data-page]').forEach((button) => button.addEventListener('click', () => setPage(button.dataset.page)));
+    if (!root.dataset.navigationBound) {
+      root.addEventListener('click', (event) => { const control = event.target.closest('[data-page]'); if (!control || !root.contains(control) || !PAGES.has(control.dataset.page)) return; event.preventDefault(); setPage(control.dataset.page); });
+      root.dataset.navigationBound = 'true';
+    }
     root.querySelector('[data-menu-toggle]')?.addEventListener('click', (event) => {
       const topbar = root.querySelector('#topbar');
       topbar.classList.toggle('open');
@@ -900,7 +959,7 @@
       const [itemId, portion] = button.dataset.remove.split(':'); removeLine(itemId, portion);
     }));
     root.querySelectorAll('[data-date]').forEach((button) => button.addEventListener('click', () => {
-      const status = isDateAvailable(parseLocalDate(button.dataset.date));
+      const status = isDateAvailable(button.dataset.date);
       if (!status.ok) {
         const messages = { too_soon: `Cette date ne respecte pas le délai minimal de préparation de 72h.`, weekend: 'La livraison n’est pas offerte les samedis et dimanches.', invalid: 'Cette date n’est pas disponible.' };
         state.dateMessage = messages[status.reason] || 'Cette date n’est pas disponible.';
@@ -932,5 +991,7 @@
     render();
   }
 
+  window.addEventListener('error', (event) => { console.error('[RVSITE runtime error]', { message: event.message, source: event.filename, line: event.lineno, column: event.colno, error: event.error, page: state.page }); });
+  window.addEventListener('unhandledrejection', (event) => { console.error('[RVSITE rejected promise]', { reason: event.reason, page: state.page }); });
   window.addEventListener('DOMContentLoaded', init);
 })();

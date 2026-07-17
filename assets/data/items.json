@@ -1,125 +1,154 @@
 {
   "items": [
     {
-      "id": "poulet_parmesan_spaghetti_20260710",
-      "title": "Poulet parmesan avec spaghetti",
+      "id": "poulet-shish-taouk-patates-ail",
+      "title": "Poulet shish taouk avec patates à l’ail",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Plat principal",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
       "pricing": {
         "petit": 6,
         "grand": 12,
         "familial": 23
       },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "pate_chinois_20260710",
-      "title": "Pâté chinois",
-      "description": "",
-      "category": "Plats principaux",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "petit": 6,
-        "grand": 12,
-        "familial": 23
+      "compare_at_pricing": {
+        "petit": 8
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "penne_alfredo_bacon_20260710",
-      "title": "Penne Alfredo bacon",
+      "id": "linguine-sauce-rosee-parmesan",
+      "title": "Linguine sauce rosée avec parmesan",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Plat principal",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
       "pricing": {
         "petit": 6,
         "grand": 12,
         "familial": 23
       },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "boulettes_bbq_patates_pilees_20260710",
-      "title": "Boulettes BBQ avec patates pilées",
-      "description": "",
-      "category": "Plats principaux",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "petit": 6,
-        "grand": 12,
-        "familial": 23
+      "compare_at_pricing": {
+        "petit": 8
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "macaroni_viande_20260710",
-      "title": "Macaroni à la viande",
+      "id": "riz-style-chinois-boeuf",
+      "title": "Riz style chinois au bœuf",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Plat principal",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
       "pricing": {
         "petit": 6,
         "grand": 12,
         "familial": 23
       },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "burritos_20260710",
-      "title": "Burritos",
-      "description": "",
-      "category": "Plats principaux",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "petit": 6,
-        "grand": 12,
-        "familial": 23
+      "compare_at_pricing": {
+        "petit": 8
       },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "porc_coreen_riz_legumes_20260710",
-      "title": "Tranches de porc coréen, riz et légumes",
+      "id": "boulettes-aigres-douces-riz-legumes",
+      "title": "Boulettes aigres-douces avec riz aux légumes",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Plat principal",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
       "pricing": {
         "petit": 6,
         "grand": 12,
         "familial": 23
       },
+      "compare_at_pricing": {
+        "petit": 8
+      },
       "tags": [],
       "showcase": false
     },
     {
-      "id": "potage_legumes_20260710",
-      "title": "Potage de légumes",
+      "id": "gratin-patates-bacon-brocoli",
+      "title": "Gratin de patates, bacon et brocoli",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Plat principal",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
+      "pricing": {
+        "petit": 6,
+        "grand": 12,
+        "familial": 23
+      },
+      "compare_at_pricing": {
+        "petit": 8
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "pizza-pepperoni-pain-pita",
+      "title": "Pizza pepperoni sur pain pita",
+      "description": "",
+      "category": "Plat principal",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "images": {},
+      "pricing": {
+        "petit": 6,
+        "grand": 12,
+        "familial": 23
+      },
+      "compare_at_pricing": {
+        "petit": 8
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "griot-porc-haitien-riz-feves-rouges",
+      "title": "Griot de porc haïtien avec riz aux fèves rouges",
+      "description": "",
+      "category": "Plat principal",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "images": {},
+      "pricing": {
+        "petit": 6,
+        "grand": 12,
+        "familial": 23
+      },
+      "compare_at_pricing": {
+        "petit": 8
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "soupe-legumes",
+      "title": "Soupe aux légumes",
+      "description": "",
+      "category": "Soupe",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "images": {},
       "pricing": {
         "standard": 4
       },
@@ -127,13 +156,14 @@
       "showcase": false
     },
     {
-      "id": "salade_cesar_20260710",
-      "title": "Salade César",
+      "id": "salade-grecque",
+      "title": "Salade grecque",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Salade",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
       "pricing": {
         "standard": 5
       },
@@ -141,13 +171,14 @@
       "showcase": false
     },
     {
-      "id": "sous_marin_pizza_20260710",
-      "title": "Sous-marin pizza",
+      "id": "sous-marin-jambon-moutarde-miel",
+      "title": "Sous-marin jambon et moutarde au miel",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Sous-marin",
       "available": true,
       "featured": false,
       "image": "",
+      "images": {},
       "pricing": {
         "standard": 7
       },
