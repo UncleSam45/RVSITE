@@ -34,6 +34,7 @@
     thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi',
   };
   const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
+  const PAGES = new Set(['home', 'menu', 'commander', 'traiteur', 'livraison', 'contact']);
   const DATE_REASONS = {
     available: 'Disponible', too_soon: 'Trop tôt', insufficient_delivery_windows: 'Plages insuffisantes',
     not_configured_delivery_day: 'Jour non desservi', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
@@ -263,52 +264,129 @@
   }
 
   function setPage(page) {
+    if (!PAGES.has(page)) return;
+    const previousPage = state.page;
     state.page = page;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      render();
+      window.location.hash = page === 'home' ? '' : `#${page}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error(`[La cuisine de Rosalie] Navigation vers ${page} impossible:`, error);
+      state.page = previousPage;
+      try { render(); } catch (recoveryError) { console.error('[La cuisine de Rosalie] Échec du rendu de récupération:', recoveryError); }
+      showToast('Cette section est temporairement indisponible.');
+    }
   }
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
   }
 
-  function getBusinessTimeParts(now = new Date()) {
-    const timezone = state.data?.settings?.ordering?.timezone;
-    if (timezone !== 'America/Toronto') return null;
-    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(now).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
-    const weekday = WEEKDAYS[new Date(Date.UTC(+p.year, +p.month - 1, +p.day)).getUTCDay()];
-    return { year:+p.year, month:+p.month, day:+p.day, hour:+p.hour, minute:+p.minute, second:+p.second, weekday };
+  function getMontrealNow(now = new Date()) {
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(now).reduce((result, part) => ({ ...result, [part.type]: part.value }), {});
+    return { year: Number(parts.year), month: Number(parts.month), day: Number(parts.day), hour: Number(parts.hour), minute: Number(parts.minute), second: Number(parts.second), weekday: new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day))).getUTCDay(), timestamp: now.getTime() };
   }
-  function getBusinessCalendarDate(now = new Date()) { const p = getBusinessTimeParts(now); return p && `${p.year}-${String(p.month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}`; }
-  function getOrderingCycle(now = new Date()) { const p = getBusinessTimeParts(now); if (!p) return ''; const d = new Date(Date.UTC(p.year,p.month-1,p.day-((WEEKDAYS.indexOf(p.weekday)-5+7)%7))); return d.toISOString().slice(0,10); }
-  function validOrderingConfiguration() { const o=state.data?.settings?.ordering, w=o?.weekly_order_window; return o?.timezone==='America/Toronto' && Number(o.order_notice_hours)===72 && w?.open_day==='friday' && w?.open_time==='01:00' && w?.close_day==='wednesday' && w?.close_time==='12:00' && [null,'open','closed'].includes(o.manual_override ?? null); }
-  function isInsideWeeklyOrderWindow(now = new Date()) { const p=getBusinessTimeParts(now); if(!p) return false; const minute=p.hour*60+p.minute; return ['saturday','sunday','monday','tuesday'].includes(p.weekday)||(p.weekday==='friday'&&minute>=60)||(p.weekday==='wednesday'&&minute<720); }
+
+  function getCurrentOrderWindow(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const weekStart = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day - ((montreal.weekday + 2) % 7), 1));
+    const weekEnd = new Date(weekStart); weekEnd.setUTCDate(weekEnd.getUTCDate() + 5); weekEnd.setUTCHours(12);
+    return { opened_at: weekStart, closes_at: weekEnd };
+  }
+
+  function getNextOrderOpening(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const daysUntilFriday = (5 - montreal.weekday + 7) % 7;
+    const opening = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day + daysUntilFriday, 1));
+    if (daysUntilFriday === 0 && (montreal.hour > 1 || (montreal.hour === 1 && (montreal.minute > 0 || montreal.second > 0)))) opening.setUTCDate(opening.getUTCDate() + 7);
+    return opening;
+  }
+
+  function isOrderingOpen(now = new Date()) {
+    const montreal = getMontrealNow(now);
+    const minuteOfWeek = montreal.weekday * 1440 + montreal.hour * 60 + montreal.minute;
+    return minuteOfWeek >= (5 * 1440 + 60) || minuteOfWeek < (3 * 1440 + 720);
+  }
+
   function getMenuOrderStatus(now = new Date()) {
-    if (!validOrderingConfiguration()) return {open:false,reason:'invalid_configuration'};
-    const override=state.data.settings.ordering.manual_override, menu=getCurrentMenu(), cycle=getOrderingCycle(now);
-    if (override==='closed') return {open:false,reason:'manual_override_closed'};
-    if (override==='open') return {open:true,reason:'manual_override_open',cycle_start_date:cycle};
-    if (menu.active!==true) return {open:false,reason:'menu_inactive'};
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(menu.cycle_start_date||'') || menu.cycle_start_date!==cycle) return {open:false,reason:'menu_cycle_mismatch'};
-    return {open:isInsideWeeklyOrderWindow(now),reason:isInsideWeeklyOrderWindow(now)?'weekly_window_open':'weekly_window_closed',cycle_start_date:cycle};
+    if (getCurrentMenu().active === false) return { open: false, state: 'inactive' };
+    return isOrderingOpen(now) ? { open: true, state: 'open' } : { open: false, state: 'closed' };
   }
-  function menuOrderStatusMessage(now = new Date()) { const status=getMenuOrderStatus(now); if(status.open) return 'Commandes ouvertes jusqu’à mercredi à midi.'; if(['menu_inactive','menu_cycle_mismatch'].includes(status.reason)) return 'Le prochain menu n’est pas encore disponible.'; if(status.reason==='invalid_configuration') return 'La prise de commandes est temporairement indisponible.'; return 'Commandes fermées. Réouverture vendredi à 1 h.'; }
-  function deliveryWindows() { return (state.data?.delivery?.delivery_windows||[]).filter((w)=>w && w.enabled!==false && w.id && /^\d{2}:\d{2}$/.test(w.start_time||'')); }
-  function getMinimumDeliveryInstant(now = new Date()) { return new Date(now.getTime()+72*60*60*1000); }
-  function deliveryWindowInstant(date, window) { const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(date||''); if(!m||!window) return null; const [h,min]=window.start_time.split(':').map(Number), pseudo=Date.UTC(+m[1],+m[2]-1,+m[3],h,min); const offset=(v)=>{const z=new Intl.DateTimeFormat('en-US',{timeZone:'America/Toronto',timeZoneName:'shortOffset'}).formatToParts(new Date(v)).find(x=>x.type==='timeZoneName')?.value||'GMT';const x=/GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(z);return x?(x[1]==='+'?1:-1)*(+x[2]*60 + +(x[3]||0))*60000:0}; let v=pseudo-offset(pseudo);v=pseudo-offset(v);return new Date(v); }
-  function getEligibleDeliveryWindows(date, now = new Date()) { return deliveryWindows().filter((w)=>deliveryWindowInstant(date,w)?.getTime()>=getMinimumDeliveryInstant(now).getTime()); }
-  function isDateAvailable(iso, now = new Date()) { if(!/^\d{4}-\d{2}-\d{2}$/.test(iso||'')) return {ok:false,reason:'invalid'}; const day=WEEKDAYS[new Date(`${iso}T12:00:00Z`).getUTCDay()], rules=state.data?.delivery?.rules||{}, menu=getCurrentMenu(); if(WEEKEND_DAYS.has(day))return {ok:false,reason:'weekend'}; if(!(rules.delivery_days||DEFAULT_DELIVERY_DAYS).includes(day))return {ok:false,reason:'not_configured_delivery_day'}; if((menu.closed_dates||[]).includes(iso))return {ok:false,reason:'closed'};if((menu.full_dates||[]).includes(iso))return {ok:false,reason:'full'};const windows=getEligibleDeliveryWindows(iso,now);return windows.length>=2?{ok:true,reason:'available',windows}:{ok:false,reason:windows.length?'insufficient_delivery_windows':'too_soon',windows}; }
-  function getFirstAvailableDeliveryDate(now = new Date()) { const today=getBusinessCalendarDate(now); if(!today)return ''; const start=new Date(`${today}T12:00:00Z`);for(let i=0;i<45;i++){const d=new Date(start);d.setUTCDate(start.getUTCDate()+i);const iso=d.toISOString().slice(0,10);if(isDateAvailable(iso,now).ok)return iso;}return ''; }
-  function firstAvailableDate(){return getFirstAvailableDeliveryDate();}
-  function normalizeCart() { if(!state.data)return; const ids=currentMenuIds(); state.cart.items=state.cart.items.flatMap((line)=>{const item=getItemById(line.itemId), portion=item&&getPortions(item).find(p=>p.key===line.portion),qty=Math.floor(Number(line.qty));return ids.has(line.itemId)&&item?.available!==false&&portion&&qty>0?[{...line,title:item.title,portionLabel:portion.label,price:portion.price,qty}]:[];}); const date=isDateAvailable(state.cart.deliveryDate); if(state.cart.deliveryDate&&!date.ok){state.cart.deliveryDate='';state.cart.deliveryWindow1='';state.cart.deliveryWindow2='';state.dateMessage='Votre date de livraison n’est plus disponible; veuillez en choisir une autre.';} const allowed=new Set(getEligibleDeliveryWindows(state.cart.deliveryDate).map(w=>w.id)); if(!allowed.has(state.cart.deliveryWindow1))state.cart.deliveryWindow1='';if(!allowed.has(state.cart.deliveryWindow2)||state.cart.deliveryWindow2===state.cart.deliveryWindow1)state.cart.deliveryWindow2=''; saveCart(); }
-  async function refreshBusinessState({renderPage=true}={}) { if(state.business.refreshInProgress)return state.business.refreshInProgress; state.business.refreshInProgress=(async()=>{try{const data=await loadData();state.data=data;state.business.configurationError=validOrderingConfiguration()?null:'Configuration de commandes invalide.';state.business.orderStatus=getMenuOrderStatus();state.business.lastRefreshAt=Date.now();normalizeCart();setSeo(data.content);if(renderPage)render();}catch(e){state.business.configurationError='Impossible de confirmer les données de commande.';state.business.orderStatus={open:false,reason:'invalid_configuration'};if(renderPage)render();throw e;}finally{state.business.refreshInProgress=null;}})();return state.business.refreshInProgress; }
-  function startBusinessWatchers(){clearTimeout(state.business.scheduleTimer);clearInterval(state.business.dataRefreshTimer);const delay=60*1000-(Date.now()%60000)+500;state.business.scheduleTimer=setTimeout(async()=>{await refreshBusinessState();startBusinessWatchers();},delay);state.business.dataRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshBusinessState();},5*60*1000);}
+
+  function menuOrderStatusMessage(now = new Date()) {
+    if (getCurrentMenu().active === false) return 'Le menu de la semaine est présentement indisponible.';
+    if (isOrderingOpen(now)) return 'Commandes ouvertes. Commandez avant mercredi à midi.';
+    const opening = getNextOrderOpening(now);
+    return `Commandes fermées. Réouverture ${formatDate(toLocalIsoDate(opening))} à 1 h.`;
+  }
+
+  function deliveryWindows() {
+    return Array.isArray(state.data?.delivery?.delivery_windows) ? state.data.delivery.delivery_windows : [];
+  }
+
+  function deliveryDayLabels() {
+    const rules = state.data?.delivery?.rules || {};
+    const configuredDays = Array.isArray(rules.delivery_days) ? rules.delivery_days : DEFAULT_DELIVERY_DAYS;
+    return configuredDays.filter((day) => WEEKDAY_LABELS[day]).map((day) => WEEKDAY_LABELS[day]).join(', ');
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+  }
+
+  function getMinimumDeliveryTimestamp(now = new Date()) {
+    return new Date(now.getTime() + Number(getSettingRules().order_notice_hours || 72) * 60 * 60 * 1000);
+  }
+
+  function isDeliveryWeekday(date) {
+    const weekday = WEEKDAYS[new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay()];
+    return (getSettingRules().delivery_days || DEFAULT_DELIVERY_DAYS).includes(weekday);
+  }
+
+  function deliveryCandidateTimestamp(isoDate) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ''));
+    if (!match) return null;
+    // 13 h Montréal is the configured first delivery time and is shared with the Worker.
+    const [year, month, day] = match.slice(1).map(Number); const cutoff = String(getSettingRules().delivery_cutoff_time || '13:00').split(':').map(Number);
+    const pseudo = Date.UTC(year, month - 1, day, cutoff[0], cutoff[1] || 0);
+    const timezone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const offset = (value) => { const name = new Intl.DateTimeFormat('en-US', { timeZone: timezone, timeZoneName: 'shortOffset' }).formatToParts(new Date(value)).find((part) => part.type === 'timeZoneName')?.value || 'GMT-0'; const m = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(name); return m ? (m[1] === '+' ? 1 : -1) * (Number(m[2]) * 60 + Number(m[3] || 0)) * 60000 : 0; };
+    let timestamp = pseudo - offset(pseudo); timestamp = pseudo - offset(timestamp);
+    return new Date(timestamp);
+  }
+
+  function isDateAvailable(dateLike, now = new Date()) {
+    const iso = typeof dateLike === 'string' ? dateLike : toLocalIsoDate(dateLike);
+    const candidate = deliveryCandidateTimestamp(iso);
+    if (!candidate || Number.isNaN(candidate.getTime())) return { ok: false, reason: 'invalid' };
+    if (candidate < getMinimumDeliveryTimestamp(now)) return { ok: false, reason: 'too_soon' };
+    const [year, month, day] = iso.split('-').map(Number);
+    if (!isDeliveryWeekday({ year, month, day })) return { ok: false, reason: 'weekend' };
+    const menu = getCurrentMenu();
+    if ((menu.closed_dates || []).includes(iso)) return { ok: false, reason: 'closed' };
+    if ((menu.full_dates || []).includes(iso)) return { ok: false, reason: 'full' };
+    return { ok: true, reason: 'available' };
+  }
+
+  function getFirstAvailableDeliveryDate(now = new Date()) {
+    const montreal = getMontrealNow(now); const start = new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
+    for (let i = 0; i < 45; i += 1) { const candidate = new Date(start); candidate.setUTCDate(start.getUTCDate() + i); const iso = candidate.toISOString().slice(0, 10); if (isDateAvailable(iso, now).ok) return iso; }
+    return '';
+  }
+
+  function firstAvailableDate() { return getFirstAvailableDeliveryDate(); }
+
   function validateOrder() {
     const errors = [];
     const rules = getSettingRules();
     const totals = cartTotals();
-    const customer = state.cart.customer;
-    if (!getMenuOrderStatus().open || state.business.configurationError) errors.push(menuOrderStatusMessage());
+    const customer = state.cart.customer && typeof state.cart.customer === 'object' ? state.cart.customer : {};
+    const name = String(customer.name || '').trim(); const phone = String(customer.phone || '').trim();
+    const email = String(customer.email || '').trim(); const streetNumber = String(customer.streetNumber || '').trim();
+    const streetName = String(customer.streetName || '').trim(); const city = String(customer.city || '').trim();
+    if (!isOrderingOpen()) errors.push('Les commandes sont actuellement fermées. Elles rouvriront vendredi à 1 h.');
     if (!state.cart.items.length) errors.push('Ajoutez au moins un plat au panier.');
     const currentIds = currentMenuIds();
     if (state.cart.items.some((line) => { const item = getItemById(line.itemId); return !currentIds.has(line.itemId) || !item || item.available === false || !Object.hasOwn(item.pricing || {}, line.portion); })) errors.push('Un article de votre panier n’est plus disponible dans le menu actuel.');
@@ -321,14 +399,14 @@
       else if (!dateStatus.ok && dateStatus.reason === 'full') errors.push('Cette date de livraison est complète.');
       else if (!dateStatus.ok) errors.push('Choisissez une date de livraison disponible.');
     }
-    if (!customer.name.trim()) errors.push('Le nom complet est requis.');
-    if (!customer.phone.trim()) errors.push('Le téléphone est requis.');
-    if (!customer.email.trim()) errors.push('Le courriel est requis afin que Rosalie puisse vous contacter au besoin concernant votre commande.');
-    else if (!isValidEmail(customer.email)) errors.push('Veuillez inscrire un courriel valide.');
-    if (!customer.streetNumber.trim() || !customer.streetName.trim()) errors.push('L’adresse de livraison est requise.');
-    if (!customer.city.trim()) errors.push('La ville est requise.');
-    const allowed = getEnabledZones().map((zone) => zone.city.toLowerCase());
-    if (customer.city && !allowed.includes(customer.city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
+    if (!name) errors.push('Le nom complet est requis.');
+    if (!phone) errors.push('Le téléphone est requis.');
+    if (!email) errors.push('Le courriel est requis afin que Rosalie puisse vous contacter au besoin concernant votre commande.');
+    else if (!isValidEmail(email)) errors.push('Veuillez inscrire un courriel valide.');
+    if (!streetNumber || !streetName) errors.push('L’adresse de livraison est requise.');
+    if (!city) errors.push('La ville est requise.');
+    const allowed = getEnabledZones().map((zone) => String(zone.city || '').toLowerCase());
+    if (city && !allowed.includes(city.toLowerCase())) errors.push('La ville choisie n’est pas dans la zone de livraison.');
     if (!state.cart.deliveryWindow1 || !state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires de livraison.');
     else if (state.cart.deliveryWindow1 === state.cart.deliveryWindow2) errors.push('Veuillez choisir deux plages horaires différentes.');
     else { const eligible = new Set(getEligibleDeliveryWindows(state.cart.deliveryDate).map((window) => window.id)); if (!eligible.has(state.cart.deliveryWindow1) || !eligible.has(state.cart.deliveryWindow2)) errors.push('Une plage horaire ne respecte plus le délai de livraison.'); }
@@ -685,7 +763,7 @@
       <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
       ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
       ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
-      ${includeButton ? `<button class="btn btn-primary" data-page="commander" ${!getMenuOrderStatus().open ? 'disabled' : ''} style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
+      ${includeButton ? `<button class="btn btn-primary" data-page="commander" style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
     </aside>`;
   }
 
@@ -704,13 +782,11 @@
   }
 
   function commanderHtml() {
-    if (!getMenuOrderStatus().open) {
-      return `<section class="container section panel"><div class="kicker">Commandes fermées</div><h1 class="page-title">Commandes fermées</h1><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><div class="cta-row"><button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button></div></section>`;
-    }
-    normalizeDeliveryDate();
+    const orderingOpen = getMenuOrderStatus().open;
+    if (orderingOpen) normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();
-    return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
+    return `${orderingOpen ? '' : `<section class="container section panel"><div class="kicker">Commandes fermées</div><p class="lead">${escapeHtml(menuOrderStatusMessage())}</p><p class="notice">Votre panier et vos coordonnées restent accessibles; le paiement est temporairement désactivé.</p></section>`}<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
       <div class="grid">
         <section class="card step"><h2><span class="step-number">1</span>Votre commande</h2>${cartPanelHtml(false)}</section>
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
@@ -722,7 +798,7 @@
 
   function dateSelectorHtml() {
     const first = firstAvailableDate();
-    const businessDate = getBusinessCalendarDate(); const start = first ? new Date(`${first}T00:00:00Z`) : new Date(`${businessDate}T00:00:00Z`);
+    const montreal = getMontrealNow(); const start = first ? new Date(`${first}T00:00:00Z`) : new Date(Date.UTC(montreal.year, montreal.month - 1, montreal.day));
     const buttons = [];
     for (let i = 0; i < 14; i += 1) {
       const date = new Date(start); date.setDate(start.getDate() + i);
@@ -734,7 +810,7 @@
   }
 
   function customerFormHtml() {
-    const c = state.cart.customer;
+    const c = state.cart.customer && typeof state.cart.customer === 'object' ? state.cart.customer : {};
     const zones = getEnabledZones();
     const input = (key, label, attrs = '') => `<div class="field"><label for="${key}">${label}</label><input id="${key}" data-customer="${key}" value="${escapeHtml(c[key] || '')}" ${attrs}></div>`;
     return `<div class="form-grid">
@@ -827,16 +903,28 @@
     return `<div class="mobile-cart-bar ${totals.count ? '' : 'empty'}"><span>${totals.count} article${totals.count > 1 ? 's' : ''} • ${formatCurrency(totals.subtotal)}</span><button data-page="commander">Voir le panier</button></div>`;
   }
 
+  function renderPageFailureHtml(page) {
+    const commanderActions = page === 'commander' ? '<button class="btn btn-primary" data-page="menu">Retour au menu</button><button class="btn btn-secondary" onclick="window.location.reload()">Actualiser la page</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>' : '<button class="btn btn-primary" data-page="home">Retour à l’accueil</button>';
+    return `<section class="container section panel"><h1 class="page-title">Section indisponible</h1><p class="lead">Cette section est temporairement indisponible. Veuillez actualiser la page ou réessayer dans quelques instants.</p><div class="cta-row">${commanderActions}</div></section>`;
+  }
+
+  function renderCurrentPage() {
+    const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml };
+    try { return (pages[state.page] || homeHtml)(); } catch (error) { console.error(`[La cuisine de Rosalie] Échec du rendu de la page ${state.page}:`, error); return renderPageFailureHtml(state.page); }
+  }
+
   function render() {
     const root = document.getElementById('webframe-root');
-    const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml };
-    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
-    bindEvents(root);
-    bindGalleryEvents(root);
+    if (!root) { console.error('[La cuisine de Rosalie] Élément #webframe-root introuvable.'); return; }
+    root.innerHTML = `<div class="site">${navHtml()}<main>${renderCurrentPage()}</main>${footerHtml()}${mobileCartBarHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
+    bindEvents(root); bindGalleryEvents(root);
   }
 
   function bindEvents(root) {
-    root.querySelectorAll('[data-page]').forEach((button) => button.addEventListener('click', () => setPage(button.dataset.page)));
+    if (!root.dataset.navigationBound) {
+      root.addEventListener('click', (event) => { const control = event.target.closest('[data-page]'); if (!control || !root.contains(control) || !PAGES.has(control.dataset.page)) return; event.preventDefault(); setPage(control.dataset.page); });
+      root.dataset.navigationBound = 'true';
+    }
     root.querySelector('[data-menu-toggle]')?.addEventListener('click', (event) => {
       const topbar = root.querySelector('#topbar');
       topbar.classList.toggle('open');
@@ -892,5 +980,7 @@
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshBusinessState(); });
   }
 
+  window.addEventListener('error', (event) => { console.error('[RVSITE runtime error]', { message: event.message, source: event.filename, line: event.lineno, column: event.colno, error: event.error, page: state.page }); });
+  window.addEventListener('unhandledrejection', (event) => { console.error('[RVSITE rejected promise]', { reason: event.reason, page: state.page }); });
   window.addEventListener('DOMContentLoaded', init);
 })();
