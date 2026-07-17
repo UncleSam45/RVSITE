@@ -43,9 +43,33 @@
     "delivery_cutoff_time": "13:00"
   },
   "delivery_windows": [
-    "13h à 15h",
-    "15h à 17h",
-    "17h à 19h",
-    "19h à 21h"
+    {
+      "id": "13-15",
+      "label": "13 h à 15 h",
+      "start_time": "13:00",
+      "end_time": "15:00",
+      "enabled": true
+    },
+    {
+      "id": "15-17",
+      "label": "15 h à 17 h",
+      "start_time": "15:00",
+      "end_time": "17:00",
+      "enabled": true
+    },
+    {
+      "id": "17-19",
+      "label": "17 h à 19 h",
+      "start_time": "17:00",
+      "end_time": "19:00",
+      "enabled": true
+    },
+    {
+      "id": "19-21",
+      "label": "19 h à 21 h",
+      "start_time": "19:00",
+      "end_time": "21:00",
+      "enabled": true
+    }
   ]
 }
