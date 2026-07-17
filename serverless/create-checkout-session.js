@@ -51,7 +51,7 @@ function isMenuOrderingOpen(menu, now = new Date()) {
   if (menu.active === false) return false;
   const time = now.getTime();
   if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return false;
-  if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) return false;
+  if (menu.order_close_at && time >= new Date(menu.order_close_at).getTime()) return false;
   return true;
 }
 
