@@ -1,8 +1,8 @@
 {
   "items": [
     {
-      "id": "poulet_parmesan_spaghetti_20260710",
-      "title": "Poulet parmesan avec spaghetti",
+      "id": "poulet-shish-taouk-avec-patates-a-lail_20260717",
+      "title": "Poulet shish taouk avec patates à l’ail",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -17,8 +17,8 @@
       "showcase": false
     },
     {
-      "id": "pate_chinois_20260710",
-      "title": "Pâté chinois",
+      "id": "linguini-sauce-rosee-avec-parmesan_20260717",
+      "title": "Linguini sauce rosée avec parmesan",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -33,8 +33,8 @@
       "showcase": false
     },
     {
-      "id": "penne_alfredo_bacon_20260710",
-      "title": "Penne Alfredo bacon",
+      "id": "riz-style-chinois-au-boeuf_20260717",
+      "title": "Riz style chinois au bœuf",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -49,8 +49,8 @@
       "showcase": false
     },
     {
-      "id": "boulettes_bbq_patates_pilees_20260710",
-      "title": "Boulettes BBQ avec patates pilées",
+      "id": "boulette-aigre-douce-avec-riz-aux-legumes_20260717",
+      "title": "Boulette aigre douce avec riz aux légumes",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -65,8 +65,8 @@
       "showcase": false
     },
     {
-      "id": "macaroni_viande_20260710",
-      "title": "Macaroni à la viande",
+      "id": "gratin-de-patate-bacon-brocoli_20260717",
+      "title": "Gratin de patate bacon brocoli",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -81,8 +81,8 @@
       "showcase": false
     },
     {
-      "id": "burritos_20260710",
-      "title": "Burritos",
+      "id": "pizza-pepperoni-sur-pain-pita_20260717",
+      "title": "Pizza pepperoni sur pain pita",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -97,8 +97,8 @@
       "showcase": false
     },
     {
-      "id": "porc_coreen_riz_legumes_20260710",
-      "title": "Tranches de porc coréen, riz et légumes",
+      "id": "griot-de-porc-haitien-avec-riz-aux-feves-rouge_20260717",
+      "title": "Griot de porc haïtien avec riz aux fèves rouge",
       "description": "",
       "category": "Plats principaux",
       "available": true,
@@ -113,8 +113,8 @@
       "showcase": false
     },
     {
-      "id": "potage_legumes_20260710",
-      "title": "Potage de légumes",
+      "id": "soupe-legumes_20260717",
+      "title": "Soupe légumes",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -127,8 +127,8 @@
       "showcase": false
     },
     {
-      "id": "salade_cesar_20260710",
-      "title": "Salade César",
+      "id": "salade-grecque_20260717",
+      "title": "Salade grecque",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
@@ -141,8 +141,8 @@
       "showcase": false
     },
     {
-      "id": "sous_marin_pizza_20260710",
-      "title": "Sous-marin pizza",
+      "id": "sous-marin-jambon-moutarde-miel_20260717",
+      "title": "Sous marin jambon moutarde miel",
       "description": "",
       "category": "Accompagnements & extras",
       "available": true,
