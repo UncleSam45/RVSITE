@@ -60,7 +60,7 @@
     lastAddedKey: '',
     dateMessage: '',
     carousel: { index: 0, timer: null, paused: false, touchStartX: 0 },
-    admin: { authenticated: false, token: '', rememberKey: false, owner: 'UncleSam45', repo: 'RVSITE', branch: 'main', working: null, original: null, selectedFile: 'assets/data/content.json', message: '', saving: false, editorValid: true },
+    admin: { authenticated: false, token: '', rememberKey: false, owner: 'UncleSam45', repo: 'RVSITE', branch: 'main', working: null, original: null, selectedFile: 'assets/data/content.json', message: '', saving: false, editorValid: true, stripe: { apiKey: '', projectSlug: 'lacuisine_rosalie', currency: 'cad', environment: 'test', loading: false, updating: false, message: '', repoCatalog: null, stripeCatalog: null, plan: null, results: null } },
   };
 
   function injectStyles() {
@@ -883,7 +883,7 @@
 
 
   const ADMIN_FILES = [
-    ['assets/data/content.json', 'Accueil'], ['assets/data/settings.json', 'Entreprise'], ['assets/data/menus.json', 'Menu'], ['assets/data/items.json', 'Plats'], ['assets/data/delivery.json', 'Livraison'], ['assets/data/promotions.json', 'Promos'], ['assets/data/gallery.json', 'Galerie'],
+    ['assets/data/content.json', 'Accueil'], ['assets/data/settings.json', 'Entreprise'], ['assets/data/menus.json', 'Menu'], ['assets/data/items.json', 'Plats'], ['assets/data/delivery.json', 'Livraison'], ['assets/data/promotions.json', 'Promos'], ['assets/data/gallery.json', 'Galerie'], ['stripe', 'Stripe'],
   ];
 
   function cloneJson(value) { return JSON.parse(JSON.stringify(value || {})); }
@@ -896,7 +896,7 @@
 
   function ensureAdminWorking() {
     if (!state.admin.working) {
-      state.admin.working = Object.fromEntries(ADMIN_FILES.map(([path]) => [path, adminDataForPath(path)]));
+      state.admin.working = Object.fromEntries(ADMIN_FILES.filter(([path]) => path !== 'stripe').map(([path]) => [path, adminDataForPath(path)]));
       state.admin.original = cloneJson(state.admin.working);
     }
   }
@@ -906,6 +906,7 @@
   }
 
   function adminGet(path) {
+    if (!state.admin.working?.[state.admin.selectedFile]) return '';
     return path.split('.').reduce((value, part) => (value == null ? '' : value[Number.isInteger(Number(part)) ? Number(part) : part]), state.admin.working[state.admin.selectedFile]);
   }
 
@@ -965,11 +966,13 @@
   }
 
   function adminPanelHtml(path) {
+    if (path === 'stripe') return adminStripePanel();
     const panels = { 'assets/data/content.json': adminContentPanel, 'assets/data/settings.json': adminSettingsPanel, 'assets/data/menus.json': adminMenuPanel, 'assets/data/items.json': adminItemsPanel, 'assets/data/delivery.json': adminDeliveryPanel, 'assets/data/promotions.json': adminPromotionsPanel, 'assets/data/gallery.json': adminGalleryPanel };
     return (panels[path] || adminContentPanel)();
   }
 
   function adminSummaryHtml(path) {
+    if (path === 'stripe') return adminStripeSummaryHtml();
     const current = state.admin.working[path];
     const original = state.admin.original[path];
     const changed = JSON.stringify(current) !== JSON.stringify(original);
@@ -984,7 +987,7 @@
     }
     ensureAdminWorking();
     const path = admin.selectedFile;
-    return `<div class="container admin-shell section"><aside class="panel admin-panel"><div class="kicker">Admin console</div><h1 class="admin-title">Modifier le site</h1><p>Choisissez une section, changez les champs importants, puis soumettez.</p><div class="admin-tabs">${ADMIN_FILES.map(([file,label]) => `<button class="btn ${file === path ? 'btn-olive' : 'btn-secondary'} admin-tab" data-admin-file="${escapeHtml(file)}">${escapeHtml(label)}</button>`).join('')}</div><div class="cta-row"><button class="btn btn-secondary" data-admin-logout>Verrouiller</button></div></aside><section class="panel admin-panel"><div class="section-head"><div><div class="kicker">Éditeur simple</div><h2>${escapeHtml(ADMIN_FILES.find(([file]) => file === path)?.[1] || 'Contenu')}</h2><p>Pas de code à toucher: chaque champ correspond à un élément visible ou important du site.</p></div></div>${adminPanelHtml(path)}</section>${adminSummaryHtml(path)}</div>`;
+    return `<div class="container admin-shell section"><aside class="panel admin-panel"><div class="kicker">Admin console</div><h1 class="admin-title">Modifier le site</h1><p>Choisissez une section, changez les champs importants, puis soumettez. La section Stripe synchronise le catalogue depuis GitHub.</p><div class="admin-tabs">${ADMIN_FILES.map(([file,label]) => `<button class="btn ${file === path ? 'btn-olive' : 'btn-secondary'} admin-tab" data-admin-file="${escapeHtml(file)}">${escapeHtml(label)}</button>`).join('')}</div><div class="cta-row"><button class="btn btn-secondary" data-admin-logout>Verrouiller</button></div></aside><section class="panel admin-panel"><div class="section-head"><div><div class="kicker">Éditeur simple</div><h2>${escapeHtml(ADMIN_FILES.find(([file]) => file === path)?.[1] || 'Contenu')}</h2><p>Pas de code à toucher: chaque champ correspond à un élément visible ou important du site.</p></div></div>${adminPanelHtml(path)}</section>${adminSummaryHtml(path)}</div>`;
   }
 
   async function githubPutJson(path, data) {
@@ -998,6 +1001,166 @@
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.message || `GitHub a retourné ${response.status}`);
     return result;
+  }
+
+
+  const STRIPE_API_BASE = 'https://api.stripe.com/v1';
+  const TOOL_SOURCE = 'rvsite_stripe_manager';
+  const STRIPE_TOOL_VERSION = 'js-portal-1.0.0';
+
+  function stripeOptions() {
+    const stripe = state.admin.stripe;
+    return { project_slug: stripe.projectSlug || 'lacuisine_rosalie', currency: (stripe.currency || 'cad').toLowerCase(), environment: stripe.environment || (stripe.apiKey.startsWith('sk_live_') ? 'live' : 'test'), archive_missing_items: true };
+  }
+
+  function centsToAmount(cents) { return Math.round(Number(cents || 0)) / 100; }
+  function moneyToCents(value) {
+    const amount = Number(String(value ?? '').trim().replace(',', '.'));
+    if (!Number.isFinite(amount) || amount <= 0) throw new Error(`Prix invalide: ${value}`);
+    return Math.round(amount * 100);
+  }
+  function canonicalJson(value) {
+    if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+    if (value && typeof value === 'object') return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(',')}}`;
+    return JSON.stringify(value);
+  }
+  async function stableHash(payload) {
+    const bytes = new TextEncoder().encode(canonicalJson(payload));
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('').slice(0, 16);
+  }
+  async function productHashFor(item, menuId) {
+    return stableHash({ item_id: item.item_id, title: item.title, description: item.description, category: item.category, menu_id: menuId, active: item.available });
+  }
+  function pythonFloatString(value) {
+    const number = Number(value);
+    return Number.isInteger(number) ? `${number.toFixed(1)}` : `${number}`;
+  }
+  async function priceHashFor(itemId, portionKey, amount, currency) {
+    const normalized = `{"amount":${pythonFloatString(amount)},"currency":${JSON.stringify(currency.toLowerCase())},"item_id":${JSON.stringify(itemId)},"portion_key":${JSON.stringify(portionKey)}}`;
+    const bytes = new TextEncoder().encode(normalized);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('').slice(0, 16);
+  }
+
+  async function githubGetJson(path) {
+    const { token, owner, repo, branch } = state.admin;
+    const api = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+    const response = await fetch(api, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || `GitHub a retourné ${response.status}`);
+    return JSON.parse(decodeURIComponent(escape(atob(String(result.content || '').replace(/\s/g, '')))));
+  }
+
+  async function loadGithubLocalCatalog() {
+    const [itemsData, menusData] = await Promise.all([githubGetJson('assets/data/items.json'), githubGetJson('assets/data/menus.json')]);
+    const rawItems = Array.isArray(itemsData.items) ? itemsData.items : [];
+    const warnings = [];
+    const lookup = new Map();
+    rawItems.forEach((raw) => { if (raw?.id) lookup.set(String(raw.id).trim(), raw); else warnings.push('Un plat sans id dans items.json a été ignoré.'); });
+    const menu = menusData.current_menu || { id: 'available-items', title: 'Available items', active: true };
+    let orderedIds = [...(menu.item_ids || []).map((id) => [String(id), 'item_ids']), ...(menu.extra_ids || []).map((id) => [String(id), 'extra_ids'])];
+    if (!orderedIds.length) orderedIds = [...lookup.entries()].filter(([, raw]) => raw.available !== false).map(([id]) => [id, 'available_items']);
+    const items = [];
+    const missing = [];
+    for (const [itemId, source] of orderedIds) {
+      const raw = lookup.get(itemId);
+      if (!raw) { missing.push(itemId); continue; }
+      if (raw.available === false) { warnings.push(`Plat indisponible ignoré: ${itemId}`); continue; }
+      const pricing = {};
+      Object.entries(raw.pricing || {}).forEach(([key, value]) => { try { if (moneyToCents(value) > 0) pricing[String(key).trim().toLowerCase()] = Number(Number(value).toFixed(2)); } catch {} });
+      if (!Object.keys(pricing).length) { warnings.push(`Plat sans prix positif valide: ${itemId}`); continue; }
+      const item = { item_id: itemId, title: raw.title || itemId, description: raw.description || '', category: raw.category || '', available: raw.available !== false, pricing, source };
+      item.product_hash = await productHashFor(item, String(menu.id || ''));
+      items.push(item);
+    }
+    if (missing.length) warnings.push(`Le menu référence des IDs inconnus: ${missing.join(', ')}`);
+    return { menu_id: String(menu.id || ''), title: String(menu.title || ''), start_date: String(menu.start_date || ''), end_date: String(menu.end_date || ''), active: menu.active !== false, items, missing_ids: missing, warnings, source_mode: 'current_menu_only' };
+  }
+
+  async function stripeRequest(method, path, data = null) {
+    const body = data ? new URLSearchParams(data) : undefined;
+    const response = await fetch(`${STRIPE_API_BASE}${path}`, { method, headers: { Authorization: `Bearer ${state.admin.stripe.apiKey.trim()}`, 'Stripe-Version': '2024-06-20', 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error?.message || `Stripe a retourné ${response.status}`);
+    return payload;
+  }
+  async function stripeListAll(path, params = {}) {
+    const results = []; let cursor = '';
+    do { const query = new URLSearchParams({ limit: 100, ...params, ...(cursor ? { starting_after: cursor } : {}) }); const page = await stripeRequest('GET', `${path}?${query}`); results.push(...(page.data || [])); cursor = page.has_more && page.data?.length ? page.data.at(-1).id : ''; } while (cursor);
+    return results;
+  }
+  async function fetchManagedStripeCatalog() {
+    const project = stripeOptions().project_slug;
+    const rawProducts = await stripeListAll('/products');
+    const products = rawProducts.filter((p) => p.metadata?.source === TOOL_SOURCE && p.metadata?.project === project).map((p) => ({ product_id: p.id, item_id: p.metadata.item_id || '', name: p.name || '', description: p.description || '', active: !!p.active, metadata: p.metadata || {} }));
+    const productIds = new Set(products.map((p) => p.product_id));
+    const rawPrices = await stripeListAll('/prices');
+    const prices = rawPrices.filter((p) => productIds.has(p.product) && p.metadata?.source === TOOL_SOURCE && p.metadata?.project === project).map((p) => ({ price_id: p.id, product_id: p.product, item_id: p.metadata.item_id || '', portion_key: p.metadata.portion_key || '', amount: Number(p.unit_amount || 0), currency: (p.currency || '').toLowerCase(), active: !!p.active, metadata: p.metadata || {} }));
+    const warnings = [];
+    return { products, prices, ignored_external_count: rawProducts.length - products.length, warnings, raw_products: rawProducts, raw_prices: rawPrices };
+  }
+
+  async function buildStripeSyncPlan(localCatalog, stripeCatalog) {
+    const options = stripeOptions(); const productsByItem = new Map(stripeCatalog.products.filter((p) => p.item_id).map((p) => [p.item_id, p]));
+    const activePrices = new Map(stripeCatalog.prices.filter((p) => p.active).map((p) => [`${p.item_id}:${p.portion_key}`, p]));
+    const localIds = new Set(localCatalog.items.map((i) => i.item_id));
+    const actions = [];
+    for (const item of localCatalog.items) {
+      const product = productsByItem.get(item.item_id);
+      const productPayload = { name: item.title, description: item.description, active: true, metadata: { source: TOOL_SOURCE, project: options.project_slug, item_id: item.item_id, menu_id: localCatalog.menu_id, local_hash: item.product_hash, created_by_tool_version: STRIPE_TOOL_VERSION } };
+      if (!product) actions.push({ action_type: 'CREATE_PRODUCT', item_id: item.item_id, title: item.title, portion_key: null, reason: 'Local menu item does not exist in managed Stripe catalog.', payload: productPayload, risk: 'medium' });
+      else if (product.name !== item.title || (item.description && product.description !== item.description) || !product.active || product.metadata.local_hash !== item.product_hash) actions.push({ action_type: 'UPDATE_PRODUCT', item_id: item.item_id, title: item.title, portion_key: null, reason: 'Product name, description, active state, or local hash changed.', payload: { ...productPayload, product_id: product.product_id }, risk: 'low' });
+      for (const [portionKey, amount] of Object.entries(item.pricing)) {
+        const cents = moneyToCents(amount); const price = activePrices.get(`${item.item_id}:${portionKey}`); const payload = { item_id: item.item_id, portion_key: portionKey, amount_cents: cents, currency: options.currency, local_hash: await priceHashFor(item.item_id, portionKey, amount, options.currency), ...(product ? { product_id: product.product_id } : {}) };
+        if (!price) actions.push({ action_type: 'CREATE_PRICE', item_id: item.item_id, title: item.title, portion_key: portionKey, reason: 'Local portion price does not exist in Stripe.', payload, risk: 'medium', local_price: amount, stripe_price: null });
+        else if (price.amount === cents && price.currency === options.currency) actions.push({ action_type: 'UNCHANGED', item_id: item.item_id, title: item.title, portion_key: portionKey, reason: 'Stripe price amount and currency match local JSON.', payload: { ...payload, price_id: price.price_id }, risk: 'none', local_price: amount, stripe_price: centsToAmount(price.amount) });
+        else { actions.push({ action_type: 'CREATE_PRICE', item_id: item.item_id, title: item.title, portion_key: portionKey, reason: 'Local amount/currency changed; Stripe Prices are immutable, so create replacement price.', payload, risk: 'medium', local_price: amount, stripe_price: centsToAmount(price.amount) }); actions.push({ action_type: 'ARCHIVE_PRICE', item_id: item.item_id, title: item.title, portion_key: portionKey, reason: 'Archive replaced old managed Stripe price.', payload: { price_id: price.price_id }, risk: 'medium', local_price: amount, stripe_price: centsToAmount(price.amount) }); }
+      }
+    }
+    stripeCatalog.products.forEach((product) => { if (!localIds.has(product.item_id)) { stripeCatalog.prices.filter((p) => p.product_id === product.product_id && p.active).forEach((price) => actions.push({ action_type: 'ARCHIVE_PRICE', item_id: product.item_id, title: product.name, portion_key: price.portion_key, reason: 'Managed Stripe product is no longer in the current local menu.', payload: { price_id: price.price_id }, risk: 'medium' })); if (product.active) actions.push({ action_type: 'ARCHIVE_PRODUCT', item_id: product.item_id, title: product.name, portion_key: null, reason: 'Managed Stripe product is no longer in the current local menu.', payload: { product_id: product.product_id }, risk: 'medium' }); } });
+    if (stripeCatalog.ignored_external_count) actions.push({ action_type: 'IGNORED', item_id: '', title: 'External Stripe products', portion_key: null, reason: `${stripeCatalog.ignored_external_count} Stripe products were not created by this tool/project and will not be touched.`, payload: {}, risk: 'none' });
+    const summary = Object.fromEntries(['CREATE_PRODUCT', 'UPDATE_PRODUCT', 'CREATE_PRICE', 'ARCHIVE_PRICE', 'ARCHIVE_PRODUCT', 'UNCHANGED', 'IGNORED'].map((type) => [type, actions.filter((a) => a.action_type === type).length]));
+    return { actions, warnings: [...(localCatalog.warnings || []), ...(stripeCatalog.warnings || [])], errors: [], summary };
+  }
+
+  function flattenMetadata(metadata) { return Object.fromEntries(Object.entries(metadata).map(([key, value]) => [`metadata[${key}]`, String(value)])); }
+  function productWritePayload(payload) { return { name: String(payload.name), active: 'true', ...(payload.description ? { description: String(payload.description) } : {}), ...flattenMetadata(payload.metadata || {}) }; }
+  async function executeStripeSyncPlan() {
+    const stripe = state.admin.stripe; const options = stripeOptions(); const localCatalog = stripe.repoCatalog; const plan = stripe.plan;
+    const productsByItem = new Map((stripe.stripeCatalog.products || []).map((p) => [p.item_id, p.product_id])); const priceRecords = [...(stripe.stripeCatalog.prices || [])];
+    const results = { started_at: new Date().toISOString(), actions: [], errors: [], archived: { products: [], prices: [] } };
+    const record = (action, status, response) => results.actions.push({ action, status, response });
+    for (const type of ['CREATE_PRODUCT', 'UPDATE_PRODUCT', 'CREATE_PRICE', 'ARCHIVE_PRICE', 'ARCHIVE_PRODUCT']) for (const action of plan.actions.filter((a) => a.action_type === type)) {
+      try {
+        let response;
+        if (type === 'CREATE_PRODUCT') { response = await stripeRequest('POST', '/products', productWritePayload(action.payload)); productsByItem.set(action.item_id, response.id); }
+        if (type === 'UPDATE_PRODUCT') { response = await stripeRequest('POST', `/products/${action.payload.product_id}`, productWritePayload(action.payload)); productsByItem.set(action.item_id, response.id); }
+        if (type === 'CREATE_PRICE') { const productId = productsByItem.get(action.item_id) || action.payload.product_id; response = await stripeRequest('POST', '/prices', { product: productId, currency: options.currency, unit_amount: String(action.payload.amount_cents), nickname: action.portion_key || '', ...flattenMetadata({ source: TOOL_SOURCE, project: options.project_slug, item_id: action.item_id, portion_key: action.portion_key || '', local_hash: action.payload.local_hash, created_by_tool_version: STRIPE_TOOL_VERSION }) }); priceRecords.push({ price_id: response.id, product_id: productId, item_id: action.item_id, portion_key: action.portion_key || '', amount: Number(response.unit_amount || 0), currency: options.currency, active: true, metadata: response.metadata || {} }); }
+        if (type === 'ARCHIVE_PRICE') { response = await stripeRequest('POST', `/prices/${action.payload.price_id}`, { active: 'false' }); results.archived.prices.push(action.payload.price_id); }
+        if (type === 'ARCHIVE_PRODUCT') { response = await stripeRequest('POST', `/products/${action.payload.product_id}`, { active: 'false' }); results.archived.products.push(action.payload.product_id); }
+        record(action, 'success', response);
+      } catch (error) { results.errors.push({ action, error: error.message }); record(action, 'failed', error.message); break; }
+      if (results.errors.length) break;
+    }
+    const freshCatalog = results.errors.length ? { products: stripe.stripeCatalog.products, prices: priceRecords } : await fetchManagedStripeCatalog();
+    const catalog = await buildWorkerStripeCatalog(localCatalog, freshCatalog, productsByItem, results.archived, options);
+    await githubPutJson('assets/data/stripe_catalog.json', catalog);
+    results.finished_at = new Date().toISOString(); results.worker_catalog = catalog; stripe.results = results; stripe.stripeCatalog = freshCatalog; stripe.plan = await buildStripeSyncPlan(localCatalog, freshCatalog); return results;
+  }
+  async function buildWorkerStripeCatalog(localCatalog, stripeCatalog, fallbackProducts, archived, options) {
+    const productsByItem = new Map((stripeCatalog.products || []).filter((p) => p.active).map((p) => [p.item_id, p.product_id])); fallbackProducts.forEach((v, k) => { if (!productsByItem.has(k)) productsByItem.set(k, v); });
+    const prices = new Map((stripeCatalog.prices || []).filter((p) => p.active && p.currency === options.currency).map((p) => [`${p.item_id}:${p.portion_key}`, p])); const items = {};
+    for (const item of localCatalog.items) { const pricesOut = {}; for (const [portion, amount] of Object.entries(item.pricing)) { const rec = prices.get(`${item.item_id}:${portion}`); pricesOut[portion] = { price_id: rec?.price_id || '', amount, currency: options.currency, active: !!rec, local_hash: await priceHashFor(item.item_id, portion, amount, options.currency) }; } items[item.item_id] = { title: item.title, category: item.category, product_id: productsByItem.get(item.item_id) || '', active: true, local_hash: item.product_hash, prices: pricesOut }; }
+    return { app: 'RVSITE Stripe Manager', version: STRIPE_TOOL_VERSION, project: options.project_slug, environment: options.environment, currency: options.currency, synced_at: new Date().toISOString(), source_files: { items_json: 'assets/data/items.json', menus_json: 'assets/data/menus.json' }, menu: { id: localCatalog.menu_id, title: localCatalog.title, start_date: localCatalog.start_date, end_date: localCatalog.end_date }, items, archived };
+  }
+
+  function adminStripePanel() {
+    const s = state.admin.stripe; const summary = s.plan?.summary || {}; const actionRows = (s.plan?.actions || []).slice(0, 80).map((a) => `<tr><td>${escapeHtml(a.action_type)}</td><td>${escapeHtml(a.item_id)}</td><td>${escapeHtml(a.portion_key || '—')}</td><td>${escapeHtml(a.reason)}</td></tr>`).join('');
+    return `<div class="admin-workbench"><div class="admin-card"><h3>Synchronisation Stripe</h3><p>Entrez la clé Stripe; le portail lit ensuite assets/data/items.json et assets/data/menus.json directement dans le dépôt RVSITE avec le token GitHub déjà fourni.</p><div class="admin-field-row"><div class="field"><label>Stripe API key</label><input data-stripe-field="apiKey" class="admin-secret" type="password" value="${escapeHtml(s.apiKey)}" placeholder="sk_test_..."></div><div class="field"><label>Projet</label><input data-stripe-field="projectSlug" value="${escapeHtml(s.projectSlug)}"></div><div class="field"><label>Devise</label><input data-stripe-field="currency" value="${escapeHtml(s.currency)}"></div><div class="field"><label>Mode</label><select data-stripe-field="environment"><option value="test" ${s.environment === 'test' ? 'selected' : ''}>test</option><option value="live" ${s.environment === 'live' ? 'selected' : ''}>live</option></select></div></div><div class="cta-row"><button class="btn btn-secondary" data-stripe-fetch ${s.loading ? 'disabled' : ''}>${s.loading ? 'Chargement…' : 'Charger catalogue + plan'}</button><button class="btn btn-primary" data-stripe-update ${(!s.plan || s.updating) ? 'disabled' : ''}>${s.updating ? 'Mise à jour…' : 'UPDATE Stripe'}</button></div>${s.message ? `<p class="notice ${s.message.includes('succès') ? 'success-note' : ''}">${escapeHtml(s.message)}</p>` : ''}</div><div class="admin-card"><h3>Plan</h3><p>${Object.entries(summary).map(([k,v]) => `${escapeHtml(k)}: <strong>${v}</strong>`).join(' • ') || 'Aucun plan chargé.'}</p><div style="overflow:auto"><table><tbody>${actionRows || '<tr><td>Aucune action.</td></tr>'}</tbody></table></div></div></div>`;
+  }
+  function adminStripeSummaryHtml() {
+    const s = state.admin.stripe; return `<aside class="panel admin-panel admin-preview"><div class="kicker">Stripe</div><h2>${s.stripeCatalog ? `${s.stripeCatalog.products.length} produits gérés` : 'Catalogue non chargé'}</h2><div class="admin-preview-box"><strong>Source GitHub</strong><p>${escapeHtml(state.admin.owner)}/${escapeHtml(state.admin.repo)}@${escapeHtml(state.admin.branch)} → assets/data/items.json + menus.json</p><p>${s.repoCatalog ? `${s.repoCatalog.items.length} plats locaux prêts.` : 'Cliquez Charger pour créer le plan.'}</p></div></aside>`;
   }
 
   function footerHtml() {
@@ -1082,6 +1245,25 @@
       try { await githubPutJson(state.admin.selectedFile, state.admin.working[state.admin.selectedFile]); state.admin.original[state.admin.selectedFile] = cloneJson(state.admin.working[state.admin.selectedFile]); state.admin.message = 'Soumission réussie avec succès.'; }
       catch (error) { state.admin.message = `Erreur de soumission: ${error.message}`; }
       finally { state.admin.saving = false; render(); }
+    });
+    root.querySelectorAll('[data-stripe-field]').forEach((field) => field.addEventListener('input', () => { state.admin.stripe[field.dataset.stripeField] = field.value.trim(); }));
+    root.querySelectorAll('select[data-stripe-field]').forEach((field) => field.addEventListener('change', () => { state.admin.stripe[field.dataset.stripeField] = field.value.trim(); render(); }));
+    root.querySelector('[data-stripe-fetch]')?.addEventListener('click', async () => {
+      const stripe = state.admin.stripe;
+      if (!state.admin.token) { stripe.message = 'Token GitHub requis.'; render(); return; }
+      if (!stripe.apiKey) { stripe.message = 'Clé Stripe requise.'; render(); return; }
+      stripe.loading = true; stripe.message = 'Lecture du dépôt RVSITE et du catalogue Stripe…'; render();
+      try { stripe.repoCatalog = await loadGithubLocalCatalog(); stripe.stripeCatalog = await fetchManagedStripeCatalog(); stripe.plan = await buildStripeSyncPlan(stripe.repoCatalog, stripe.stripeCatalog); stripe.message = 'Plan Stripe prêt.'; }
+      catch (error) { stripe.message = `Erreur Stripe/GitHub: ${error.message}`; }
+      finally { stripe.loading = false; render(); }
+    });
+    root.querySelector('[data-stripe-update]')?.addEventListener('click', async () => {
+      const stripe = state.admin.stripe;
+      if (!stripe.plan) { stripe.message = 'Chargez un plan avant UPDATE.'; render(); return; }
+      stripe.updating = true; stripe.message = 'Mise à jour Stripe en cours…'; render();
+      try { const results = await executeStripeSyncPlan(); stripe.message = results.errors.length ? `Mise à jour terminée avec ${results.errors.length} erreur(s).` : 'Mise à jour Stripe réussie avec succès.'; }
+      catch (error) { stripe.message = `Erreur de mise à jour Stripe: ${error.message}`; }
+      finally { stripe.updating = false; render(); }
     });
     root.querySelector('[data-checkout]')?.addEventListener('click', checkout);
   }
