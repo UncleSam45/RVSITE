@@ -989,12 +989,21 @@
     return { orders, archivedOrders, totalCents, itemCount, pending, nextDelivery };
   }
 
+  function adminOrderCardHtml(order, { archived = false } = {}) {
+    const orderId = order.order_id || '';
+    const action = archived
+      ? `<button class="order-archive-btn" data-order-restore="${escapeHtml(orderId)}">Restaurer</button>`
+      : `<button class="order-archive-btn" data-order-archive="${escapeHtml(orderId)}">Archiver</button>`;
+    return `<article class="order-card ${archived ? 'order-card-archived' : ''}"><div class="order-card-head"><div><h3>${escapeHtml(order.customer?.name || 'Client')}</h3><div class="order-meta"><span>${escapeHtml(order.business || '')}</span><span>${escapeHtml(formatDateTime(order.created_at))}</span>${archived ? '<span>Archivée</span>' : ''}</div></div><div class="order-actions"><span class="status-badge ${String(order.payment_status).toLowerCase() === 'unconfirmed' ? 'closed' : ''}">${escapeHtml(order.payment_status || 'inconnu')}</span>${action}</div></div><div class="order-delivery"><div>Livraison<br>${escapeHtml(order.delivery?.date || '—')}</div><div>Fenêtres<br>${escapeHtml([order.delivery?.window_1, order.delivery?.window_2].filter(Boolean).join(' / ') || '—')}</div><div>Contact<br>${escapeHtml(order.customer?.phone || '—')}</div><div>Total<br>${formatMoney(order.subtotal_cents, order.currency)}</div></div><div class="order-lines">${(order.items || []).map((item) => `<div class="order-line"><span>${Number(item.quantity || 0)}× ${escapeHtml(item.title || 'Article')} <small>${escapeHtml(item.portion_label || '')}</small></span><strong>${formatMoney(item.line_total_cents, order.currency)}</strong></div>`).join('')}</div>${order.delivery?.instructions ? `<p class="notice">Instruction: ${escapeHtml(order.delivery.instructions)}</p>` : ''}</article>`;
+  }
+
   function adminDashboardPanel() {
     const ordersState = state.admin.orders;
     const { orders, archivedOrders, totalCents, itemCount, pending, nextDelivery } = orderStats();
     const recentOrders = [...orders].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))).slice(0, 12);
+    const recentArchivedOrders = [...archivedOrders].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
     const statusClass = ordersState.message.includes('Erreur') ? '' : 'success-note';
-    return `<div class="admin-workbench"><div class="admin-home-hero"><div><div class="kicker">Bienvenue</div><h2>Centre des commandes</h2><p>Connecté à ${escapeHtml(ordersState.owner)}/${escapeHtml(ordersState.repo)} pour lire ${escapeHtml(ordersState.path)} avec votre token GitHub. Les commandes du worker deviennent un tableau clair pour les décisions du jour.</p><div class="cta-row"><button class="btn btn-primary" data-orders-refresh ${ordersState.loading ? 'disabled' : ''}>${ordersState.loading ? 'Actualisation…' : 'Actualiser orders.json'}</button></div></div><div class="admin-home-stats"><div class="admin-stat"><span>Commandes</span><strong>${orders.length}</strong></div><div class="admin-stat"><span>Revenus</span><strong>${formatMoney(totalCents, orders[0]?.currency || 'cad')}</strong></div><div class="admin-stat"><span>Articles</span><strong>${itemCount}</strong></div><div class="admin-stat"><span>À confirmer</span><strong>${pending}</strong></div><div class="admin-stat"><span>Archivées</span><strong>${archivedOrders.length}</strong></div></div></div><div class="admin-card"><div class="orders-toolbar"><div><h3>Résumé opérationnel</h3><p>Prochaine livraison: <strong>${escapeHtml(nextDelivery)}</strong> • orders.json mis à jour: <strong>${escapeHtml(formatDateTime(ordersState.data?.updated_at))}</strong></p></div><span class="status-badge">${ordersState.lastFetchedAt ? `Lu ${escapeHtml(formatDateTime(ordersState.lastFetchedAt))}` : 'Prêt'}</span></div>${ordersState.message ? `<p class="notice ${statusClass}">${escapeHtml(ordersState.message)}</p>` : ''}</div><div class="orders-grid">${recentOrders.map((order) => `<article class="order-card"><div class="order-card-head"><div><h3>${escapeHtml(order.customer?.name || 'Client')}</h3><div class="order-meta"><span>${escapeHtml(order.business || '')}</span><span>${escapeHtml(formatDateTime(order.created_at))}</span></div></div><div class="order-actions"><span class="status-badge ${String(order.payment_status).toLowerCase() === 'unconfirmed' ? 'closed' : ''}">${escapeHtml(order.payment_status || 'inconnu')}</span><button class="order-archive-btn" data-order-archive="${escapeHtml(order.order_id || '')}">Archiver</button></div></div><div class="order-delivery"><div>Livraison<br>${escapeHtml(order.delivery?.date || '—')}</div><div>Fenêtres<br>${escapeHtml([order.delivery?.window_1, order.delivery?.window_2].filter(Boolean).join(' / ') || '—')}</div><div>Contact<br>${escapeHtml(order.customer?.phone || '—')}</div><div>Total<br>${formatMoney(order.subtotal_cents, order.currency)}</div></div><div class="order-lines">${(order.items || []).map((item) => `<div class="order-line"><span>${Number(item.quantity || 0)}× ${escapeHtml(item.title || 'Article')} <small>${escapeHtml(item.portion_label || '')}</small></span><strong>${formatMoney(item.line_total_cents, order.currency)}</strong></div>`).join('')}</div>${order.delivery?.instructions ? `<p class="notice">Instruction: ${escapeHtml(order.delivery.instructions)}</p>` : ''}</article>`).join('') || '<div class="admin-empty">Aucune commande chargée. Cliquez Actualiser orders.json pour lire les dernières commandes.</div>'}</div></div>`;
+    return `<div class="admin-workbench"><div class="admin-home-hero"><div><div class="kicker">Bienvenue</div><h2>Centre des commandes</h2><p>Connecté à ${escapeHtml(ordersState.owner)}/${escapeHtml(ordersState.repo)} pour lire ${escapeHtml(ordersState.path)} avec votre token GitHub. Les commandes archivées restent visibles ci-dessous et peuvent être restaurées.</p><div class="cta-row"><button class="btn btn-primary" data-orders-refresh ${ordersState.loading ? 'disabled' : ''}>${ordersState.loading ? 'Actualisation…' : 'Actualiser orders.json'}</button></div></div><div class="admin-home-stats"><div class="admin-stat"><span>Commandes actives</span><strong>${orders.length}</strong></div><div class="admin-stat"><span>Revenus actifs</span><strong>${formatMoney(totalCents, orders[0]?.currency || 'cad')}</strong></div><div class="admin-stat"><span>Articles actifs</span><strong>${itemCount}</strong></div><div class="admin-stat"><span>À confirmer</span><strong>${pending}</strong></div><div class="admin-stat"><span>Archivées</span><strong>${archivedOrders.length}</strong></div></div></div><div class="admin-card"><div class="orders-toolbar"><div><h3>Résumé opérationnel</h3><p>Prochaine livraison active: <strong>${escapeHtml(nextDelivery)}</strong> • orders.json mis à jour: <strong>${escapeHtml(formatDateTime(ordersState.data?.updated_at))}</strong></p></div><span class="status-badge">${ordersState.lastFetchedAt ? `Lu ${escapeHtml(formatDateTime(ordersState.lastFetchedAt))}` : 'Prêt'}</span></div>${ordersState.message ? `<p class="notice ${statusClass}">${escapeHtml(ordersState.message)}</p>` : ''}</div><div><div class="orders-toolbar"><h3>Commandes actives</h3><span class="status-badge">${orders.length}</span></div><div class="orders-grid">${recentOrders.map((order) => adminOrderCardHtml(order)).join('') || '<div class="admin-empty">Aucune commande active. Cliquez Actualiser orders.json pour lire les dernières commandes.</div>'}</div></div><div class="admin-card"><div class="orders-toolbar"><div><h3>Commandes archivées</h3><p>Archivage local seulement: les commandes restent lisibles ici tant qu’elles existent dans orders.json.</p></div><span class="status-badge closed">${archivedOrders.length}</span></div><div class="orders-grid">${recentArchivedOrders.map((order) => adminOrderCardHtml(order, { archived: true })).join('') || '<div class="admin-empty">Aucune commande archivée pour le moment.</div>'}</div></div></div>`;
   }
 
   function adminPanelHtml(path) {
@@ -1046,13 +1055,27 @@
     }
   }
 
+  function saveArchivedOrderIds() {
+    localStorage.setItem(ADMIN_ARCHIVED_ORDERS_STORAGE_KEY, JSON.stringify(state.admin.orders.archivedIds || []));
+  }
+
   function archiveAdminOrder(orderId) {
     if (!orderId) return;
     const archived = new Set(state.admin.orders.archivedIds || []);
     archived.add(orderId);
     state.admin.orders.archivedIds = [...archived];
-    localStorage.setItem(ADMIN_ARCHIVED_ORDERS_STORAGE_KEY, JSON.stringify(state.admin.orders.archivedIds));
-    state.admin.orders.message = `Commande ${orderId} archivée dans ce portail.`;
+    saveArchivedOrderIds();
+    state.admin.orders.message = `Commande ${orderId} archivée dans ce portail. Elle reste visible dans Commandes archivées.`;
+    render();
+  }
+
+  function restoreAdminOrder(orderId) {
+    if (!orderId) return;
+    const archived = new Set(state.admin.orders.archivedIds || []);
+    archived.delete(orderId);
+    state.admin.orders.archivedIds = [...archived];
+    saveArchivedOrderIds();
+    state.admin.orders.message = `Commande ${orderId} restaurée dans les commandes actives.`;
     render();
   }
 
@@ -1315,6 +1338,7 @@
     root.querySelectorAll('[data-admin-file]').forEach((button) => button.addEventListener('click', () => { state.admin.selectedFile = button.dataset.adminFile; state.admin.message = ''; state.admin.editorValid = true; render(); }));
     root.querySelector('[data-orders-refresh]')?.addEventListener('click', refreshAdminOrders);
     root.querySelectorAll('[data-order-archive]').forEach((button) => button.addEventListener('click', () => archiveAdminOrder(button.dataset.orderArchive)));
+    root.querySelectorAll('[data-order-restore]').forEach((button) => button.addEventListener('click', () => restoreAdminOrder(button.dataset.orderRestore)));
     root.querySelectorAll('[data-admin-field]').forEach((field) => field.addEventListener('input', () => {
       let value = field.dataset.adminType === 'boolean' ? field.checked : field.value;
       if (field.type === 'number') value = field.value === '' ? null : Number(field.value);
