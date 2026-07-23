@@ -1,15 +1,15 @@
 {
   "items": [
     {
-      "id": "poulet-shish-taouk-avec-patates-a-lail_20260717",
-      "title": "Poulet shish taouk avec patates à l’ail",
+      "id": "pain-de-viande-sauce-brune-avec-patates-en-cubes-assaisonnees_20260724",
+      "title": "Pain de viande, sauce brune avec patates en cubes assaisonnées",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -17,15 +17,15 @@
       "showcase": false
     },
     {
-      "id": "linguini-sauce-rosee-avec-parmesan_20260717",
-      "title": "Linguini sauce rosée avec parmesan",
+      "id": "spaghetti-sauce-viande_20260724",
+      "title": "Spaghetti sauce viande",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -33,15 +33,15 @@
       "showcase": false
     },
     {
-      "id": "riz-style-chinois-au-boeuf_20260717",
-      "title": "Riz style chinois au bœuf",
+      "id": "macaroni-3-fromage-gratine_20260724",
+      "title": "Macaroni 3 fromage gratiné",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -49,15 +49,15 @@
       "showcase": false
     },
     {
-      "id": "boulette-aigre-douce-avec-riz-aux-legumes_20260717",
-      "title": "Boulette aigre douce avec riz aux légumes",
+      "id": "poulet-marine-riz-et-brocoli_20260724",
+      "title": "Poulet mariné, riz et brocoli",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -65,15 +65,15 @@
       "showcase": false
     },
     {
-      "id": "gratin-de-patate-bacon-brocoli_20260717",
-      "title": "Gratin de patate bacon brocoli",
+      "id": "poulet-miel-et-ail-sur-fettuccini_20260724",
+      "title": "Poulet miel et ail sur fettuccini",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -81,15 +81,15 @@
       "showcase": false
     },
     {
-      "id": "pizza-pepperoni-sur-pain-pita_20260717",
-      "title": "Pizza pepperoni sur pain pita",
+      "id": "couscous-libanais_20260724",
+      "title": "Couscous libanais",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -97,15 +97,15 @@
       "showcase": false
     },
     {
-      "id": "griot-de-porc-haitien-avec-riz-aux-feves-rouge_20260717",
-      "title": "Griot de porc haïtien avec riz aux fèves rouge",
+      "id": "penne-tomate-vin-rouge-et-saucisse-italienne_20260724",
+      "title": "Penne tomate, vin rouge et saucisse italienne",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -113,10 +113,10 @@
       "showcase": false
     },
     {
-      "id": "soupe-legumes_20260717",
+      "id": "soupe-legumes_20260724",
       "title": "Soupe légumes",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Les soupes",
       "available": true,
       "featured": false,
       "image": "",
@@ -127,10 +127,10 @@
       "showcase": false
     },
     {
-      "id": "salade-grecque_20260717",
-      "title": "Salade grecque",
+      "id": "salade-du-chef_20260724",
+      "title": "Salade du chef",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Les salades",
       "available": true,
       "featured": false,
       "image": "",
@@ -141,10 +141,10 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-jambon-moutarde-miel_20260717",
-      "title": "Sous marin jambon moutarde miel",
+      "id": "sous-marin-viandes-froides_20260724",
+      "title": "Sous-marin viandes froides",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Les sous-marins",
       "available": true,
       "featured": false,
       "image": "",
