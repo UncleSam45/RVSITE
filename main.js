@@ -35,7 +35,7 @@
     sunday: 'dimanche', monday: 'lundi', tuesday: 'mardi', wednesday: 'mercredi',
     thursday: 'jeudi', friday: 'vendredi', saturday: 'samedi',
   };
-  const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
+  const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Famille', standard: 'Format unique' };
   const DATE_REASONS = {
     available: 'Disponible', too_soon: 'Trop tôt',
     no_delivery: 'Pas de livraison', weekend: 'Fin de semaine', full: 'Complet', closed: 'Fermé', invalid: 'Date invalide',
@@ -88,7 +88,7 @@
   function setSeo(content) {
     const seo = content?.seo || {};
     document.title = seo.title || 'La cuisine de Rosalie | Repas faits maison & livraison locale';
-    upsertMeta('description', seo.description || 'Menus faits maison en rotation, portions Petit / Grand / Familial et livraison locale.');
+    upsertMeta('description', seo.description || 'Menus faits maison en rotation, portions Petit / Grand / Famille et livraison locale.');
     upsertMeta('og:title', document.title, 'property');
     upsertMeta('og:description', seo.description || '', 'property');
     upsertMeta('og:type', 'website', 'property');
@@ -645,11 +645,11 @@
           <h1>${escapeHtml(state.data.content.home?.headline || 'Repas faits maison livrés dans votre secteur')}</h1>
           <p class="lead">${escapeHtml(state.data.content.home?.subheadline || 'Une cuisine simple, généreuse et préparée avec soin pour simplifier vos repas de semaine.')}</p>
           <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
-          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Portions Petit / Grand / Familial</span>` : '<span class="chip">Menu de la semaine</span>'}</div>
+          <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Formats Petit / Grand / Famille</span>` : '<span class="chip">Menu de la semaine</span>'}</div>
         </div>
         <div class="hero-visual">
           <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu de la semaine')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Familial • livraison à céduler avec le client` : 'Les commandes sont fermées pour le moment. Consultez le menu pour connaître la prochaine période de commande.'}</span></div>
+          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu de la semaine')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Famille • livraison à céduler avec le client` : 'Les commandes sont fermées pour le moment. Consultez le menu pour connaître la prochaine période de commande.'}</span></div>
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
@@ -664,7 +664,7 @@
       </section>` : ''}
       ${galleryCarouselHtml()}
       <section class="section container grid grid-4">
-        ${['Choisissez vos plats', 'Sélectionnez Petit, Grand ou Familial', 'Planifiez votre livraison', 'Savourez vos repas faits maison'].map((text, index) => `<div class="card mini-card"><strong>${index + 1}. ${text}</strong><p>Un parcours simple, pensé pour commander rapidement sur téléphone.</p></div>`).join('')}
+        ${['Choisissez vos plats', 'Sélectionnez Petit, Grand ou Famille', 'Planifiez votre livraison', 'Savourez vos repas faits maison'].map((text, index) => `<div class="card mini-card"><strong>${index + 1}. ${text}</strong><p>Un parcours simple, pensé pour commander rapidement sur téléphone.</p></div>`).join('')}
       </section>
       <section class="section container panel emotional-card">
         <div class="section-head"><div><div class="kicker">Confiance</div><h2>Fait maison, local et pensé pour les familles.</h2><p>Portions familiales, livraison dans les secteurs desservis, préavis de ${orderNoticeText()} et préparation soignée. Zones: ${escapeHtml(zones)}.</p></div><button class="btn btn-primary" data-page="livraison">Voir les conditions</button></div>
@@ -702,7 +702,7 @@
           <section class="menu-header">
             <div class="kicker">Menu en rotation</div><h1>${escapeHtml(menu.title || 'Menu de la semaine')}</h1><span class="status-badge ${isOpen ? '' : 'closed'}">${isOpen ? 'Commande ouverte' : 'Commandes fermées'}</span>
             <p class="lead">${escapeHtml(menu.description || 'Menu disponible pour commandes planifiées.')}</p><p class="notice ${isOpen ? 'success-note' : ''}">${menuOrderStatusMessage()}</p>
-            <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Familial</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
+            <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Famille</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
           </section>
           ${!menu.active ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${menu.active && !orderStatus.open ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${menu.active && promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
           ${menu.active ? `${menuSectionHtml('Plats principaux', getMenuItems('items'))}${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}` : ''}
@@ -948,7 +948,7 @@
 
   function adminItemsPanel() {
     const items = adminGet('items') || [];
-    return `<div class="admin-workbench"><div class="admin-warning"><strong>Important: prix et plats</strong>Si vous changez un plat, une disponibilité ou un prix, vous devez informer l’admin à <a href="mailto:rosalie.vaisica@crowdnet.33mail.com">rosalie.vaisica@crowdnet.33mail.com</a> pour une mise à jour Stripe. Sans cette mise à jour serveur, le paiement/checkout peut ne pas fonctionner.</div>${items.map((item, index) => `<div class="admin-card admin-item-card"><h3>${escapeHtml(item.title || `Plat ${index + 1}`)}</h3><div class="admin-field-row">${adminInput(`items.${index}.title`, 'Nom du plat')}${adminInput(`items.${index}.category`, 'Catégorie')}</div>${adminTextarea(`items.${index}.description`, 'Description client')}<div class="admin-price-grid">${adminInput(`items.${index}.pricing.petit`, 'Prix petit', 'number', 'step="0.01"')}${adminInput(`items.${index}.pricing.grand`, 'Prix grand', 'number', 'step="0.01"')}${adminInput(`items.${index}.pricing.familial`, 'Prix familial', 'number', 'step="0.01"')}</div><div class="admin-mini-actions">${adminCheckbox(`items.${index}.available`, 'Disponible')}${adminCheckbox(`items.${index}.featured`, 'Mettre en vedette')}</div></div>`).join('')}</div>`;
+    return `<div class="admin-workbench"><div class="admin-warning"><strong>Important: prix et plats</strong>Si vous changez un plat, une disponibilité ou un prix, vous devez informer l’admin à <a href="mailto:rosalie.vaisica@crowdnet.33mail.com">rosalie.vaisica@crowdnet.33mail.com</a> pour une mise à jour Stripe. Sans cette mise à jour serveur, le paiement/checkout peut ne pas fonctionner.</div>${items.map((item, index) => `<div class="admin-card admin-item-card"><h3>${escapeHtml(item.title || `Plat ${index + 1}`)}</h3><div class="admin-field-row">${adminInput(`items.${index}.title`, 'Nom du plat')}${adminInput(`items.${index}.category`, 'Catégorie')}</div>${adminTextarea(`items.${index}.description`, 'Description client')}<div class="admin-price-grid">${adminInput(`items.${index}.pricing.petit`, 'Prix petit', 'number', 'step="0.01"')}${adminInput(`items.${index}.pricing.grand`, 'Prix grand', 'number', 'step="0.01"')}${adminInput(`items.${index}.pricing.familial`, 'Prix famille', 'number', 'step="0.01"')}</div><div class="admin-mini-actions">${adminCheckbox(`items.${index}.available`, 'Disponible')}${adminCheckbox(`items.${index}.featured`, 'Mettre en vedette')}</div></div>`).join('')}</div>`;
   }
 
   function adminDeliveryPanel() {
@@ -1267,7 +1267,7 @@
   }
 
   function footerHtml() {
-    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Portions Petit / Grand / Familial</p></div><div><strong>Commande</strong><p>72h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
+    return `<footer class="footer container"><div class="footer-grid"><div><strong>La cuisine de Rosalie</strong><p>Repas faits maison • Livraison locale • Formats Petit / Grand / Famille</p></div><div><strong>Commande</strong><p>72h à l’avance<br>Minimum ${formatCurrency(getSettingRules().minimum_order || 35)}</p></div><div><strong>Contact</strong><p>${escapeHtml(state.data.settings.business.phone)}<br><a href="${escapeHtml(state.data.settings.business.facebook_url)}">Facebook</a></p></div></div></footer>`;
   }
 
   function mobileCartBarHtml() {

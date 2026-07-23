@@ -1,25 +1,25 @@
 {
   "current_menu": {
     "active": true,
-    "title": "Menu du 17 au 22 juillet",
-    "description": "Commandes ouvertes du vendredi 17 juillet à 1 h au mercredi 22 juillet à midi (heure de Montréal).",
-    "start_date": "2026-07-17",
-    "end_date": "2026-07-22",
-    "order_open_at": "2026-07-17T01:00:00-04:00",
-    "order_close_at": "2026-07-22T12:00:00-04:00",
+    "title": "Menu du 24 au 29 juillet",
+    "description": "Commandes ouvertes du vendredi 24 juillet 2026 à 1 h au mercredi 29 juillet 2026 à midi (heure de Montréal).",
+    "start_date": "2026-07-24",
+    "end_date": "2026-07-29",
+    "order_open_at": "2026-07-24T01:00:00-04:00",
+    "order_close_at": "2026-07-29T12:00:00-04:00",
     "item_ids": [
-      "poulet-shish-taouk-avec-patates-a-lail_20260717",
-      "linguini-sauce-rosee-avec-parmesan_20260717",
-      "riz-style-chinois-au-boeuf_20260717",
-      "boulette-aigre-douce-avec-riz-aux-legumes_20260717",
-      "gratin-de-patate-bacon-brocoli_20260717",
-      "pizza-pepperoni-sur-pain-pita_20260717",
-      "griot-de-porc-haitien-avec-riz-aux-feves-rouge_20260717"
+      "pain-de-viande-sauce-brune-avec-patates-en-cubes-assaisonnees_20260724",
+      "spaghetti-sauce-viande_20260724",
+      "macaroni-3-fromage-gratine_20260724",
+      "poulet-marine-riz-et-brocoli_20260724",
+      "poulet-miel-et-ail-sur-fettuccini_20260724",
+      "couscous-libanais_20260724",
+      "penne-tomate-vin-rouge-et-saucisse-italienne_20260724"
     ],
     "extra_ids": [
-      "soupe-legumes_20260717",
-      "salade-grecque_20260717",
-      "sous-marin-jambon-moutarde-miel_20260717"
+      "soupe-legumes_20260724",
+      "salade-du-chef_20260724",
+      "sous-marin-viandes-froides_20260724"
     ]
   },
   "archive": []

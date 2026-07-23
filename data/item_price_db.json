@@ -1,82 +1,82 @@
 {
   "items": [
     {
-      "title": "Poulet chasseur avec riz",
+      "title": "Pain de viande, sauce brune avec patates en cubes assaisonnées",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "poulet-chasseur-riz"
+      "last_seen_id": "pain-de-viande-sauce-brune-avec-patates-en-cubes-assaisonnees"
     },
     {
-      "title": "Nouille Sauté de légumes",
+      "title": "Spaghetti sauce viande",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "nouille-saute-legumes"
+      "last_seen_id": "spaghetti-sauce-viande"
     },
     {
-      "title": "Sandwich au porc mexicain",
+      "title": "Macaroni 3 fromage gratiné",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "sandwich-porc-mexicain"
+      "last_seen_id": "macaroni-3-fromage-gratine"
     },
     {
-      "title": "Couscous méditerranéen",
+      "title": "Poulet mariné, riz et brocoli",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "couscous-mediterraneen"
+      "last_seen_id": "poulet-marine-riz-et-brocoli"
     },
     {
-      "title": "Macaroni au fromage bacon",
+      "title": "Poulet miel et ail sur fettuccini",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "macaroni-fromage-bacon"
+      "last_seen_id": "poulet-miel-et-ail-sur-fettuccini"
     },
     {
-      "title": "Macaroni chinois au poulet",
+      "title": "Couscous libanais",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "macaroni-chinois-poulet"
+      "last_seen_id": "couscous-libanais"
     },
     {
-      "title": "Lasagne à la viande sauce rosée",
+      "title": "Penne tomate, vin rouge et saucisse italienne",
       "type": "regular_meal",
       "pricing": {
-        "small_meal": 6,
+        "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "lasagne-viande-sauce-rosee"
+      "last_seen_id": "penne-tomate-vin-rouge-et-saucisse-italienne"
     },
     {
-      "title": "Soupe poulet et Nouilles",
+      "title": "Soupe légumes",
       "type": "extra",
       "pricing": {
         "standard": 4
       },
-      "last_seen_id": "soupe-poulet-nouilles"
+      "last_seen_id": "soupe-legumes"
     },
     {
       "title": "Salade du chef",
@@ -87,20 +87,12 @@
       "last_seen_id": "salade-du-chef"
     },
     {
-      "title": "Sous-marins pepperoni jambon",
+      "title": "Sous-marin viandes froides",
       "type": "extra",
       "pricing": {
         "standard": 7
       },
-      "last_seen_id": "sous-marins-pepperoni-jambon"
-    },
-    {
-      "title": "Muffin pépites de chocolat",
-      "type": "extra",
-      "pricing": {
-        "standard": 3
-      },
-      "last_seen_id": "muffin-pepites-chocolat"
+      "last_seen_id": "sous-marin-viandes-froides"
     }
   ]
 }

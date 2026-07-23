@@ -1,15 +1,15 @@
 {
   "items": [
     {
-      "id": "poulet-chasseur-riz",
-      "title": "Poulet chasseur avec riz",
+      "id": "pain-de-viande-sauce-brune-avec-patates-en-cubes-assaisonnees_20260724",
+      "title": "Pain de viande, sauce brune avec patates en cubes assaisonnées",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -17,15 +17,15 @@
       "showcase": false
     },
     {
-      "id": "nouille-saute-legumes",
-      "title": "Nouille Sauté de légumes",
+      "id": "spaghetti-sauce-viande_20260724",
+      "title": "Spaghetti sauce viande",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -33,15 +33,15 @@
       "showcase": false
     },
     {
-      "id": "sandwich-porc-mexicain",
-      "title": "Sandwich au porc mexicain",
+      "id": "macaroni-3-fromage-gratine_20260724",
+      "title": "Macaroni 3 fromage gratiné",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -49,15 +49,15 @@
       "showcase": false
     },
     {
-      "id": "couscous-mediterraneen",
-      "title": "Couscous méditerranéen",
+      "id": "poulet-marine-riz-et-brocoli_20260724",
+      "title": "Poulet mariné, riz et brocoli",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -65,15 +65,15 @@
       "showcase": false
     },
     {
-      "id": "macaroni-fromage-bacon",
-      "title": "Macaroni au fromage bacon",
+      "id": "poulet-miel-et-ail-sur-fettuccini_20260724",
+      "title": "Poulet miel et ail sur fettuccini",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -81,15 +81,15 @@
       "showcase": false
     },
     {
-      "id": "macaroni-chinois-poulet",
-      "title": "Macaroni chinois au poulet",
+      "id": "couscous-libanais_20260724",
+      "title": "Couscous libanais",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -97,15 +97,15 @@
       "showcase": false
     },
     {
-      "id": "lasagne-viande-sauce-rosee",
-      "title": "Lasagne à la viande sauce rosée",
+      "id": "penne-tomate-vin-rouge-et-saucisse-italienne_20260724",
+      "title": "Penne tomate, vin rouge et saucisse italienne",
       "description": "",
-      "category": "Plats principaux",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "petit": 6,
+        "petit": 8,
         "grand": 12,
         "familial": 23
       },
@@ -113,10 +113,10 @@
       "showcase": false
     },
     {
-      "id": "soupe-poulet-nouilles",
-      "title": "Soupe poulet et Nouilles",
+      "id": "soupe-legumes_20260724",
+      "title": "Soupe légumes",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Les soupes",
       "available": true,
       "featured": false,
       "image": "",
@@ -127,10 +127,10 @@
       "showcase": false
     },
     {
-      "id": "salade-du-chef",
+      "id": "salade-du-chef_20260724",
       "title": "Salade du chef",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Les salades",
       "available": true,
       "featured": false,
       "image": "",
@@ -141,29 +141,15 @@
       "showcase": false
     },
     {
-      "id": "sous-marins-pepperoni-jambon",
-      "title": "Sous-marins pepperoni jambon",
+      "id": "sous-marin-viandes-froides_20260724",
+      "title": "Sous-marin viandes froides",
       "description": "",
-      "category": "Accompagnements & extras",
+      "category": "Les sous-marins",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
         "standard": 7
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "muffin-pepites-chocolat",
-      "title": "Muffin pépites de chocolat",
-      "description": "",
-      "category": "Accompagnements & extras",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 3
       },
       "tags": [],
       "showcase": false

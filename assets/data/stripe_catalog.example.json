@@ -7,14 +7,14 @@
     "pates-strogonoff": {
       "title": "Pâtes strogonoff",
       "prices": {
-        "petit": { "stripe_price_id": "price_replace_petit", "unit_amount": 600 },
+        "petit": { "stripe_price_id": "price_replace_petit", "unit_amount": 800 },
         "grand": { "stripe_price_id": "price_replace_grand", "unit_amount": 1000 },
         "familial": { "stripe_price_id": "price_replace_familial", "unit_amount": 2300 }
       }
     }
   },
   "prices": {
-    "petit": { "stripe_price_id": "price_replace_global_petit", "unit_amount": 600 },
+    "petit": { "stripe_price_id": "price_replace_global_petit", "unit_amount": 800 },
     "grand": { "stripe_price_id": "price_replace_global_grand", "unit_amount": 1000 },
     "familial": { "stripe_price_id": "price_replace_global_familial", "unit_amount": 2300 }
   }
