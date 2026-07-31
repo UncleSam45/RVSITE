@@ -1,0 +1,466 @@
+{
+  "items": [
+    {
+      "id": "fusilli-aux-legumes-et-crevettes_20260731",
+      "title": "Fusilli aux légumes et crevettes",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "salade-tacos_20260731",
+      "title": "Salade tacos",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+      "title": "Macaroni tomate à la chair de saucisses",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "riz-chinois-au-poulet_20260731",
+      "title": "Riz chinois au poulet",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "pate-chinois_20260731",
+      "title": "Pâté chinois",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "linguine-alfredo-au-bacon_20260731",
+      "title": "Linguine Alfredo au bacon",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "saute-de-porc-asiatique_20260731",
+      "title": "Sauté de porc asiatique",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "soupe-aux-legumes_20260731",
+      "title": "Soupe aux légumes",
+      "description": "Préparé maison.",
+      "category": "Les soupes",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 4
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "salade-cesar_20260731",
+      "title": "Salade César",
+      "description": "Préparé maison.",
+      "category": "Les salades",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 5
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "sous-marin-pizza_20260731",
+      "title": "Sous-marin pizza",
+      "description": "Préparé maison.",
+      "category": "Les sous-marins",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+      "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+      "gift_title": "Fusilli aux légumes et crevettes",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-salade-tacos-petit-20260731",
+      "title": "PROMO — Salade tacos — Petit format",
+      "gift_title": "Salade tacos",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+      "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+      "gift_title": "Macaroni tomate à la chair de saucisses",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-riz-chinois-au-poulet-petit-20260731",
+      "title": "PROMO — Riz chinois au poulet — Petit format",
+      "gift_title": "Riz chinois au poulet",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-pate-chinois-petit-20260731",
+      "title": "PROMO — Pâté chinois — Petit format",
+      "gift_title": "Pâté chinois",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+      "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+      "gift_title": "Linguine Alfredo au bacon",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-saute-de-porc-asiatique-petit-20260731",
+      "title": "PROMO — Sauté de porc asiatique — Petit format",
+      "gift_title": "Sauté de porc asiatique",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "petit",
+      "regular_value": 8,
+      "image": "",
+      "pricing": {
+        "petit": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+      "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+      "gift_title": "Fusilli aux légumes et crevettes",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-salade-tacos-familial-20260731",
+      "title": "PROMO — Salade tacos — Format familial",
+      "gift_title": "Salade tacos",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+      "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+      "gift_title": "Macaroni tomate à la chair de saucisses",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-riz-chinois-au-poulet-familial-20260731",
+      "title": "PROMO — Riz chinois au poulet — Format familial",
+      "gift_title": "Riz chinois au poulet",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-pate-chinois-familial-20260731",
+      "title": "PROMO — Pâté chinois — Format familial",
+      "gift_title": "Pâté chinois",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+      "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+      "gift_title": "Linguine Alfredo au bacon",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    },
+    {
+      "id": "promo-saute-de-porc-asiatique-familial-20260731",
+      "title": "PROMO — Sauté de porc asiatique — Format familial",
+      "gift_title": "Sauté de porc asiatique",
+      "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+      "category": "Promotion cachée",
+      "available": true,
+      "featured": false,
+      "promotional": true,
+      "hidden": true,
+      "promotion_tier": "familial",
+      "regular_value": 23,
+      "image": "",
+      "pricing": {
+        "familial": 0
+      },
+      "tags": [
+        "promotion",
+        "hidden"
+      ],
+      "showcase": false
+    }
+  ]
+}

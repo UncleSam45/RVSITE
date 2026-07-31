@@ -1,0 +1,18 @@
+{
+  "slides": [
+    {
+      "id": "macaroni fromage bacon deluxe",
+      "title": "macaroni fromage bacon deluxe",
+      "subtitle": "",
+      "image": "",
+      "thumb": "",
+      "linked_item_id": "",
+      "status": "past",
+      "badge": "Création passée",
+      "cta_label": "Voir le menu actuel",
+      "cta_page": "menu",
+      "enabled": true,
+      "sort": 10
+    }
+  ]
+}
