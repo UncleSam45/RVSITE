@@ -62,6 +62,7 @@
     dateMessage: '',
     carousel: { index: 0, timer: null, paused: false, touchStartX: 0 },
     countdownTimer: null,
+    promotion: { open: false, selecting: false },
     admin: { authenticated: false, token: '', rememberKey: false, owner: 'UncleSam45', repo: 'RVSITE', branch: 'main', working: null, original: null, selectedFile: 'dashboard', message: '', saving: false, editorValid: true, orders: { owner: 'UncleSam45', repo: 'RVSITE_BRIDGE', branch: 'main', path: 'orders.json', loading: false, message: '', data: null, updatedAt: '', lastFetchedAt: '', archivedIds: [] }, stripe: { apiKey: '', projectSlug: 'lacuisine_rosalie', currency: 'cad', environment: 'test', loading: false, updating: false, message: '', repoCatalog: null, stripeCatalog: null, plan: null, results: null } },
   };
 
@@ -78,9 +79,10 @@
 
       /* Soft Easter palette: sunny yellows, fresh mint, and gentle blush accents without stark white surfaces. */
       .topbar{border-color:rgba(232,211,133,.95);background:rgba(255,246,204,.92)}.brand-mark{background:linear-gradient(135deg,#F7CA4D,#CFEFA9 52%,#93D7B0);color:#24382F;box-shadow:0 12px 26px rgba(247,202,77,.24)}.nav-btn:hover,.nav-btn[aria-current=true]{background:#FFF4BC;border-color:#F3DC7A;color:var(--deep-olive)}.cart-nav,.btn-olive,.step-pill.active{background:linear-gradient(135deg,#2F6F55,#5DBB7B);color:#fff;border-color:#2F6F55}.cart-badge{background:#FFE889;color:#24382F}.hero{background:radial-gradient(circle at 5% 0%,rgba(255,221,235,.72),transparent 38%),linear-gradient(135deg,rgba(255,249,218,.98),rgba(255,238,164,.92) 55%,rgba(225,246,207,.9));border-color:#E8D385}.btn-primary{background:linear-gradient(180deg,#FFE889,#F7CA4D);color:#24382F;box-shadow:0 14px 26px rgba(247,202,77,.32);border-color:#EEC33F}.btn-secondary{background:#FFF4C9;color:var(--deep-olive);border-color:#D9E9B7}.btn-ghost{background:#FFF3F8;color:#A24D6A;border-color:#FFD7E6}.chip{background:rgba(255,248,211,.94);border-color:#EAD99B;color:#5E7168}.hero-visual{background:linear-gradient(135deg,#FFF4BC,#E1F7D2 58%,#FFE5EF)}.hero-card{border-color:rgba(255,250,224,.92);background:rgba(255,246,204,.92)}.card,.panel{background:rgba(255,249,218,.95);border-color:#E8D385}.menu-header{border-color:#F1E6B8;background:radial-gradient(circle at 8% 0%,rgba(255,229,239,.72),transparent 40%),linear-gradient(135deg,#fffef4,#fff6c9 58%,#effbe8)}.promo{border-left-color:#F7CA4D;background:#FFF9D9}.menu-banner{overflow:hidden;margin-bottom:18px;border:1px solid #E8D385;border-radius:28px;background:#FFF6CF;box-shadow:var(--soft);line-height:0}.menu-banner img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}.menu-card,.cart-panel,.step,.order-summary,.quote-card{background:rgba(255,248,211,.96);border-color:#E8D385}.portion-btn,.date-btn,input,select,textarea{border-color:#E4D28D;background:#FFFBE7}.portion-btn.active,.date-btn.available.active{border-color:#F7CA4D;background:#FFF3A8;color:#24382F;box-shadow:0 8px 18px rgba(247,202,77,.22)}.date-btn.available{background:#F3FFE9}.mobile-cart-bar{background:linear-gradient(135deg,#2F6F55,#69BE7D);border-color:#2F6F55}.food-placeholder{background:linear-gradient(135deg,#FFF4BC,#F4FFE9 65%,#FFE5EF);color:var(--deep-olive)}.availability-strip,.menu-empty{background:rgba(255,246,204,.94);border-color:#E8D385}.availability-strip span{background:#FFF8CD}.showcase-shell{background:radial-gradient(circle at 15% 0,rgba(255,229,239,.72),transparent 35%),radial-gradient(circle at 95% 12%,rgba(218,247,226,.82),transparent 34%),linear-gradient(135deg,#fffdf1,#fff4bc);border-color:#F1E6B8}.showcase-image-wrap{background:#FFF4BC}.showcase-overlay{background:linear-gradient(90deg,rgba(47,111,85,.70),rgba(47,111,85,.30) 48%,rgba(247,202,77,.10)),linear-gradient(0deg,rgba(47,111,85,.48),transparent 55%)}.showcase-subtitle{color:#FFFBE8}.showcase-badge,.showcase-controls button{background:rgba(255,246,204,.94);color:var(--deep-olive);border-color:rgba(255,250,224,.78)}.showcase-dots button[aria-selected=true]{background:#FFE889}.catering-callout{background:linear-gradient(135deg,#fffef4,#fff3bd 55%,#eafbe3)}
-      @media(max-width:980px){.admin-shell,.admin-home-stats,.orders-grid,.order-delivery,.admin-diff,.admin-field-row,.admin-price-grid{grid-template-columns:1fr}.contact-actions{grid-template-columns:1fr}.identity-row{grid-template-columns:1fr;gap:4px}.availability-strip{grid-template-columns:1fr 1fr}.showcase-image-wrap{min-height:430px}.showcase-controls{inset:auto 18px 18px}.catering-callout{display:block}.nav{display:none}.mobile-menu{display:inline-flex}.topbar.open .nav{display:flex;position:absolute;left:10px;right:10px;top:76px;padding:12px;border:1px solid var(--border);border-radius:20px;background:#fffdf8;box-shadow:var(--shadow)}.hero,.menu-layout,.checkout-grid{grid-template-columns:1fr}.cart-panel{position:static}.grid-3,.grid-4,.footer-grid{grid-template-columns:1fr 1fr}.mobile-cart-bar{display:flex}.menu-card{grid-template-columns:130px 1fr}.site{padding-bottom:92px}}
+      .promo-progress{margin-top:12px;padding:14px;border:1px solid #ead38a;border-radius:18px;background:#fff9dd;color:#625020;font-weight:850;line-height:1.45}.promo-progress.unlocked{border-color:#a8d3b8;background:#eef9f1;color:var(--deep-olive)}.gift-line{border:2px solid #e2bf48;background:linear-gradient(135deg,#fff9d8,#fff)}.gift-heading{font-size:.7rem;letter-spacing:.12em;color:#98731a;font-weight:950;margin-bottom:7px}.free-label{display:inline-flex;padding:5px 9px;border-radius:99px;background:var(--deep-olive);color:#fff;font-size:.72rem;font-weight:950}.gift-overlay{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:18px;background:rgba(20,43,34,.72);backdrop-filter:blur(14px);animation:giftFade .25s ease}.gift-dialog{position:relative;width:min(1040px,100%);max-height:92vh;overflow:auto;border:1px solid #fff;border-radius:32px;padding:clamp(20px,4vw,42px);background:radial-gradient(circle at 15% 0,#fff3ae,transparent 34%),radial-gradient(circle at 90% 10%,#d9f3df,transparent 34%),#fffdf6;box-shadow:0 35px 100px rgba(0,0,0,.35);animation:giftRise .55s cubic-bezier(.16,1,.3,1)}.gift-dialog:before{content:'✦  ✧  ✦';position:absolute;right:28px;top:18px;color:#d0a328;font-size:1.5rem;animation:sparkle 1.8s infinite}.gift-intro{text-align:center;max-width:700px;margin:0 auto 24px}.gift-intro h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2rem,5vw,3.7rem);margin:5px 0}.gift-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.gift-card{display:grid;grid-template-rows:130px 1fr;border:1px solid #e6d7a9;border-radius:22px;overflow:hidden;background:#fff;cursor:pointer;box-shadow:var(--soft);transition:.25s}.gift-card:hover,.gift-card:focus{transform:translateY(-5px) scale(1.01);border-color:#d0a328}.gift-card .food-placeholder{min-height:130px}.gift-card-body{display:grid;gap:7px;padding:14px}.gift-card h3{font-size:1rem;margin:0}.gift-card small{color:var(--muted);font-weight:800}.gift-card.selecting{animation:giftSelected .55s ease both}.gift-close{position:absolute;left:18px;top:18px;width:42px;min-height:42px;border:0;border-radius:50%;background:#fff;color:var(--deep-olive);cursor:pointer;font-weight:950}@keyframes giftFade{from{opacity:0}}@keyframes giftRise{from{opacity:0;transform:translateY(35px) scale(.96)}}@keyframes sparkle{50%{transform:scale(1.15);opacity:.55}}@keyframes giftSelected{50%{transform:scale(1.04)}to{transform:scale(.9);opacity:0}}
+      @media(max-width:980px){.admin-shell,.admin-home-stats,.orders-grid,.order-delivery,.admin-diff,.admin-field-row,.admin-price-grid{grid-template-columns:1fr}.contact-actions{grid-template-columns:1fr}.identity-row{grid-template-columns:1fr;gap:4px}.availability-strip{grid-template-columns:1fr 1fr}.showcase-image-wrap{min-height:430px}.showcase-controls{inset:auto 18px 18px}.catering-callout{display:block}.nav{display:none}.mobile-menu{display:inline-flex}.topbar.open .nav{display:flex;position:absolute;left:10px;right:10px;top:76px;padding:12px;border:1px solid var(--border);border-radius:20px;background:#fffdf8;box-shadow:var(--shadow)}.hero,.menu-layout,.checkout-grid{grid-template-columns:1fr}.cart-panel{position:static}.grid-3,.grid-4,.footer-grid{grid-template-columns:1fr 1fr}.gift-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-cart-bar{display:flex}.menu-card{grid-template-columns:130px 1fr}.site{padding-bottom:92px}}
       @media (prefers-reduced-motion: reduce){.showcase-track,.showcase-slide,.countdown-aurora,.countdown-unit::after{transition:none!important;animation:none!important}.btn:hover{transform:none}}
-      @media(max-width:660px){.stepper{grid-template-columns:1fr}.availability-strip{grid-template-columns:1fr}.showcase-shell{padding:8px;border-radius:24px}.showcase-image-wrap{min-height:390px;border-radius:20px}.showcase-overlay{background:linear-gradient(0deg,rgba(47,111,85,.78),rgba(47,111,85,.12))}.showcase-badge{top:14px;left:14px}.showcase-copy{left:18px;right:18px;bottom:52px}.showcase-title{font-size:2rem}.showcase-subtitle{font-size:.98rem}.showcase-controls{display:none}.step-pill{text-align:left}.mobile-cart-bar.empty{display:none}.site{padding-left:8px;padding-right:8px}.topbar{border-radius:18px}.brand-mark{width:74px;height:52px;flex-basis:74px;border-radius:16px;font-size:1.05rem}.hero{padding:20px;border-radius:24px}.hero-visual,.hero-visual img{min-height:410px}.countdown-banner{padding:14px;border-radius:22px}.countdown-copy{display:grid;gap:6px}.countdown-copy strong{text-align:left}.countdown-clock{gap:7px}.countdown-unit{min-height:76px;border-radius:16px}.countdown-unit strong{font-size:1.7rem}.grid-2,.grid-3,.grid-4,.footer-grid,.form-grid,.quote-list{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.menu-card{grid-template-columns:1fr}.menu-card img{height:210px}.portion-grid{grid-template-columns:1fr}.date-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.checkout-grid{gap:12px}.panel,.step{padding:16px}.brand-name{font-size:1rem}.brand-tagline{font-size:.76rem}}
+      @media(max-width:660px){.stepper{grid-template-columns:1fr}.availability-strip{grid-template-columns:1fr}.showcase-shell{padding:8px;border-radius:24px}.showcase-image-wrap{min-height:390px;border-radius:20px}.showcase-overlay{background:linear-gradient(0deg,rgba(47,111,85,.78),rgba(47,111,85,.12))}.showcase-badge{top:14px;left:14px}.showcase-copy{left:18px;right:18px;bottom:52px}.showcase-title{font-size:2rem}.showcase-subtitle{font-size:.98rem}.showcase-controls{display:none}.step-pill{text-align:left}.mobile-cart-bar.empty{display:none}.site{padding-left:8px;padding-right:8px}.topbar{border-radius:18px}.brand-mark{width:74px;height:52px;flex-basis:74px;border-radius:16px;font-size:1.05rem}.hero{padding:20px;border-radius:24px}.hero-visual,.hero-visual img{min-height:410px}.countdown-banner{padding:14px;border-radius:22px}.countdown-copy{display:grid;gap:6px}.countdown-copy strong{text-align:left}.countdown-clock{gap:7px}.countdown-unit{min-height:76px;border-radius:16px}.countdown-unit strong{font-size:1.7rem}.grid-2,.grid-3,.grid-4,.footer-grid,.form-grid,.quote-list,.gift-grid{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.menu-card{grid-template-columns:1fr}.menu-card img{height:210px}.portion-grid{grid-template-columns:1fr}.date-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.checkout-grid{gap:12px}.panel,.step{padding:16px}.brand-name{font-size:1rem}.brand-tagline{font-size:.76rem}}
     `;
     document.head.appendChild(style);
   }
@@ -224,13 +226,38 @@
     return getCurrentMenuOfferings().filter((item) => item.available !== false && itemImagePath(item, 'hero'));
   }
 
+  function isPromotionalItem(itemOrLine) {
+    const item = itemOrLine?.itemId ? getItemById(itemOrLine.itemId) : itemOrLine;
+    return item?.promotional === true;
+  }
+
   function cartTotals() {
-    const subtotal = state.cart.items.reduce((sum, line) => sum + line.price * line.qty, 0);
+    const subtotal = state.cart.items.reduce((sum, line) => sum + (isPromotionalItem(line) ? 0 : line.price * line.qty), 0);
     const count = state.cart.items.reduce((sum, line) => sum + line.qty, 0);
     return { subtotal, count };
   }
 
+  function promotionTier(subtotal = cartTotals().subtotal) {
+    if (subtotal >= 120) return 'familial';
+    if (subtotal >= 80) return 'petit';
+    return '';
+  }
+
+  function promotionalItems(tier = promotionTier()) {
+    return (state.data?.items || []).filter((item) => item.promotional === true && item.promotion_tier === tier);
+  }
+
+  function selectedGift() {
+    return state.cart.items.find((line) => isPromotionalItem(line));
+  }
+
+  function reconcileGift() {
+    const tier = promotionTier();
+    state.cart.items = state.cart.items.filter((line) => !isPromotionalItem(line) || (tier && getItemById(line.itemId)?.promotion_tier === tier));
+  }
+
   function saveCart() {
+    reconcileGift();
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.cart));
   }
 
@@ -266,7 +293,7 @@
 
   function changeLineQty(itemId, portion, delta) {
     const line = state.cart.items.find((entry) => entry.itemId === itemId && entry.portion === portion);
-    if (!line) return;
+    if (!line || isPromotionalItem(line)) return;
     line.qty += delta;
     if (line.qty <= 0) state.cart.items = state.cart.items.filter((entry) => !(entry.itemId === itemId && entry.portion === portion));
     saveCart();
@@ -274,6 +301,7 @@
   }
 
   function removeLine(itemId, portion) {
+    if (isPromotionalItem(getItemById(itemId))) return;
     state.cart.items = state.cart.items.filter((entry) => !(entry.itemId === itemId && entry.portion === portion));
     saveCart();
     render();
@@ -320,7 +348,7 @@
     if (status.state === 'before') return `Les commandes pour ce menu ouvriront ${formatOrderTimestamp(menu.order_open_at)} (heure de Montréal).`;
     if (status.state === 'after') return 'Commandes fermées';
     if (status.state === 'inactive') return 'Commandes fermées';
-    return `Commandes ouvertes jusqu’au ${formatOrderTimestamp(menu.order_close_at)} (heure de Montréal).`;
+    return menu.order_close_at ? `Commandes ouvertes jusqu’au ${formatOrderTimestamp(menu.order_close_at)} (heure de Montréal).` : 'Commandes ouvertes pour le menu actuel.';
   }
 
   function getMenuCountdownConfig(now = new Date()) {
@@ -571,7 +599,7 @@
     const menuIds = currentMenuIds();
     return (state.data?.items || [])
       .map((item, index) => ({ item, index, image: itemImagePath(item, 'hero') }))
-      .filter(({ item, image }) => item.available !== false && image)
+      .filter(({ item, image }) => item.available !== false && item.hidden !== true && image)
       .map(({ item, index, image }) => ({
         id: `auto-item-${item.id || index}`,
         title: item.title || 'Plat maison',
@@ -704,7 +732,7 @@
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
     const heroItems = getCurrentMenuImageItems();
     const activeHeroItem = heroItems.length ? heroItems[state.carousel.index % heroItems.length] : null;
-    const heroImage = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || 'assets/images/hero/homepage-hero.webp';
+    const heroImage = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
     return `
       <section class="hero container">
         <div>
@@ -806,12 +834,15 @@
   function cartPanelHtml(includeButton = false) {
     const totals = cartTotals();
     const rules = getSettingRules();
-    const lines = state.cart.items.map((line) => cartLineHtml(line)).join('');
+    const paidLines = state.cart.items.filter((line) => !isPromotionalItem(line)).map((line) => cartLineHtml(line)).join('');
+    const giftLines = state.cart.items.filter((line) => isPromotionalItem(line)).map((line) => cartLineHtml(line)).join('');
     const min = Number(rules.minimum_order || 0);
     const threshold = Number(rules.free_delivery_threshold || 0);
     return `<aside class="cart-panel card" aria-label="Votre panier"><h2>Votre panier</h2>
-      ${state.cart.items.length ? `<div class="cart-lines">${lines}</div>` : `<div class="cart-empty">Votre panier est vide. Ajoutez un plat du menu de la semaine.</div>`}
+      ${paidLines ? `<div class="cart-lines">${paidLines}</div>` : `<div class="cart-empty">Votre panier est vide. Ajoutez un plat du menu de la semaine.</div>`}
+      ${giftLines ? `<div class="gift-heading" style="margin-top:16px">CADEAU PROMOTIONNEL</div><div class="cart-lines">${giftLines}</div>` : ''}
       <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
+      ${promotionProgressHtml(totals.subtotal)}
       ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
       ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
       ${includeButton ? `<button class="btn btn-primary" data-page="commander" ${!getMenuOrderStatus().open ? 'disabled' : ''} style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
@@ -819,7 +850,17 @@
   }
 
   function cartLineHtml(line) {
+    if (isPromotionalItem(line)) {
+      const item = getItemById(line.itemId);
+      return `<div class="cart-line gift-line"><div class="line-top"><div><div class="line-title">${escapeHtml(item?.gift_title || line.title.replace(/^PROMO — /, ''))}</div><div class="line-meta">${escapeHtml(line.portionLabel)}<br>Valeur régulière: ${formatCurrency(item?.regular_value || 0)}</div></div><span class="free-label">GRATUIT</span></div><div class="line-meta" style="margin-top:8px">Prix promotionnel: <strong>GRATUIT</strong> • Quantité 1</div></div>`;
+    }
     return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
+  }
+
+  function promotionProgressHtml(subtotal) {
+    if (subtotal < 80) return `<p class="promo-progress">🎁 Ajoutez encore ${formatCurrency(80 - subtotal)} à votre commande pour recevoir gratuitement un petit format de votre choix.</p>`;
+    if (subtotal < 120) return `<p class="promo-progress unlocked">🎉 Votre petit format gratuit est débloqué! Ajoutez encore ${formatCurrency(120 - subtotal)} pour le remplacer par un format familial gratuit.</p>`;
+    return `<p class="promo-progress unlocked">✨ Félicitations! Votre format familial gratuit est débloqué.</p>`;
   }
 
   function normalizeDeliveryDate() {
@@ -841,14 +882,43 @@
     normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();
+    const tier = promotionTier(totals.subtotal);
+    const needsGift = tier && !selectedGift();
+    const checkoutLabel = tier === 'familial' ? 'CHOISIR MON FORMAT FAMILIAL GRATUIT' : 'CHOISIR MON PLAT GRATUIT';
     return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
       <div class="grid">
         <section class="card step"><h2><span class="step-number">1</span>Votre commande</h2>${cartPanelHtml(false)}</section>
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
         <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
       </div>
-      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
+      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" ${needsGift ? 'data-open-gifts' : 'data-checkout'} ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">${needsGift ? checkoutLabel : 'Passer au paiement sécurisé'}</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
     </div>`;
+  }
+
+  function giftSelectorHtml() {
+    if (!state.promotion.open) return '';
+    const tier = promotionTier();
+    const items = promotionalItems(tier);
+    const familial = tier === 'familial';
+    return `<div class="gift-overlay" role="presentation"><section class="gift-dialog" role="dialog" aria-modal="true" aria-labelledby="gift-title"><button class="gift-close" data-close-gifts aria-label="Fermer">×</button><div class="gift-intro"><div class="kicker">Votre cadeau vous attend</div><h2 id="gift-title">Félicitations!</h2><p class="lead">Votre commande vous donne droit à un ${familial ? 'format familial gratuit d’une valeur de 23 $' : 'petit format gratuit d’une valeur de 8 $'}.<br><strong>Choisissez votre plat préféré.</strong></p></div><div class="gift-grid">${items.map((item) => `<button class="gift-card" data-select-gift="${escapeHtml(item.id)}"><div>${itemImageHtml(item)}</div><span class="gift-card-body"><span class="free-label">GRATUIT</span><h3>${escapeHtml(item.gift_title || item.title)}</h3><small>${familial ? 'Format familial' : 'Petit format'} • Valeur ${formatCurrency(item.regular_value)}</small></span></button>`).join('')}</div></section></div>`;
+  }
+
+  async function chooseGift(itemId, button) {
+    const item = getItemById(itemId);
+    const tier = promotionTier();
+    if (!item?.promotional || item.promotion_tier !== tier || state.promotion.selecting) return;
+    state.promotion.selecting = true;
+    button?.classList.add('selecting');
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    state.cart.items = state.cart.items.filter((line) => !isPromotionalItem(line));
+    const portion = getPortions(item)[0];
+    state.cart.items.push({ itemId: item.id, title: item.title, portion: portion.key, portionLabel: portion.label, price: 0, qty: 1 });
+    state.promotion.open = false;
+    state.promotion.selecting = false;
+    saveCart();
+    showToast('Votre cadeau gratuit a été ajouté!');
+    render();
+    await checkout();
   }
 
   function dateSelectorHtml() {
@@ -1187,7 +1257,7 @@
   function centsToAmount(cents) { return Math.round(Number(cents || 0)) / 100; }
   function moneyToCents(value) {
     const amount = Number(String(value ?? '').trim().replace(',', '.'));
-    if (!Number.isFinite(amount) || amount <= 0) throw new Error(`Prix invalide: ${value}`);
+    if (!Number.isFinite(amount) || amount < 0) throw new Error(`Prix invalide: ${value}`);
     return Math.round(amount * 100);
   }
   function canonicalJson(value) {
@@ -1230,7 +1300,7 @@
     const lookup = new Map();
     rawItems.forEach((raw) => { if (raw?.id) lookup.set(String(raw.id).trim(), raw); else warnings.push('Un plat sans id dans items.json a été ignoré.'); });
     const menu = menusData.current_menu || { id: 'available-items', title: 'Available items', active: true };
-    let orderedIds = [...(menu.item_ids || []).map((id) => [String(id), 'item_ids']), ...(menu.extra_ids || []).map((id) => [String(id), 'extra_ids'])];
+    let orderedIds = [...(menu.item_ids || []).map((id) => [String(id), 'item_ids']), ...(menu.extra_ids || []).map((id) => [String(id), 'extra_ids']), ...(menu.promotion_ids || []).map((id) => [String(id), 'promotion_ids'])];
     if (!orderedIds.length) orderedIds = [...lookup.entries()].filter(([, raw]) => raw.available !== false).map(([id]) => [id, 'available_items']);
     const items = [];
     const missing = [];
@@ -1239,8 +1309,8 @@
       if (!raw) { missing.push(itemId); continue; }
       if (raw.available === false) { warnings.push(`Plat indisponible ignoré: ${itemId}`); continue; }
       const pricing = {};
-      Object.entries(raw.pricing || {}).forEach(([key, value]) => { try { if (moneyToCents(value) > 0) pricing[String(key).trim().toLowerCase()] = Number(Number(value).toFixed(2)); } catch {} });
-      if (!Object.keys(pricing).length) { warnings.push(`Plat sans prix positif valide: ${itemId}`); continue; }
+      Object.entries(raw.pricing || {}).forEach(([key, value]) => { try { if (moneyToCents(value) >= 0) pricing[String(key).trim().toLowerCase()] = Number(Number(value).toFixed(2)); } catch {} });
+      if (!Object.keys(pricing).length) { warnings.push(`Plat sans prix valide: ${itemId}`); continue; }
       const item = { item_id: itemId, title: raw.title || itemId, description: raw.description || '', category: raw.category || '', available: raw.available !== false, pricing, source };
       item.product_hash = await productHashFor(item, String(menu.id || ''));
       items.push(item);
@@ -1346,7 +1416,7 @@
   function render() {
     const root = document.getElementById('webframe-root');
     const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml, admin: adminHtml };
-    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}${adminLaunchHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
+    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}${adminLaunchHtml()}${giftSelectorHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
     bindEvents(root);
     bindGalleryEvents(root);
     bindCountdown(root);
@@ -1441,6 +1511,9 @@
       finally { stripe.updating = false; render(); }
     });
     root.querySelector('[data-checkout]')?.addEventListener('click', checkout);
+    root.querySelector('[data-open-gifts]')?.addEventListener('click', () => { state.promotion.open = true; render(); });
+    root.querySelector('[data-close-gifts]')?.addEventListener('click', () => { state.promotion.open = false; render(); });
+    root.querySelectorAll('[data-select-gift]').forEach((button) => button.addEventListener('click', () => chooseGift(button.dataset.selectGift, button)));
   }
 
   async function init() {

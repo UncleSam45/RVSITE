@@ -1,98 +1,98 @@
 {
   "items": [
     {
-      "title": "Pain de viande, sauce brune avec patates en cubes assaisonnées",
+      "title": "Fusilli aux légumes et crevettes",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "pain-de-viande-sauce-brune-avec-patates-en-cubes-assaisonnees"
+      "last_seen_id": "fusilli-aux-legumes-et-crevettes"
     },
     {
-      "title": "Spaghetti sauce viande",
+      "title": "Salade tacos",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "spaghetti-sauce-viande"
+      "last_seen_id": "salade-tacos"
     },
     {
-      "title": "Macaroni 3 fromage gratiné",
+      "title": "Macaroni tomate à la chair de saucisses",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "macaroni-3-fromage-gratine"
+      "last_seen_id": "macaroni-tomate-a-la-chair-de-saucisses"
     },
     {
-      "title": "Poulet mariné, riz et brocoli",
+      "title": "Riz chinois au poulet",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "poulet-marine-riz-et-brocoli"
+      "last_seen_id": "riz-chinois-au-poulet"
     },
     {
-      "title": "Poulet miel et ail sur fettuccini",
+      "title": "Pâté chinois",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "poulet-miel-et-ail-sur-fettuccini"
+      "last_seen_id": "pate-chinois"
     },
     {
-      "title": "Couscous libanais",
+      "title": "Linguine Alfredo au bacon",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "couscous-libanais"
+      "last_seen_id": "linguine-alfredo-au-bacon"
     },
     {
-      "title": "Penne tomate, vin rouge et saucisse italienne",
+      "title": "Sauté de porc asiatique",
       "type": "regular_meal",
       "pricing": {
         "small_meal": 8,
         "large_meal": 12,
         "family_format": 23
       },
-      "last_seen_id": "penne-tomate-vin-rouge-et-saucisse-italienne"
+      "last_seen_id": "saute-de-porc-asiatique"
     },
     {
-      "title": "Soupe légumes",
+      "title": "Soupe aux légumes",
       "type": "extra",
       "pricing": {
         "standard": 4
       },
-      "last_seen_id": "soupe-legumes"
+      "last_seen_id": "soupe-aux-legumes"
     },
     {
-      "title": "Salade du chef",
+      "title": "Salade César",
       "type": "extra",
       "pricing": {
         "standard": 5
       },
-      "last_seen_id": "salade-du-chef"
+      "last_seen_id": "salade-cesar"
     },
     {
-      "title": "Sous-marin viandes froides",
+      "title": "Sous-marin pizza",
       "type": "extra",
       "pricing": {
         "standard": 7
       },
-      "last_seen_id": "sous-marin-viandes-froides"
+      "last_seen_id": "sous-marin-pizza"
     }
   ]
 }
