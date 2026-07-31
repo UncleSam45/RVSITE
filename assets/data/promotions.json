@@ -2,8 +2,8 @@
   "active": [
     {
       "id": "petit-format-special",
-      "title": "Spécial sur le petit format",
-      "description": "Petit format à 6 $ (habituellement 8 $).",
+      "title": "",
+      "description": "",
       "type": "portion_discount",
       "portion": "petit",
       "original_price": 8,
