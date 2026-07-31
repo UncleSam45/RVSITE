@@ -333,28 +333,69 @@
     }).format(date).replace(' h 00', ' h');
   }
 
+  function formatOrderDate(date) {
+    const timeZone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    return new Intl.DateTimeFormat('fr-CA', { timeZone, weekday: 'long', day: 'numeric', month: 'long' }).format(date);
+  }
+
+  function zonedDateParts(date, timeZone) {
+    return Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+      timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+    }).formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [part.type, Number(part.value)]));
+  }
+
+  function zonedDateTime(parts, timeZone) {
+    const intended = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour || 0, parts.minute || 0, parts.second || 0);
+    let result = intended;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const actual = zonedDateParts(new Date(result), timeZone);
+      const represented = Date.UTC(actual.year, actual.month - 1, actual.day, actual.hour, actual.minute, actual.second);
+      result += intended - represented;
+    }
+    return new Date(result);
+  }
+
+  function shiftCalendarDate(parts, days) {
+    const shifted = new Date(Date.UTC(parts.year, parts.month - 1, parts.day + days));
+    return { year: shifted.getUTCFullYear(), month: shifted.getUTCMonth() + 1, day: shifted.getUTCDate() };
+  }
+
+  // Weekly ordering cycle in Montréal: Friday 01:00 through Wednesday 12:00.
+  function getWeeklyOrderWindow(now = new Date()) {
+    const timeZone = state.data?.settings?.ordering?.timezone || 'America/Toronto';
+    const local = zonedDateParts(now, timeZone);
+    const localNoon = zonedDateTime({ ...local, hour: 12, minute: 0, second: 0 }, timeZone);
+    const weekdayLabel = new Intl.DateTimeFormat('en-CA', { timeZone, weekday: 'short' }).format(localNoon);
+    const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(weekdayLabel);
+    const friday = shiftCalendarDate(local, -((weekday - 5 + 7) % 7));
+    let opensAt = zonedDateTime({ ...friday, hour: 1 }, timeZone);
+    let closesAt = zonedDateTime({ ...shiftCalendarDate(friday, 5), hour: 12 }, timeZone);
+    if (now >= closesAt) {
+      const nextFriday = shiftCalendarDate(friday, 7);
+      opensAt = zonedDateTime({ ...nextFriday, hour: 1 }, timeZone);
+      closesAt = zonedDateTime({ ...shiftCalendarDate(nextFriday, 5), hour: 12 }, timeZone);
+    }
+    return { open: now >= opensAt && now < closesAt, opensAt, closesAt, timeZone };
+  }
+
   function getMenuOrderStatus(now = new Date()) {
     const menu = getCurrentMenu();
     if (menu.active === false) return { open: false, state: 'inactive' };
-    const time = now.getTime();
-    if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return { open: false, state: 'before' };
-    if (menu.order_close_at && time >= new Date(menu.order_close_at).getTime()) return { open: false, state: 'after' };
-    return { open: true, state: 'open' };
+    const window = getWeeklyOrderWindow(now);
+    return { ...window, state: window.open ? 'open' : 'before' };
   }
 
   function menuOrderStatusMessage() {
-    const menu = getCurrentMenu();
     const status = getMenuOrderStatus();
-    if (status.state === 'before') return `Les commandes pour ce menu ouvriront ${formatOrderTimestamp(menu.order_open_at)} (heure de Montréal).`;
-    if (status.state === 'after') return 'Commandes fermées';
+    if (status.state === 'before') return `Les commandes ouvriront ${formatOrderTimestamp(status.opensAt)} (heure de Montréal).`;
     if (status.state === 'inactive') return 'Commandes fermées';
-    return menu.order_close_at ? `Commandes ouvertes jusqu’au ${formatOrderTimestamp(menu.order_close_at)} (heure de Montréal).` : 'Commandes ouvertes pour le menu actuel.';
+    return `Commandes ouvertes jusqu’au ${formatOrderTimestamp(status.closesAt)} (heure de Montréal).`;
   }
 
   function getMenuCountdownConfig(now = new Date()) {
-    const menu = getCurrentMenu();
     const status = getMenuOrderStatus(now);
-    const target = status.state === 'before' ? menu.order_open_at : status.state === 'open' ? menu.order_close_at : '';
+    const target = status.state === 'before' ? status.opensAt : status.state === 'open' ? status.closesAt : '';
     const targetDate = target ? new Date(target) : null;
     if (!targetDate || Number.isNaN(targetDate.getTime())) {
       return { enabled: false, status, target: '', eyebrow: 'Menu de la semaine', title: 'Prochaine fenêtre à annoncer', accent: 'paused' };
@@ -733,6 +774,7 @@
     const heroItems = getCurrentMenuImageItems();
     const activeHeroItem = heroItems.length ? heroItems[state.carousel.index % heroItems.length] : null;
     const heroImage = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
+    const orderWindow = getWeeklyOrderWindow();
     return `
       <section class="hero container">
         <div>
@@ -749,7 +791,7 @@
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
-        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatDate(menu.start_date)} au ${formatDate(menu.end_date)}` : 'Menu de la semaine'}</span>
+        <span><strong>${menuIsActive ? 'Période:' : 'Statut:'}</strong> ${menuIsActive ? `${formatOrderDate(orderWindow.opensAt)} au ${formatOrderDate(orderWindow.closesAt)}` : 'Menu de la semaine'}</span>
         <span><strong>${menuIsActive ? 'Préavis:' : 'Menu:'}</strong> ${menuIsActive ? orderNoticeText(false) : 'Commandes fermées'}</span>
         <span><strong>Zones:</strong> ${escapeHtml(zones || 'à confirmer')}</span>
         <span><strong>Minimum:</strong> ${formatCurrency(rules.minimum_order || 35)}</span>

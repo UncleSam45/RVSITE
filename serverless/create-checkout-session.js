@@ -49,10 +49,13 @@ function isDeliveryDateAllowed(deliveryDate, settings) {
 
 function isMenuOrderingOpen(menu, now = new Date()) {
   if (menu.active === false) return false;
-  const time = now.getTime();
-  if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) return false;
-  if (menu.order_close_at && time >= new Date(menu.order_close_at).getTime()) return false;
-  return true;
+  const local = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Toronto', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now);
+  const value = (type) => local.find((part) => part.type === type)?.value;
+  const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(value('weekday'));
+  const minutes = Number(value('hour')) * 60 + Number(value('minute'));
+  return (weekday === 5 && minutes >= 60) || weekday === 6 || weekday === 0 || weekday === 1 || weekday === 2 || (weekday === 3 && minutes < 720);
 }
 
 function validateOrder(payload, data) {
