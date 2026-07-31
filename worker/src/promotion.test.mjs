@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { validateOrderItems } from './order-validation.js';
+const paid = { id: 'paid', title: 'Payé', available: true, pricing: { familial: 23 } };
+const small = { id: 'gift-small', title: 'Cadeau petit', available: true, promotional: true, promotion_tier: 'petit', pricing: { petit: 0 } };
+const family = { id: 'gift-family', title: 'Cadeau familial', available: true, promotional: true, promotion_tier: 'familial', pricing: { familial: 0 } };
+const site = { menus: { current_menu: { item_ids: ['paid'], promotion_ids: ['gift-small', 'gift-family'] } }, items: { items: [paid, small, family] } };
+const line = (item_id, portion, qty = 1) => ({ item_id, portion, qty });
+assert.equal(validateOrderItems([line('paid', 'familial', 4), line('gift-small', 'petit')], site).paidSubtotalCents, 9200);
+assert.equal(validateOrderItems([line('paid', 'familial', 6), line('gift-family', 'familial')], site).paidSubtotalCents, 13800);
+assert.throws(() => validateOrderItems([line('paid', 'familial', 3), line('gift-small', 'petit')], site), /80/);
+assert.throws(() => validateOrderItems([line('paid', 'familial', 6), line('gift-small', 'petit')], site), /palier/);
+assert.throws(() => validateOrderItems([line('paid', 'familial', 4)], site), /Choisissez/);
+assert.throws(() => validateOrderItems([line('paid', 'familial', 4), line('gift-small', 'petit', 2)], site), /quantité de 1/);
+console.log('promotion worker validation passed');

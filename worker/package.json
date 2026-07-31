@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "check": "wrangler deploy --dry-run"
+    "check": "wrangler deploy --dry-run",
+    "test": "node src/promotion.test.mjs && node src/full-worker.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
