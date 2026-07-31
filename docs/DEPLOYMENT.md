@@ -72,3 +72,17 @@ Variables d’environnement requises:
 Le navigateur envoie seulement les identifiants d’items, portions, quantités,
 date de livraison et coordonnées. La fonction valide les prix officiels depuis
 les JSON avant de créer la session Stripe.
+
+### Compatibilité pendant une synchronisation de menu
+
+Le Worker valide également les identifiants reçus contre son catalogue Stripe
+déjà publié. Si le menu frontend est publié avant ce catalogue, un article peut
+utiliser `checkout_item_id` pour envoyer temporairement l’identifiant Stripe
+compatible du menu précédent. Cette passerelle évite de bloquer toutes les
+commandes pendant la synchronisation.
+
+Un cadeau portant `stripe_checkout_enabled: false` est consigné dans les notes
+de commande, mais n’est pas envoyé comme ligne Stripe avant la création de son
+Price à 0 $. Après la synchronisation des 14 cadeaux dans Stripe, retirez ce
+champ (ou passez-le à `true`) afin que les cadeaux soient transmis directement
+comme lignes à 0 $.

@@ -111,8 +111,8 @@ def money_to_cents(value: int | float | str | Decimal) -> int:
         amount = Decimal(str(value).strip().replace(",", "."))
     except (InvalidOperation, AttributeError) as exc:
         raise ValueError(f"Invalid price: {value}") from exc
-    if amount <= 0:
-        raise ValueError("Price must be greater than 0.")
+    if amount < 0:
+        raise ValueError("Price must be zero or greater.")
     return int((amount * Decimal("100")).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
@@ -246,7 +246,7 @@ def _item_from_raw(raw: dict[str, Any], source: str) -> LocalItem | None:
     pricing: dict[str, float] = {}
     for key, value in (raw.get("pricing") or {}).items():
         try:
-            if money_to_cents(value) > 0:
+            if money_to_cents(value) >= 0:
                 pricing[str(key).strip().lower()] = float(Decimal(str(value)).quantize(Decimal("0.01")))
         except Exception:
             continue
@@ -296,7 +296,9 @@ def load_local_catalog(project_folder: Path, sync_mode: str = DEFAULT_SYNC_MODE,
                 raise ValueError("menus.json has no current_menu object.")
             if not bool(menu.get("active", False)):
                 warnings.append("current_menu.active is false; menu was still loaded for preview.")
-            ordered_ids = [(str(i), "item_ids") for i in menu.get("item_ids", [])] + [(str(i), "extra_ids") for i in menu.get("extra_ids", [])]
+            ordered_ids = ([(str(i), "item_ids") for i in menu.get("item_ids", [])]
+                           + [(str(i), "extra_ids") for i in menu.get("extra_ids", [])]
+                           + [(str(i), "promotion_ids") for i in menu.get("promotion_ids", [])])
         except Exception as exc:
             warnings.append(f"Falling back to available items because menus.json is missing or invalid: {exc}")
             source_mode = "available_items_only"
@@ -317,7 +319,7 @@ def load_local_catalog(project_folder: Path, sync_mode: str = DEFAULT_SYNC_MODE,
             warnings.append(f"Unavailable item skipped: {item.item_id}")
             continue
         if not item.pricing:
-            warnings.append(f"Item has no valid positive prices: {item.item_id}")
+            warnings.append(f"Item has no valid non-negative prices: {item.item_id}")
             continue
         item.product_hash = product_hash_for(item, str(menu.get("id") or ""))
         local_items.append(item)
