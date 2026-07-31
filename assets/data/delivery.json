@@ -1,0 +1,41 @@
+{
+  "zones": [
+    {
+      "city": "Contrecoeur",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Sorel",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Varennes",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Saint-Roch-de-Richelieu",
+      "province": "QC",
+      "enabled": true
+    },
+    {
+      "city": "Verchères",
+      "province": "QC",
+      "enabled": true
+    }
+  ],
+  "rules": {
+    "order_notice_hours": 72,
+    "minimum_order": 35,
+    "free_delivery_threshold": 35,
+    "scheduling_note": "La livraison est planifiée avec le client."
+  },
+  "delivery_windows": [
+    "13h à 15h",
+    "15h à 17h",
+    "17h à 19h",
+    "19h à 21h"
+  ]
+}
