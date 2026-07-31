@@ -7,7 +7,7 @@
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "",
+      "image": "assets/images/items/FUSILLI AUX LEGUMES ET CREVETTES.jpg",
       "pricing": {
         "petit": 8,
         "grand": 12,
@@ -23,7 +23,7 @@
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "",
+      "image": "assets/images/items/SALAD TACOS.png",
       "pricing": {
         "petit": 8,
         "grand": 12,
@@ -55,7 +55,7 @@
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "",
+      "image": "assets/images/items/RIZ CHINOIS AU POULET.jpg",
       "pricing": {
         "petit": 8,
         "grand": 12,
@@ -87,7 +87,7 @@
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "",
+      "image": "assets/images/items/LINGUINI AFLEDRO BACON.jpg",
       "pricing": {
         "petit": 8,
         "grand": 12,
@@ -166,7 +166,7 @@
       "hidden": true,
       "promotion_tier": "petit",
       "regular_value": 8,
-      "image": "",
+      "image": "assets/images/items/FUSILLI AUX LEGUMES ET CREVETTES.jpg",
       "pricing": {
         "petit": 0
       },
@@ -188,7 +188,7 @@
       "hidden": true,
       "promotion_tier": "petit",
       "regular_value": 8,
-      "image": "",
+      "image": "assets/images/items/SALAD TACOS.png",
       "pricing": {
         "petit": 0
       },
@@ -232,7 +232,7 @@
       "hidden": true,
       "promotion_tier": "petit",
       "regular_value": 8,
-      "image": "",
+      "image": "assets/images/items/RIZ CHINOIS AU POULET.jpg",
       "pricing": {
         "petit": 0
       },
@@ -276,7 +276,7 @@
       "hidden": true,
       "promotion_tier": "petit",
       "regular_value": 8,
-      "image": "",
+      "image": "assets/images/items/LINGUINI AFLEDRO BACON.jpg",
       "pricing": {
         "petit": 0
       },
@@ -320,7 +320,7 @@
       "hidden": true,
       "promotion_tier": "familial",
       "regular_value": 23,
-      "image": "",
+      "image": "assets/images/items/FUSILLI AUX LEGUMES ET CREVETTES.jpg",
       "pricing": {
         "familial": 0
       },
@@ -342,7 +342,7 @@
       "hidden": true,
       "promotion_tier": "familial",
       "regular_value": 23,
-      "image": "",
+      "image": "assets/images/items/SALAD TACOS.png",
       "pricing": {
         "familial": 0
       },
@@ -386,7 +386,7 @@
       "hidden": true,
       "promotion_tier": "familial",
       "regular_value": 23,
-      "image": "",
+      "image": "assets/images/items/RIZ CHINOIS AU POULET.jpg",
       "pricing": {
         "familial": 0
       },
@@ -430,7 +430,7 @@
       "hidden": true,
       "promotion_tier": "familial",
       "regular_value": 23,
-      "image": "",
+      "image": "assets/images/items/LINGUINI AFLEDRO BACON.jpg",
       "pricing": {
         "familial": 0
       },
