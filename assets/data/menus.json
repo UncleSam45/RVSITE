@@ -1,25 +1,40 @@
 {
   "current_menu": {
+    "id": "menu-2026-07-31",
     "active": true,
-    "title": "Menu du 24 au 29 juillet",
-    "description": "Commandes ouvertes du vendredi 24 juillet 2026 à 1 h au mercredi 29 juillet 2026 à midi (heure de Montréal).",
-    "start_date": "2026-07-24",
-    "end_date": "2026-07-29",
-    "order_open_at": "2026-07-24T01:00:00-04:00",
-    "order_close_at": "2026-07-29T12:00:00-04:00",
+    "title": "Nouveau menu maison",
+    "description": "Commandez au moins 72 heures à l’avance. Le ramassage peut être offert pendant cette période pour une plus grande flexibilité.",
+    "start_date": "2026-07-31",
+    "end_date": "2026-08-31",
     "item_ids": [
-      "pain-de-viande-sauce-brune-avec-patates-en-cubes-assaisonnees_20260724",
-      "spaghetti-sauce-viande_20260724",
-      "macaroni-3-fromage-gratine_20260724",
-      "poulet-marine-riz-et-brocoli_20260724",
-      "poulet-miel-et-ail-sur-fettuccini_20260724",
-      "couscous-libanais_20260724",
-      "penne-tomate-vin-rouge-et-saucisse-italienne_20260724"
+      "fusilli-aux-legumes-et-crevettes_20260731",
+      "salade-tacos_20260731",
+      "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+      "riz-chinois-au-poulet_20260731",
+      "pate-chinois_20260731",
+      "linguine-alfredo-au-bacon_20260731",
+      "saute-de-porc-asiatique_20260731"
     ],
     "extra_ids": [
-      "soupe-legumes_20260724",
-      "salade-du-chef_20260724",
-      "sous-marin-viandes-froides_20260724"
+      "soupe-aux-legumes_20260731",
+      "salade-cesar_20260731",
+      "sous-marin-pizza_20260731"
+    ],
+    "promotion_ids": [
+      "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+      "promo-salade-tacos-petit-20260731",
+      "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+      "promo-riz-chinois-au-poulet-petit-20260731",
+      "promo-pate-chinois-petit-20260731",
+      "promo-linguine-alfredo-au-bacon-petit-20260731",
+      "promo-saute-de-porc-asiatique-petit-20260731",
+      "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+      "promo-salade-tacos-familial-20260731",
+      "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+      "promo-riz-chinois-au-poulet-familial-20260731",
+      "promo-pate-chinois-familial-20260731",
+      "promo-linguine-alfredo-au-bacon-familial-20260731",
+      "promo-saute-de-porc-asiatique-familial-20260731"
     ]
   },
   "archive": []

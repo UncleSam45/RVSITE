@@ -33,7 +33,11 @@ jobs:
         run: |
           test "$(cat _site/CNAME)" = "lacuisinederosalie.ca"
           grep -F "Chargement de La cuisine de Rosalie" _site/index.html
-          grep -F "main.js?v=20260717-menu-v7" _site/index.html
+          grep -E '<script src="\./main\.js\?v=[^"]+" defer></script>' _site/index.html
+          cmp index.html _site/index.html
+          cmp main.js _site/main.js
+          test -s _site/assets/data/items.json
+          test -s _site/assets/data/menus.json
 
       - name: Publish static site to gh-pages branch
         env:
