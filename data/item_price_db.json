@@ -1,0 +1,98 @@
+{
+  "items": [
+    {
+      "title": "Fusilli aux légumes et crevettes",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "fusilli-aux-legumes-et-crevettes"
+    },
+    {
+      "title": "Salade tacos",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "salade-tacos"
+    },
+    {
+      "title": "Macaroni tomate à la chair de saucisses",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "macaroni-tomate-a-la-chair-de-saucisses"
+    },
+    {
+      "title": "Riz chinois au poulet",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "riz-chinois-au-poulet"
+    },
+    {
+      "title": "Pâté chinois",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "pate-chinois"
+    },
+    {
+      "title": "Linguine Alfredo au bacon",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "linguine-alfredo-au-bacon"
+    },
+    {
+      "title": "Sauté de porc asiatique",
+      "type": "regular_meal",
+      "pricing": {
+        "small_meal": 8,
+        "large_meal": 12,
+        "family_format": 23
+      },
+      "last_seen_id": "saute-de-porc-asiatique"
+    },
+    {
+      "title": "Soupe aux légumes",
+      "type": "extra",
+      "pricing": {
+        "standard": 4
+      },
+      "last_seen_id": "soupe-aux-legumes"
+    },
+    {
+      "title": "Salade César",
+      "type": "extra",
+      "pricing": {
+        "standard": 5
+      },
+      "last_seen_id": "salade-cesar"
+    },
+    {
+      "title": "Sous-marin pizza",
+      "type": "extra",
+      "pricing": {
+        "standard": 7
+      },
+      "last_seen_id": "sous-marin-pizza"
+    }
+  ]
+}

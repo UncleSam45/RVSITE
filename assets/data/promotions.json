@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "id": "petit-format-special",
+      "title": "",
+      "description": "",
+      "type": "portion_discount",
+      "portion": "petit",
+      "original_price": 8,
+      "active_price": 6,
+      "enabled": false
+    }
+  ]
+}

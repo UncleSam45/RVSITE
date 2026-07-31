@@ -1,0 +1,3492 @@
+{
+  "app": "RVSITE Stripe Manager",
+  "version": "0.5.0",
+  "generated_at": "2026-07-31T04:38:34Z",
+  "local_menu": {
+    "menu_id": "menu-2026-07-31",
+    "title": "Nouveau menu maison",
+    "start_date": "2026-07-31",
+    "end_date": "2026-08-31",
+    "active": true,
+    "items": [
+      {
+        "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+        "title": "Fusilli aux légumes et crevettes",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "b4ee7ee82c92fb55"
+      },
+      {
+        "item_id": "salade-tacos_20260731",
+        "title": "Salade tacos",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "8dc242b23c6e9027"
+      },
+      {
+        "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+        "title": "Macaroni tomate à la chair de saucisses",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "193c6fde8d2e1e13"
+      },
+      {
+        "item_id": "riz-chinois-au-poulet_20260731",
+        "title": "Riz chinois au poulet",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "b96083f51f518a0d"
+      },
+      {
+        "item_id": "pate-chinois_20260731",
+        "title": "Pâté chinois",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "25a723adff6c6fd1"
+      },
+      {
+        "item_id": "linguine-alfredo-au-bacon_20260731",
+        "title": "Linguine Alfredo au bacon",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "79b3adcbfd89ef0a"
+      },
+      {
+        "item_id": "saute-de-porc-asiatique_20260731",
+        "title": "Sauté de porc asiatique",
+        "description": "Plat maison préparé avec soin.",
+        "category": "Les plats",
+        "available": true,
+        "pricing": {
+          "petit": 8.0,
+          "grand": 12.0,
+          "familial": 23.0
+        },
+        "source": "item_ids",
+        "product_hash": "db32f9ce7bc8db1d"
+      },
+      {
+        "item_id": "soupe-aux-legumes_20260731",
+        "title": "Soupe aux légumes",
+        "description": "Préparé maison.",
+        "category": "Les soupes",
+        "available": true,
+        "pricing": {
+          "standard": 4.0
+        },
+        "source": "extra_ids",
+        "product_hash": "0bb359256472e1a0"
+      },
+      {
+        "item_id": "salade-cesar_20260731",
+        "title": "Salade César",
+        "description": "Préparé maison.",
+        "category": "Les salades",
+        "available": true,
+        "pricing": {
+          "standard": 5.0
+        },
+        "source": "extra_ids",
+        "product_hash": "1dabdcb2cdb415ba"
+      },
+      {
+        "item_id": "sous-marin-pizza_20260731",
+        "title": "Sous-marin pizza",
+        "description": "Préparé maison.",
+        "category": "Les sous-marins",
+        "available": true,
+        "pricing": {
+          "standard": 7.0
+        },
+        "source": "extra_ids",
+        "product_hash": "b1dc2473d6ec1858"
+      },
+      {
+        "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+        "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "31b1d5ab66fdf8f7"
+      },
+      {
+        "item_id": "promo-salade-tacos-petit-20260731",
+        "title": "PROMO — Salade tacos — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "39ec7bf261b2fe8d"
+      },
+      {
+        "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "91fdad9cd580c354"
+      },
+      {
+        "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+        "title": "PROMO — Riz chinois au poulet — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "bcade65a510eeb62"
+      },
+      {
+        "item_id": "promo-pate-chinois-petit-20260731",
+        "title": "PROMO — Pâté chinois — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "9f7a954933fae8d1"
+      },
+      {
+        "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+        "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "1b133f8b4e8a6842"
+      },
+      {
+        "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+        "title": "PROMO — Sauté de porc asiatique — Petit format",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "petit": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "7fdfab9e74fb37fd"
+      },
+      {
+        "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+        "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "30366421717bc8e8"
+      },
+      {
+        "item_id": "promo-salade-tacos-familial-20260731",
+        "title": "PROMO — Salade tacos — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "10f3e0c7a30703e4"
+      },
+      {
+        "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "5b40b98e86fa46e1"
+      },
+      {
+        "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+        "title": "PROMO — Riz chinois au poulet — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "ad01190a88ca23f9"
+      },
+      {
+        "item_id": "promo-pate-chinois-familial-20260731",
+        "title": "PROMO — Pâté chinois — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "63f4a89defbbede1"
+      },
+      {
+        "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+        "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "3756a3f87692cedc"
+      },
+      {
+        "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+        "title": "PROMO — Sauté de porc asiatique — Format familial",
+        "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+        "category": "Promotion cachée",
+        "available": true,
+        "pricing": {
+          "familial": 0.0
+        },
+        "source": "promotion_ids",
+        "product_hash": "d50750ff739e877d"
+      }
+    ],
+    "missing_ids": [],
+    "warnings": [],
+    "source_mode": "current_menu_only"
+  },
+  "stripe_catalog_summary": {
+    "managed_products": 83,
+    "managed_prices": 183,
+    "ignored_external_count": 0,
+    "warnings": []
+  },
+  "sync_plan": {
+    "summary": {
+      "CREATE_PRODUCT": 0,
+      "UPDATE_PRODUCT": 14,
+      "CREATE_PRICE": 14,
+      "ARCHIVE_PRICE": 0,
+      "ARCHIVE_PRODUCT": 0,
+      "UNCHANGED": 24,
+      "IGNORED": 0,
+      "WARNING": 0,
+      "ERROR": 0
+    },
+    "actions": [
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+        "title": "Fusilli aux légumes et crevettes",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "d2b858b89d1c8d43",
+          "product_id": "prod_Uz5qnu75z7f8OX",
+          "price_id": "price_1Tz7fOQQfUV8N4lpGmjalK2N"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+        "title": "Fusilli aux légumes et crevettes",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "ecac34b9a0752496",
+          "product_id": "prod_Uz5qnu75z7f8OX",
+          "price_id": "price_1Tz7fOQQfUV8N4lp1xUzUOWP"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+        "title": "Fusilli aux légumes et crevettes",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "fusilli-aux-legumes-et-crevettes_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "9af994a7548d07b1",
+          "product_id": "prod_Uz5qnu75z7f8OX",
+          "price_id": "price_1Tz7fOQQfUV8N4lpyAvNHiO6"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "salade-tacos_20260731",
+        "title": "Salade tacos",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "salade-tacos_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "88d18b6a31b8c8d8",
+          "product_id": "prod_Uz5qrVKLMHdML8",
+          "price_id": "price_1Tz7fPQQfUV8N4lpeFPBioAe"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "salade-tacos_20260731",
+        "title": "Salade tacos",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "salade-tacos_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "65a1d498480853b8",
+          "product_id": "prod_Uz5qrVKLMHdML8",
+          "price_id": "price_1Tz7fPQQfUV8N4lpl1GKDvkL"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "salade-tacos_20260731",
+        "title": "Salade tacos",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "salade-tacos_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "b6061a3ea926da67",
+          "product_id": "prod_Uz5qrVKLMHdML8",
+          "price_id": "price_1Tz7fPQQfUV8N4lpb2TmRkaa"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+        "title": "Macaroni tomate à la chair de saucisses",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "f20bbb3f3fe28153",
+          "product_id": "prod_Uz5qvdyRPuGPZf",
+          "price_id": "price_1Tz7fQQQfUV8N4lpKTF6AyKi"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+        "title": "Macaroni tomate à la chair de saucisses",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "05fa89f6f8ef0ea5",
+          "product_id": "prod_Uz5qvdyRPuGPZf",
+          "price_id": "price_1Tz7fQQQfUV8N4lpJLflB1si"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+        "title": "Macaroni tomate à la chair de saucisses",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "macaroni-tomate-a-la-chair-de-saucisses_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "bc98e53ee6f175c2",
+          "product_id": "prod_Uz5qvdyRPuGPZf",
+          "price_id": "price_1Tz7fQQQfUV8N4lpZFDkdq7Z"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "riz-chinois-au-poulet_20260731",
+        "title": "Riz chinois au poulet",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "riz-chinois-au-poulet_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "0999894e39883bd7",
+          "product_id": "prod_Uz5q13PUzDIm9E",
+          "price_id": "price_1Tz7fRQQfUV8N4lp02oVZdMS"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "riz-chinois-au-poulet_20260731",
+        "title": "Riz chinois au poulet",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "riz-chinois-au-poulet_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "c2ead471152bc45d",
+          "product_id": "prod_Uz5q13PUzDIm9E",
+          "price_id": "price_1Tz7fRQQfUV8N4lpnP7O4rFe"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "riz-chinois-au-poulet_20260731",
+        "title": "Riz chinois au poulet",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "riz-chinois-au-poulet_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "39f1a67fbc98870a",
+          "product_id": "prod_Uz5q13PUzDIm9E",
+          "price_id": "price_1Tz7fRQQfUV8N4lpHHBUVnpm"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "pate-chinois_20260731",
+        "title": "Pâté chinois",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "pate-chinois_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "692d839080d29112",
+          "product_id": "prod_Uz5qWjSCtAYXg3",
+          "price_id": "price_1Tz7fSQQfUV8N4lp7Sb3f4yF"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "pate-chinois_20260731",
+        "title": "Pâté chinois",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "pate-chinois_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "29bfe21f8692dbfe",
+          "product_id": "prod_Uz5qWjSCtAYXg3",
+          "price_id": "price_1Tz7fSQQfUV8N4lph9rW78rb"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "pate-chinois_20260731",
+        "title": "Pâté chinois",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "pate-chinois_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "dc44e9e5f432260e",
+          "product_id": "prod_Uz5qWjSCtAYXg3",
+          "price_id": "price_1Tz7fTQQfUV8N4lpbeu54lsc"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "linguine-alfredo-au-bacon_20260731",
+        "title": "Linguine Alfredo au bacon",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "linguine-alfredo-au-bacon_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "ae14022e5bae7267",
+          "product_id": "prod_Uz5qKYwPCWhWDi",
+          "price_id": "price_1Tz7fTQQfUV8N4lpe7DPaL37"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "linguine-alfredo-au-bacon_20260731",
+        "title": "Linguine Alfredo au bacon",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "linguine-alfredo-au-bacon_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "3b232abbf08c9384",
+          "product_id": "prod_Uz5qKYwPCWhWDi",
+          "price_id": "price_1Tz7fTQQfUV8N4lpFAx7tGqM"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "linguine-alfredo-au-bacon_20260731",
+        "title": "Linguine Alfredo au bacon",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "linguine-alfredo-au-bacon_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "10a4a24b5e4e5836",
+          "product_id": "prod_Uz5qKYwPCWhWDi",
+          "price_id": "price_1Tz7fUQQfUV8N4lpUE866qn8"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "saute-de-porc-asiatique_20260731",
+        "title": "Sauté de porc asiatique",
+        "portion_key": "petit",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "saute-de-porc-asiatique_20260731",
+          "portion_key": "petit",
+          "amount_cents": 800,
+          "currency": "cad",
+          "local_hash": "0d48769f948b1a82",
+          "product_id": "prod_Uz5q5bp0W7Cloc",
+          "price_id": "price_1Tz7fUQQfUV8N4lpFZofpd8H"
+        },
+        "risk": "none",
+        "local_price": 8.0,
+        "stripe_price": 8.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "saute-de-porc-asiatique_20260731",
+        "title": "Sauté de porc asiatique",
+        "portion_key": "grand",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "saute-de-porc-asiatique_20260731",
+          "portion_key": "grand",
+          "amount_cents": 1200,
+          "currency": "cad",
+          "local_hash": "51eaf62e4cf3bcb9",
+          "product_id": "prod_Uz5q5bp0W7Cloc",
+          "price_id": "price_1Tz7fUQQfUV8N4lpl5X1edZn"
+        },
+        "risk": "none",
+        "local_price": 12.0,
+        "stripe_price": 12.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "saute-de-porc-asiatique_20260731",
+        "title": "Sauté de porc asiatique",
+        "portion_key": "familial",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "saute-de-porc-asiatique_20260731",
+          "portion_key": "familial",
+          "amount_cents": 2300,
+          "currency": "cad",
+          "local_hash": "21310077b1c3c0d9",
+          "product_id": "prod_Uz5q5bp0W7Cloc",
+          "price_id": "price_1Tz7fVQQfUV8N4lpQRMJImu7"
+        },
+        "risk": "none",
+        "local_price": 23.0,
+        "stripe_price": 23.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "soupe-aux-legumes_20260731",
+        "title": "Soupe aux légumes",
+        "portion_key": "standard",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "soupe-aux-legumes_20260731",
+          "portion_key": "standard",
+          "amount_cents": 400,
+          "currency": "cad",
+          "local_hash": "3468c06161a32522",
+          "product_id": "prod_Uz5qSjJGXvXD8F",
+          "price_id": "price_1Tz7fVQQfUV8N4lp9EYidUbl"
+        },
+        "risk": "none",
+        "local_price": 4.0,
+        "stripe_price": 4.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "salade-cesar_20260731",
+        "title": "Salade César",
+        "portion_key": "standard",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "salade-cesar_20260731",
+          "portion_key": "standard",
+          "amount_cents": 500,
+          "currency": "cad",
+          "local_hash": "25012dd301ec3cd7",
+          "product_id": "prod_Uz5rntsRHHqBBR",
+          "price_id": "price_1Tz7fVQQfUV8N4lpACzA1DsE"
+        },
+        "risk": "none",
+        "local_price": 5.0,
+        "stripe_price": 5.0
+      },
+      {
+        "action_type": "UNCHANGED",
+        "item_id": "sous-marin-pizza_20260731",
+        "title": "Sous-marin pizza",
+        "portion_key": "standard",
+        "reason": "Stripe price amount and currency match local JSON.",
+        "payload": {
+          "item_id": "sous-marin-pizza_20260731",
+          "portion_key": "standard",
+          "amount_cents": 700,
+          "currency": "cad",
+          "local_hash": "8e01c8e9346e49bd",
+          "product_id": "prod_Uz5rFR2AH3Y9eQ",
+          "price_id": "price_1Tz7fWQQfUV8N4lpKrta9iAJ"
+        },
+        "risk": "none",
+        "local_price": 7.0,
+        "stripe_price": 7.0
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+        "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "31b1d5ab66fdf8f7",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rCy8R7ITqOs"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+        "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "ca6790acbce724c3",
+          "product_id": "prod_Uz5rCy8R7ITqOs"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-salade-tacos-petit-20260731",
+        "title": "PROMO — Salade tacos — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Salade tacos — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-salade-tacos-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "39ec7bf261b2fe8d",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rq3vqjTbCQ6"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-salade-tacos-petit-20260731",
+        "title": "PROMO — Salade tacos — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-salade-tacos-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "7015ef4a6a1ea86d",
+          "product_id": "prod_Uz5rq3vqjTbCQ6"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "91fdad9cd580c354",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rmKB9p7k1UU"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "3e2ea95bebbb4b43",
+          "product_id": "prod_Uz5rmKB9p7k1UU"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+        "title": "PROMO — Riz chinois au poulet — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Riz chinois au poulet — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "bcade65a510eeb62",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rjuNyfVlkDs"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+        "title": "PROMO — Riz chinois au poulet — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "958ed6777e80e58f",
+          "product_id": "prod_Uz5rjuNyfVlkDs"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-pate-chinois-petit-20260731",
+        "title": "PROMO — Pâté chinois — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Pâté chinois — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-pate-chinois-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "9f7a954933fae8d1",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5r6Uoejr4n6w"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-pate-chinois-petit-20260731",
+        "title": "PROMO — Pâté chinois — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-pate-chinois-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "b100b2abf0311dcf",
+          "product_id": "prod_Uz5r6Uoejr4n6w"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+        "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Linguine Alfredo au bacon — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "1b133f8b4e8a6842",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5reGn0MZgfXX"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+        "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "03c0e077ad5ea94a",
+          "product_id": "prod_Uz5reGn0MZgfXX"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+        "title": "PROMO — Sauté de porc asiatique — Petit format",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Sauté de porc asiatique — Petit format",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "7fdfab9e74fb37fd",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rcjMPM4Citt"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+        "title": "PROMO — Sauté de porc asiatique — Petit format",
+        "portion_key": "petit",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+          "portion_key": "petit",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "3c23ad219fb78289",
+          "product_id": "prod_Uz5rcjMPM4Citt"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+        "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "30366421717bc8e8",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rK2OsspzpIR"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+        "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "0c21e000c8f2673d",
+          "product_id": "prod_Uz5rK2OsspzpIR"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-salade-tacos-familial-20260731",
+        "title": "PROMO — Salade tacos — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Salade tacos — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-salade-tacos-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "10f3e0c7a30703e4",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rccJfPCe0DL"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-salade-tacos-familial-20260731",
+        "title": "PROMO — Salade tacos — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-salade-tacos-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "10043b1bf1aab3bb",
+          "product_id": "prod_Uz5rccJfPCe0DL"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "5b40b98e86fa46e1",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5reKfv0HQ41d"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "ee9981aff749b91f",
+          "product_id": "prod_Uz5reKfv0HQ41d"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+        "title": "PROMO — Riz chinois au poulet — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Riz chinois au poulet — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "ad01190a88ca23f9",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rxcxlvDyp2M"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+        "title": "PROMO — Riz chinois au poulet — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "7e40d848f81e7c09",
+          "product_id": "prod_Uz5rxcxlvDyp2M"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-pate-chinois-familial-20260731",
+        "title": "PROMO — Pâté chinois — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Pâté chinois — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-pate-chinois-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "63f4a89defbbede1",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rUQbg6fEW2H"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-pate-chinois-familial-20260731",
+        "title": "PROMO — Pâté chinois — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-pate-chinois-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "29b127ddcd0fa84b",
+          "product_id": "prod_Uz5rUQbg6fEW2H"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+        "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Linguine Alfredo au bacon — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "3756a3f87692cedc",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5ryO5Jq9Erlk"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+        "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "33da7c26fc1f73ac",
+          "product_id": "prod_Uz5ryO5Jq9Erlk"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      },
+      {
+        "action_type": "UPDATE_PRODUCT",
+        "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+        "title": "PROMO — Sauté de porc asiatique — Format familial",
+        "portion_key": null,
+        "reason": "Product name, description, active state, or local hash changed.",
+        "payload": {
+          "name": "PROMO — Sauté de porc asiatique — Format familial",
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "active": true,
+          "metadata": {
+            "source": "rvsite_stripe_manager",
+            "project": "lacuisine_rosalie",
+            "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+            "menu_id": "menu-2026-07-31",
+            "local_hash": "d50750ff739e877d",
+            "created_by_tool_version": "0.5.0"
+          },
+          "product_id": "prod_Uz5rYQHRXQJXMu"
+        },
+        "risk": "low",
+        "local_price": null,
+        "stripe_price": null
+      },
+      {
+        "action_type": "CREATE_PRICE",
+        "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+        "title": "PROMO — Sauté de porc asiatique — Format familial",
+        "portion_key": "familial",
+        "reason": "Local portion price does not exist in Stripe.",
+        "payload": {
+          "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+          "portion_key": "familial",
+          "amount_cents": 0,
+          "currency": "cad",
+          "local_hash": "b9108fd946f27474",
+          "product_id": "prod_Uz5rYQHRXQJXMu"
+        },
+        "risk": "medium",
+        "local_price": 0.0,
+        "stripe_price": null
+      }
+    ],
+    "warnings": [],
+    "errors": []
+  },
+  "results": {
+    "started_at": "2026-07-31T04:38:23Z",
+    "dry_run": false,
+    "actions": [
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+          "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "31b1d5ab66fdf8f7",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rCy8R7ITqOs"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rCy8R7ITqOs",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470600,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+            "local_hash": "31b1d5ab66fdf8f7",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472704,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rCy8R7ITqOs"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-salade-tacos-petit-20260731",
+          "title": "PROMO — Salade tacos — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Salade tacos — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-salade-tacos-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "39ec7bf261b2fe8d",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rq3vqjTbCQ6"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rq3vqjTbCQ6",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470601,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-salade-tacos-petit-20260731",
+            "local_hash": "39ec7bf261b2fe8d",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Salade tacos — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472705,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rq3vqjTbCQ6"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+          "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "91fdad9cd580c354",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rmKB9p7k1UU"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rmKB9p7k1UU",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470601,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+            "local_hash": "91fdad9cd580c354",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472705,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rmKB9p7k1UU"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+          "title": "PROMO — Riz chinois au poulet — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Riz chinois au poulet — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "bcade65a510eeb62",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rjuNyfVlkDs"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rjuNyfVlkDs",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470602,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+            "local_hash": "bcade65a510eeb62",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Riz chinois au poulet — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472705,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rjuNyfVlkDs"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-pate-chinois-petit-20260731",
+          "title": "PROMO — Pâté chinois — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Pâté chinois — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-pate-chinois-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "9f7a954933fae8d1",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5r6Uoejr4n6w"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5r6Uoejr4n6w",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470602,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-pate-chinois-petit-20260731",
+            "local_hash": "9f7a954933fae8d1",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Pâté chinois — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472706,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5r6Uoejr4n6w"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+          "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Linguine Alfredo au bacon — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "1b133f8b4e8a6842",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5reGn0MZgfXX"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5reGn0MZgfXX",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470602,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+            "local_hash": "1b133f8b4e8a6842",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Linguine Alfredo au bacon — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472706,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5reGn0MZgfXX"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+          "title": "PROMO — Sauté de porc asiatique — Petit format",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Sauté de porc asiatique — Petit format",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "7fdfab9e74fb37fd",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rcjMPM4Citt"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rcjMPM4Citt",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470603,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+            "local_hash": "7fdfab9e74fb37fd",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Sauté de porc asiatique — Petit format",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472706,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rcjMPM4Citt"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+          "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "30366421717bc8e8",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rK2OsspzpIR"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rK2OsspzpIR",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470603,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+            "local_hash": "30366421717bc8e8",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472707,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rK2OsspzpIR"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-salade-tacos-familial-20260731",
+          "title": "PROMO — Salade tacos — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Salade tacos — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-salade-tacos-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "10f3e0c7a30703e4",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rccJfPCe0DL"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rccJfPCe0DL",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470603,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-salade-tacos-familial-20260731",
+            "local_hash": "10f3e0c7a30703e4",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Salade tacos — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472707,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rccJfPCe0DL"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+          "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "5b40b98e86fa46e1",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5reKfv0HQ41d"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5reKfv0HQ41d",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470604,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+            "local_hash": "5b40b98e86fa46e1",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472707,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5reKfv0HQ41d"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+          "title": "PROMO — Riz chinois au poulet — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Riz chinois au poulet — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "ad01190a88ca23f9",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rxcxlvDyp2M"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rxcxlvDyp2M",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470604,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+            "local_hash": "ad01190a88ca23f9",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Riz chinois au poulet — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472708,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rxcxlvDyp2M"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-pate-chinois-familial-20260731",
+          "title": "PROMO — Pâté chinois — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Pâté chinois — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-pate-chinois-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "63f4a89defbbede1",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rUQbg6fEW2H"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rUQbg6fEW2H",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470604,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-pate-chinois-familial-20260731",
+            "local_hash": "63f4a89defbbede1",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Pâté chinois — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472708,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rUQbg6fEW2H"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+          "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Linguine Alfredo au bacon — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "3756a3f87692cedc",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5ryO5Jq9Erlk"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5ryO5Jq9Erlk",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470605,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+            "local_hash": "3756a3f87692cedc",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Linguine Alfredo au bacon — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472708,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5ryO5Jq9Erlk"
+        }
+      },
+      {
+        "action": {
+          "action_type": "UPDATE_PRODUCT",
+          "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+          "title": "PROMO — Sauté de porc asiatique — Format familial",
+          "portion_key": null,
+          "reason": "Product name, description, active state, or local hash changed.",
+          "payload": {
+            "name": "PROMO — Sauté de porc asiatique — Format familial",
+            "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+            "active": true,
+            "metadata": {
+              "source": "rvsite_stripe_manager",
+              "project": "lacuisine_rosalie",
+              "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+              "menu_id": "menu-2026-07-31",
+              "local_hash": "d50750ff739e877d",
+              "created_by_tool_version": "0.5.0"
+            },
+            "product_id": "prod_Uz5rYQHRXQJXMu"
+          },
+          "risk": "low",
+          "local_price": null,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "prod_Uz5rYQHRXQJXMu",
+          "object": "product",
+          "active": true,
+          "attributes": [],
+          "created": 1785470605,
+          "default_price": null,
+          "description": "Article promotionnel gratuit — inaccessible dans le menu régulier.",
+          "images": [],
+          "livemode": true,
+          "marketing_features": [],
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+            "local_hash": "d50750ff739e877d",
+            "menu_id": "menu-2026-07-31",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "name": "PROMO — Sauté de porc asiatique — Format familial",
+          "package_dimensions": null,
+          "shippable": null,
+          "statement_descriptor": null,
+          "tax_code": null,
+          "tax_details": null,
+          "type": "service",
+          "unit_label": null,
+          "updated": 1785472709,
+          "url": null,
+          "dashboard_url": "https://dashboard.stripe.com/products/prod_Uz5rYQHRXQJXMu"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+          "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "ca6790acbce724c3",
+            "product_id": "prod_Uz5rCy8R7ITqOs"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DJQQfUV8N4lpibACsrVj",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472709,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
+            "local_hash": "ca6790acbce724c3",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5rCy8R7ITqOs",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DJQQfUV8N4lpibACsrVj"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-salade-tacos-petit-20260731",
+          "title": "PROMO — Salade tacos — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-salade-tacos-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "7015ef4a6a1ea86d",
+            "product_id": "prod_Uz5rq3vqjTbCQ6"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DKQQfUV8N4lp5v323tt1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472710,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-salade-tacos-petit-20260731",
+            "local_hash": "7015ef4a6a1ea86d",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5rq3vqjTbCQ6",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DKQQfUV8N4lp5v323tt1"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+          "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "3e2ea95bebbb4b43",
+            "product_id": "prod_Uz5rmKB9p7k1UU"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DKQQfUV8N4lpBCWFxoo1",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472710,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
+            "local_hash": "3e2ea95bebbb4b43",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5rmKB9p7k1UU",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DKQQfUV8N4lpBCWFxoo1"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+          "title": "PROMO — Riz chinois au poulet — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "958ed6777e80e58f",
+            "product_id": "prod_Uz5rjuNyfVlkDs"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DKQQfUV8N4lpXg0S7b2l",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472710,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-riz-chinois-au-poulet-petit-20260731",
+            "local_hash": "958ed6777e80e58f",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5rjuNyfVlkDs",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DKQQfUV8N4lpXg0S7b2l"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-pate-chinois-petit-20260731",
+          "title": "PROMO — Pâté chinois — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-pate-chinois-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "b100b2abf0311dcf",
+            "product_id": "prod_Uz5r6Uoejr4n6w"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DLQQfUV8N4lpJ4mLTAos",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472711,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-pate-chinois-petit-20260731",
+            "local_hash": "b100b2abf0311dcf",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5r6Uoejr4n6w",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DLQQfUV8N4lpJ4mLTAos"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+          "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "03c0e077ad5ea94a",
+            "product_id": "prod_Uz5reGn0MZgfXX"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DLQQfUV8N4lpYbkyZX8Y",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472711,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-linguine-alfredo-au-bacon-petit-20260731",
+            "local_hash": "03c0e077ad5ea94a",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5reGn0MZgfXX",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DLQQfUV8N4lpYbkyZX8Y"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+          "title": "PROMO — Sauté de porc asiatique — Petit format",
+          "portion_key": "petit",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+            "portion_key": "petit",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "3c23ad219fb78289",
+            "product_id": "prod_Uz5rcjMPM4Citt"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DLQQfUV8N4lpxtxAUsoW",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472711,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-saute-de-porc-asiatique-petit-20260731",
+            "local_hash": "3c23ad219fb78289",
+            "portion_key": "petit",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "petit",
+          "product": "prod_Uz5rcjMPM4Citt",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DLQQfUV8N4lpxtxAUsoW"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+          "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "0c21e000c8f2673d",
+            "product_id": "prod_Uz5rK2OsspzpIR"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DMQQfUV8N4lpYCBjSRIx",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472712,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
+            "local_hash": "0c21e000c8f2673d",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5rK2OsspzpIR",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DMQQfUV8N4lpYCBjSRIx"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-salade-tacos-familial-20260731",
+          "title": "PROMO — Salade tacos — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-salade-tacos-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "10043b1bf1aab3bb",
+            "product_id": "prod_Uz5rccJfPCe0DL"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DMQQfUV8N4lpOLnGP3jS",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472712,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-salade-tacos-familial-20260731",
+            "local_hash": "10043b1bf1aab3bb",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5rccJfPCe0DL",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DMQQfUV8N4lpOLnGP3jS"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+          "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "ee9981aff749b91f",
+            "product_id": "prod_Uz5reKfv0HQ41d"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DMQQfUV8N4lprMVQaeKA",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472712,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
+            "local_hash": "ee9981aff749b91f",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5reKfv0HQ41d",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DMQQfUV8N4lprMVQaeKA"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+          "title": "PROMO — Riz chinois au poulet — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "7e40d848f81e7c09",
+            "product_id": "prod_Uz5rxcxlvDyp2M"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DNQQfUV8N4lpyNzzezfM",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472713,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-riz-chinois-au-poulet-familial-20260731",
+            "local_hash": "7e40d848f81e7c09",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5rxcxlvDyp2M",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DNQQfUV8N4lpyNzzezfM"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-pate-chinois-familial-20260731",
+          "title": "PROMO — Pâté chinois — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-pate-chinois-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "29b127ddcd0fa84b",
+            "product_id": "prod_Uz5rUQbg6fEW2H"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DNQQfUV8N4lpj2rPwdYY",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472713,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-pate-chinois-familial-20260731",
+            "local_hash": "29b127ddcd0fa84b",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5rUQbg6fEW2H",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DNQQfUV8N4lpj2rPwdYY"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+          "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "33da7c26fc1f73ac",
+            "product_id": "prod_Uz5ryO5Jq9Erlk"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DNQQfUV8N4lpOIZqy9Zq",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472713,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-linguine-alfredo-au-bacon-familial-20260731",
+            "local_hash": "33da7c26fc1f73ac",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5ryO5Jq9Erlk",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DNQQfUV8N4lpOIZqy9Zq"
+        }
+      },
+      {
+        "action": {
+          "action_type": "CREATE_PRICE",
+          "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+          "title": "PROMO — Sauté de porc asiatique — Format familial",
+          "portion_key": "familial",
+          "reason": "Local portion price does not exist in Stripe.",
+          "payload": {
+            "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+            "portion_key": "familial",
+            "amount_cents": 0,
+            "currency": "cad",
+            "local_hash": "b9108fd946f27474",
+            "product_id": "prod_Uz5rYQHRXQJXMu"
+          },
+          "risk": "medium",
+          "local_price": 0.0,
+          "stripe_price": null
+        },
+        "status": "success",
+        "response": {
+          "id": "price_1Tz8DOQQfUV8N4lpEEhaumNi",
+          "object": "price",
+          "active": true,
+          "billing_scheme": "per_unit",
+          "created": 1785472714,
+          "currency": "cad",
+          "custom_unit_amount": null,
+          "livemode": true,
+          "lookup_key": null,
+          "metadata": {
+            "created_by_tool_version": "0.5.0",
+            "item_id": "promo-saute-de-porc-asiatique-familial-20260731",
+            "local_hash": "b9108fd946f27474",
+            "portion_key": "familial",
+            "project": "lacuisine_rosalie",
+            "source": "rvsite_stripe_manager"
+          },
+          "nickname": "familial",
+          "product": "prod_Uz5rYQHRXQJXMu",
+          "recurring": null,
+          "tax_behavior": "unspecified",
+          "tiers_mode": null,
+          "transform_quantity": null,
+          "type": "one_time",
+          "unit_amount": 0,
+          "unit_amount_decimal": "0",
+          "dashboard_url": "https://dashboard.stripe.com/prices/price_1Tz8DOQQfUV8N4lpEEhaumNi"
+        }
+      }
+    ],
+    "errors": [],
+    "archived": {
+      "products": [],
+      "prices": []
+    },
+    "verification": {
+      "status": "passed",
+      "verified_at": "2026-07-31T04:38:34Z",
+      "managed_products_after_sync": 83,
+      "managed_prices_after_sync": 197,
+      "missing_products": [],
+      "missing_prices": [],
+      "dashboard_urls": {
+        "products": {
+          "fusilli-aux-legumes-et-crevettes_20260731": "https://dashboard.stripe.com/products/prod_Uz5qnu75z7f8OX",
+          "salade-tacos_20260731": "https://dashboard.stripe.com/products/prod_Uz5qrVKLMHdML8",
+          "macaroni-tomate-a-la-chair-de-saucisses_20260731": "https://dashboard.stripe.com/products/prod_Uz5qvdyRPuGPZf",
+          "riz-chinois-au-poulet_20260731": "https://dashboard.stripe.com/products/prod_Uz5q13PUzDIm9E",
+          "pate-chinois_20260731": "https://dashboard.stripe.com/products/prod_Uz5qWjSCtAYXg3",
+          "linguine-alfredo-au-bacon_20260731": "https://dashboard.stripe.com/products/prod_Uz5qKYwPCWhWDi",
+          "saute-de-porc-asiatique_20260731": "https://dashboard.stripe.com/products/prod_Uz5q5bp0W7Cloc",
+          "soupe-aux-legumes_20260731": "https://dashboard.stripe.com/products/prod_Uz5qSjJGXvXD8F",
+          "salade-cesar_20260731": "https://dashboard.stripe.com/products/prod_Uz5rntsRHHqBBR",
+          "sous-marin-pizza_20260731": "https://dashboard.stripe.com/products/prod_Uz5rFR2AH3Y9eQ",
+          "promo-fusilli-aux-legumes-et-crevettes-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5rCy8R7ITqOs",
+          "promo-salade-tacos-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5rq3vqjTbCQ6",
+          "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5rmKB9p7k1UU",
+          "promo-riz-chinois-au-poulet-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5rjuNyfVlkDs",
+          "promo-pate-chinois-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5r6Uoejr4n6w",
+          "promo-linguine-alfredo-au-bacon-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5reGn0MZgfXX",
+          "promo-saute-de-porc-asiatique-petit-20260731": "https://dashboard.stripe.com/products/prod_Uz5rcjMPM4Citt",
+          "promo-fusilli-aux-legumes-et-crevettes-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5rK2OsspzpIR",
+          "promo-salade-tacos-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5rccJfPCe0DL",
+          "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5reKfv0HQ41d",
+          "promo-riz-chinois-au-poulet-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5rxcxlvDyp2M",
+          "promo-pate-chinois-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5rUQbg6fEW2H",
+          "promo-linguine-alfredo-au-bacon-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5ryO5Jq9Erlk",
+          "promo-saute-de-porc-asiatique-familial-20260731": "https://dashboard.stripe.com/products/prod_Uz5rYQHRXQJXMu"
+        },
+        "prices": {
+          "fusilli-aux-legumes-et-crevettes_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fOQQfUV8N4lpGmjalK2N",
+          "fusilli-aux-legumes-et-crevettes_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fOQQfUV8N4lp1xUzUOWP",
+          "fusilli-aux-legumes-et-crevettes_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fOQQfUV8N4lpyAvNHiO6",
+          "salade-tacos_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fPQQfUV8N4lpeFPBioAe",
+          "salade-tacos_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fPQQfUV8N4lpl1GKDvkL",
+          "salade-tacos_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fPQQfUV8N4lpb2TmRkaa",
+          "macaroni-tomate-a-la-chair-de-saucisses_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fQQQfUV8N4lpKTF6AyKi",
+          "macaroni-tomate-a-la-chair-de-saucisses_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fQQQfUV8N4lpJLflB1si",
+          "macaroni-tomate-a-la-chair-de-saucisses_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fQQQfUV8N4lpZFDkdq7Z",
+          "riz-chinois-au-poulet_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fRQQfUV8N4lp02oVZdMS",
+          "riz-chinois-au-poulet_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fRQQfUV8N4lpnP7O4rFe",
+          "riz-chinois-au-poulet_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fRQQfUV8N4lpHHBUVnpm",
+          "pate-chinois_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fSQQfUV8N4lp7Sb3f4yF",
+          "pate-chinois_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fSQQfUV8N4lph9rW78rb",
+          "pate-chinois_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fTQQfUV8N4lpbeu54lsc",
+          "linguine-alfredo-au-bacon_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fTQQfUV8N4lpe7DPaL37",
+          "linguine-alfredo-au-bacon_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fTQQfUV8N4lpFAx7tGqM",
+          "linguine-alfredo-au-bacon_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fUQQfUV8N4lpUE866qn8",
+          "saute-de-porc-asiatique_20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz7fUQQfUV8N4lpFZofpd8H",
+          "saute-de-porc-asiatique_20260731:grand": "https://dashboard.stripe.com/prices/price_1Tz7fUQQfUV8N4lpl5X1edZn",
+          "saute-de-porc-asiatique_20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz7fVQQfUV8N4lpQRMJImu7",
+          "soupe-aux-legumes_20260731:standard": "https://dashboard.stripe.com/prices/price_1Tz7fVQQfUV8N4lp9EYidUbl",
+          "salade-cesar_20260731:standard": "https://dashboard.stripe.com/prices/price_1Tz7fVQQfUV8N4lpACzA1DsE",
+          "sous-marin-pizza_20260731:standard": "https://dashboard.stripe.com/prices/price_1Tz7fWQQfUV8N4lpKrta9iAJ",
+          "promo-fusilli-aux-legumes-et-crevettes-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DJQQfUV8N4lpibACsrVj",
+          "promo-salade-tacos-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DKQQfUV8N4lp5v323tt1",
+          "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DKQQfUV8N4lpBCWFxoo1",
+          "promo-riz-chinois-au-poulet-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DKQQfUV8N4lpXg0S7b2l",
+          "promo-pate-chinois-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DLQQfUV8N4lpJ4mLTAos",
+          "promo-linguine-alfredo-au-bacon-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DLQQfUV8N4lpYbkyZX8Y",
+          "promo-saute-de-porc-asiatique-petit-20260731:petit": "https://dashboard.stripe.com/prices/price_1Tz8DLQQfUV8N4lpxtxAUsoW",
+          "promo-fusilli-aux-legumes-et-crevettes-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DMQQfUV8N4lpYCBjSRIx",
+          "promo-salade-tacos-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DMQQfUV8N4lpOLnGP3jS",
+          "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DMQQfUV8N4lprMVQaeKA",
+          "promo-riz-chinois-au-poulet-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DNQQfUV8N4lpyNzzezfM",
+          "promo-pate-chinois-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DNQQfUV8N4lpj2rPwdYY",
+          "promo-linguine-alfredo-au-bacon-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DNQQfUV8N4lpOIZqy9Zq",
+          "promo-saute-de-porc-asiatique-familial-20260731:familial": "https://dashboard.stripe.com/prices/price_1Tz8DOQQfUV8N4lpEEhaumNi"
+        }
+      }
+    },
+    "finished_at": "2026-07-31T04:38:34Z"
+  },
+  "worker_catalog_preview": {
+    "app": "RVSITE Stripe Manager",
+    "version": "0.5.0",
+    "project": "lacuisine_rosalie",
+    "environment": "live",
+    "currency": "cad",
+    "synced_at": "2026-07-31T04:38:34Z",
+    "source_files": {
+      "items_json": "assets/data/items.json",
+      "menus_json": "assets/data/menus.json"
+    },
+    "menu": {
+      "id": "menu-2026-07-31",
+      "title": "Nouveau menu maison",
+      "start_date": "2026-07-31",
+      "end_date": "2026-08-31"
+    },
+    "items": {
+      "fusilli-aux-legumes-et-crevettes_20260731": {
+        "title": "Fusilli aux légumes et crevettes",
+        "category": "Les plats",
+        "product_id": "prod_Uz5qnu75z7f8OX",
+        "active": true,
+        "local_hash": "b4ee7ee82c92fb55",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fOQQfUV8N4lpGmjalK2N",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "d2b858b89d1c8d43"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fOQQfUV8N4lp1xUzUOWP",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "ecac34b9a0752496"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fOQQfUV8N4lpyAvNHiO6",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "9af994a7548d07b1"
+          }
+        }
+      },
+      "salade-tacos_20260731": {
+        "title": "Salade tacos",
+        "category": "Les plats",
+        "product_id": "prod_Uz5qrVKLMHdML8",
+        "active": true,
+        "local_hash": "8dc242b23c6e9027",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fPQQfUV8N4lpeFPBioAe",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "88d18b6a31b8c8d8"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fPQQfUV8N4lpl1GKDvkL",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "65a1d498480853b8"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fPQQfUV8N4lpb2TmRkaa",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "b6061a3ea926da67"
+          }
+        }
+      },
+      "macaroni-tomate-a-la-chair-de-saucisses_20260731": {
+        "title": "Macaroni tomate à la chair de saucisses",
+        "category": "Les plats",
+        "product_id": "prod_Uz5qvdyRPuGPZf",
+        "active": true,
+        "local_hash": "193c6fde8d2e1e13",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fQQQfUV8N4lpKTF6AyKi",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "f20bbb3f3fe28153"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fQQQfUV8N4lpJLflB1si",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "05fa89f6f8ef0ea5"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fQQQfUV8N4lpZFDkdq7Z",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "bc98e53ee6f175c2"
+          }
+        }
+      },
+      "riz-chinois-au-poulet_20260731": {
+        "title": "Riz chinois au poulet",
+        "category": "Les plats",
+        "product_id": "prod_Uz5q13PUzDIm9E",
+        "active": true,
+        "local_hash": "b96083f51f518a0d",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fRQQfUV8N4lp02oVZdMS",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "0999894e39883bd7"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fRQQfUV8N4lpnP7O4rFe",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "c2ead471152bc45d"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fRQQfUV8N4lpHHBUVnpm",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "39f1a67fbc98870a"
+          }
+        }
+      },
+      "pate-chinois_20260731": {
+        "title": "Pâté chinois",
+        "category": "Les plats",
+        "product_id": "prod_Uz5qWjSCtAYXg3",
+        "active": true,
+        "local_hash": "25a723adff6c6fd1",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fSQQfUV8N4lp7Sb3f4yF",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "692d839080d29112"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fSQQfUV8N4lph9rW78rb",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "29bfe21f8692dbfe"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fTQQfUV8N4lpbeu54lsc",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "dc44e9e5f432260e"
+          }
+        }
+      },
+      "linguine-alfredo-au-bacon_20260731": {
+        "title": "Linguine Alfredo au bacon",
+        "category": "Les plats",
+        "product_id": "prod_Uz5qKYwPCWhWDi",
+        "active": true,
+        "local_hash": "79b3adcbfd89ef0a",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fTQQfUV8N4lpe7DPaL37",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "ae14022e5bae7267"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fTQQfUV8N4lpFAx7tGqM",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "3b232abbf08c9384"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fUQQfUV8N4lpUE866qn8",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "10a4a24b5e4e5836"
+          }
+        }
+      },
+      "saute-de-porc-asiatique_20260731": {
+        "title": "Sauté de porc asiatique",
+        "category": "Les plats",
+        "product_id": "prod_Uz5q5bp0W7Cloc",
+        "active": true,
+        "local_hash": "db32f9ce7bc8db1d",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz7fUQQfUV8N4lpFZofpd8H",
+            "amount": 8.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "0d48769f948b1a82"
+          },
+          "grand": {
+            "price_id": "price_1Tz7fUQQfUV8N4lpl5X1edZn",
+            "amount": 12.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "51eaf62e4cf3bcb9"
+          },
+          "familial": {
+            "price_id": "price_1Tz7fVQQfUV8N4lpQRMJImu7",
+            "amount": 23.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "21310077b1c3c0d9"
+          }
+        }
+      },
+      "soupe-aux-legumes_20260731": {
+        "title": "Soupe aux légumes",
+        "category": "Les soupes",
+        "product_id": "prod_Uz5qSjJGXvXD8F",
+        "active": true,
+        "local_hash": "0bb359256472e1a0",
+        "prices": {
+          "standard": {
+            "price_id": "price_1Tz7fVQQfUV8N4lp9EYidUbl",
+            "amount": 4.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "3468c06161a32522"
+          }
+        }
+      },
+      "salade-cesar_20260731": {
+        "title": "Salade César",
+        "category": "Les salades",
+        "product_id": "prod_Uz5rntsRHHqBBR",
+        "active": true,
+        "local_hash": "1dabdcb2cdb415ba",
+        "prices": {
+          "standard": {
+            "price_id": "price_1Tz7fVQQfUV8N4lpACzA1DsE",
+            "amount": 5.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "25012dd301ec3cd7"
+          }
+        }
+      },
+      "sous-marin-pizza_20260731": {
+        "title": "Sous-marin pizza",
+        "category": "Les sous-marins",
+        "product_id": "prod_Uz5rFR2AH3Y9eQ",
+        "active": true,
+        "local_hash": "b1dc2473d6ec1858",
+        "prices": {
+          "standard": {
+            "price_id": "price_1Tz7fWQQfUV8N4lpKrta9iAJ",
+            "amount": 7.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "8e01c8e9346e49bd"
+          }
+        }
+      },
+      "promo-fusilli-aux-legumes-et-crevettes-petit-20260731": {
+        "title": "PROMO — Fusilli aux légumes et crevettes — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rCy8R7ITqOs",
+        "active": true,
+        "local_hash": "31b1d5ab66fdf8f7",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DJQQfUV8N4lpibACsrVj",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "ca6790acbce724c3"
+          }
+        }
+      },
+      "promo-salade-tacos-petit-20260731": {
+        "title": "PROMO — Salade tacos — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rq3vqjTbCQ6",
+        "active": true,
+        "local_hash": "39ec7bf261b2fe8d",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DKQQfUV8N4lp5v323tt1",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "7015ef4a6a1ea86d"
+          }
+        }
+      },
+      "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731": {
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rmKB9p7k1UU",
+        "active": true,
+        "local_hash": "91fdad9cd580c354",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DKQQfUV8N4lpBCWFxoo1",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "3e2ea95bebbb4b43"
+          }
+        }
+      },
+      "promo-riz-chinois-au-poulet-petit-20260731": {
+        "title": "PROMO — Riz chinois au poulet — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rjuNyfVlkDs",
+        "active": true,
+        "local_hash": "bcade65a510eeb62",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DKQQfUV8N4lpXg0S7b2l",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "958ed6777e80e58f"
+          }
+        }
+      },
+      "promo-pate-chinois-petit-20260731": {
+        "title": "PROMO — Pâté chinois — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5r6Uoejr4n6w",
+        "active": true,
+        "local_hash": "9f7a954933fae8d1",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DLQQfUV8N4lpJ4mLTAos",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "b100b2abf0311dcf"
+          }
+        }
+      },
+      "promo-linguine-alfredo-au-bacon-petit-20260731": {
+        "title": "PROMO — Linguine Alfredo au bacon — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5reGn0MZgfXX",
+        "active": true,
+        "local_hash": "1b133f8b4e8a6842",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DLQQfUV8N4lpYbkyZX8Y",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "03c0e077ad5ea94a"
+          }
+        }
+      },
+      "promo-saute-de-porc-asiatique-petit-20260731": {
+        "title": "PROMO — Sauté de porc asiatique — Petit format",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rcjMPM4Citt",
+        "active": true,
+        "local_hash": "7fdfab9e74fb37fd",
+        "prices": {
+          "petit": {
+            "price_id": "price_1Tz8DLQQfUV8N4lpxtxAUsoW",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "3c23ad219fb78289"
+          }
+        }
+      },
+      "promo-fusilli-aux-legumes-et-crevettes-familial-20260731": {
+        "title": "PROMO — Fusilli aux légumes et crevettes — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rK2OsspzpIR",
+        "active": true,
+        "local_hash": "30366421717bc8e8",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DMQQfUV8N4lpYCBjSRIx",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "0c21e000c8f2673d"
+          }
+        }
+      },
+      "promo-salade-tacos-familial-20260731": {
+        "title": "PROMO — Salade tacos — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rccJfPCe0DL",
+        "active": true,
+        "local_hash": "10f3e0c7a30703e4",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DMQQfUV8N4lpOLnGP3jS",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "10043b1bf1aab3bb"
+          }
+        }
+      },
+      "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731": {
+        "title": "PROMO — Macaroni tomate à la chair de saucisses — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5reKfv0HQ41d",
+        "active": true,
+        "local_hash": "5b40b98e86fa46e1",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DMQQfUV8N4lprMVQaeKA",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "ee9981aff749b91f"
+          }
+        }
+      },
+      "promo-riz-chinois-au-poulet-familial-20260731": {
+        "title": "PROMO — Riz chinois au poulet — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rxcxlvDyp2M",
+        "active": true,
+        "local_hash": "ad01190a88ca23f9",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DNQQfUV8N4lpyNzzezfM",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "7e40d848f81e7c09"
+          }
+        }
+      },
+      "promo-pate-chinois-familial-20260731": {
+        "title": "PROMO — Pâté chinois — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rUQbg6fEW2H",
+        "active": true,
+        "local_hash": "63f4a89defbbede1",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DNQQfUV8N4lpj2rPwdYY",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "29b127ddcd0fa84b"
+          }
+        }
+      },
+      "promo-linguine-alfredo-au-bacon-familial-20260731": {
+        "title": "PROMO — Linguine Alfredo au bacon — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5ryO5Jq9Erlk",
+        "active": true,
+        "local_hash": "3756a3f87692cedc",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DNQQfUV8N4lpOIZqy9Zq",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "33da7c26fc1f73ac"
+          }
+        }
+      },
+      "promo-saute-de-porc-asiatique-familial-20260731": {
+        "title": "PROMO — Sauté de porc asiatique — Format familial",
+        "category": "Promotion cachée",
+        "product_id": "prod_Uz5rYQHRXQJXMu",
+        "active": true,
+        "local_hash": "d50750ff739e877d",
+        "prices": {
+          "familial": {
+            "price_id": "price_1Tz8DOQQfUV8N4lpEEhaumNi",
+            "amount": 0.0,
+            "currency": "cad",
+            "active": true,
+            "local_hash": "b9108fd946f27474"
+          }
+        }
+      }
+    },
+    "archived": {
+      "products": [],
+      "prices": []
+    }
+  }
+}
