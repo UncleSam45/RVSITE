@@ -115,13 +115,13 @@ async function loadStripeCatalog(env, origin) {
   return {};
 }
 
-export function validateOrder(payload, site) {
+export function validateOrder(payload, site, now = new Date()) {
   if (!payload || typeof payload !== 'object') throw publicError('Commande invalide.', 400);
   if (!Array.isArray(payload.items) || !payload.items.length) throw publicError('Le panier est vide.', 400);
   if (site.settings?.ordering?.enabled === false) throw publicError('Les commandes en ligne sont désactivées.', 400);
 
   const menu = site.menus?.current_menu || {};
-  validateMenuOrderingWindow(menu);
+  validateMenuOrderingWindow(menu, now);
   const activeIds = new Set([
     ...(Array.isArray(menu.item_ids) ? menu.item_ids : []),
     ...(Array.isArray(menu.extra_ids) ? menu.extra_ids : []),
@@ -188,11 +188,16 @@ function eligiblePromotionTier(cents) {
   return '';
 }
 
-function validateMenuOrderingWindow(menu) {
+function validateMenuOrderingWindow(menu, now = new Date()) {
   if (menu.active === false) throw publicError('Le menu courant n’est pas actif.', 400);
-  const time = Date.now();
-  if (menu.order_open_at && time < new Date(menu.order_open_at).getTime()) throw publicError('Les commandes pour ce menu ne sont pas encore ouvertes.', 400);
-  if (menu.order_close_at && time > new Date(menu.order_close_at).getTime()) throw publicError('Les commandes pour ce menu sont fermées.', 400);
+  const local = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Toronto', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now);
+  const value = (type) => local.find((part) => part.type === type)?.value;
+  const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(value('weekday'));
+  const minutes = Number(value('hour')) * 60 + Number(value('minute'));
+  const open = (weekday === 5 && minutes >= 60) || weekday === 6 || weekday === 0 || weekday === 1 || weekday === 2 || (weekday === 3 && minutes < 720);
+  if (!open) throw publicError('Les commandes sont ouvertes du vendredi à 1 h au mercredi à midi (heure de Montréal).', 400);
 }
 
 function validateDelivery(date, window1, window2, site) {
