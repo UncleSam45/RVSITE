@@ -823,7 +823,7 @@
   }
 
   function menuBannerHtml() {
-    return `<section class="menu-banner" aria-label="Bannière vidéo de La cuisine de Rosalie"><video autoplay loop muted playsinline preload="auto" poster="${localAssetPath('banner.png')}" aria-label="Repas faits maison de La cuisine de Rosalie"><source src="${localAssetPath('assets/loop.mp4')}" type="video/mp4"></video></section>`;
+    return `<section class="menu-banner" aria-label="Bannière vidéo de La cuisine de Rosalie"><video autoplay loop muted playsinline preload="auto" aria-label="Repas faits maison de La cuisine de Rosalie"><source src="${localAssetPath('assets/loop.mp4')}" type="video/mp4"></video></section>`;
   }
 
   function menuPageHtml() {
