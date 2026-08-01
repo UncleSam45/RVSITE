@@ -459,7 +459,7 @@
   }
 
   function deliveryWindows() {
-    return state.data?.delivery?.delivery_windows || ['13h à 15h', '15h à 17h', '17h à 19h', '19h à 21h'];
+    return state.data?.delivery?.delivery_windows || ['13h à 15h', '15h à 17h', '17h à 19h'];
   }
 
   function isValidEmail(value) {
