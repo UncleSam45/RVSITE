@@ -1,76 +1,139 @@
 # La cuisine de Rosalie
 
-Static storefront and local editor/preview tools for **La cuisine de Rosalie**.
+La cuisine de Rosalie is a skeleton-frame engine for a small online catering service. It provides the minimum architecture needed to publish a weekly menu, manage structured catalogue content, validate an order, and hand payment to Stripe without coupling the public storefront to a traditional application server.
 
-## Current public state
+> **Project status:** beta testing and active prototyping. The interfaces, data schemas, checkout flow, deployment model, and administration tools may change. Review security, accessibility, privacy, tax, fulfilment, and payment requirements before using the project in production.
 
-The public website loads the storefront directly. `index.html` contains only a short loading placeholder until `main.js` renders the app.
+## Architecture
 
-The live custom domain is configured in `CNAME` as:
+The project separates customer-facing delivery, editable business data, checkout validation, and local administration:
 
-```text
-lacuisinederosalie.ca
-```
+1. The browser loads the static shell from `index.html`.
+2. `main.js` reads JSON documents from `assets/data/` and renders the storefront, menu, promotions, delivery choices, and cart.
+3. The checkout endpoint reloads trusted catalogue data, validates the submitted item identifiers, portions, quantities, delivery details, ordering window, and minimum order, then creates a Stripe Checkout session.
+4. Stripe hosts payment collection and redirects the customer back to the configured public site.
+5. Local Python tools maintain catalogue data, preview the storefront, and synchronize Stripe catalogue records.
 
-## Project structure
+This skeleton keeps prices and availability in repository-managed data rather than trusting values submitted by the browser. It is intentionally small enough to adapt for another caterer while preserving clear boundaries between presentation, content, order validation, and payments.
 
-- `index.html` — public static HTML shell for the deployed site.
-- `main.js` — frontend storefront application logic.
-- `assets/data/*.json` — public menu, business, delivery, promotion, content, and gallery data.
-- `assets/images/**` — public image assets used by the storefront.
-- `editor.py` — local editor for structured static data.
-- `main.py` — local NiceGUI preview/bootstrap.
-- `.github/workflows/pages.yml` — GitHub Pages deployment workflow for the static site.
+## Components
 
-## Local preview
+| Path | Role |
+| --- | --- |
+| `index.html` | Static document shell and public metadata. |
+| `main.js` | Storefront renderer, menu navigation, cart, delivery form, and checkout client. |
+| `assets/data/` | Public JSON source for settings, menus, items, promotions, delivery rules, gallery, content, and the Stripe catalogue. |
+| `assets/images/` | Product and storefront media. |
+| `worker/src/` | Modular Cloudflare Worker checkout implementation and tests. |
+| `worker.js` | Standalone Worker-compatible checkout entry point. |
+| `serverless/create-checkout-session.js` | Alternative Node serverless checkout endpoint skeleton. |
+| `editor.py` | NiceGUI catalogue and content editor for local administration. |
+| `main.py` | NiceGUI development preview and browser-console bridge. |
+| `striper.py` | Local Stripe catalogue planning, synchronization, and reporting tool. |
+| `docs/` | Deployment, administration, and launch-review documents. |
 
-Run the local preview with:
+## Data model
 
-```bash
-python main.py
-```
+The storefront is driven by committed JSON files:
 
-When using this preview, browser `console.log`, `console.info`, `console.warn`,
-and `console.error` messages from `main.js`, plus uncaught JavaScript errors and
-unhandled promise rejections, are printed in the terminal running `main.py`.
+- `settings.json` contains business identity, contact details, ordering settings, and external links.
+- `menus.json` selects the active menu and its available products.
+- `items.json` defines dishes, descriptions, portions, prices, images, and availability.
+- `promotions.json` defines promotional rules and eligible gifts.
+- `delivery.json` defines supported zones, delivery windows, and order constraints.
+- `content.json` and `gallery.json` contain editable presentation content.
+- `stripe_catalog.json` maps catalogue choices to synchronized Stripe records.
 
-The local NiceGUI preview is separate from the static GitHub Pages deployment. The live `.ca` site is deployed from the static artifact prepared by `.github/workflows/pages.yml`.
+Treat the deployed JSON as public information. Secrets such as Stripe keys, GitHub tokens, and credentials must be supplied through environment variables or deployment-platform secret storage and must never be committed.
 
-For a quick static preview, you can also run:
+## Local storefront preview
+
+The static site can be served with Python:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then open `http://127.0.0.1:8000/`.
+Open `http://127.0.0.1:8000/`.
 
-## Deploying to GitHub Pages
+For the NiceGUI preview, install the required Python dependency and run:
 
-The workflow `.github/workflows/pages.yml` runs on pushes to `main` or `master`, and can also be started manually with `workflow_dispatch`.
+```bash
+python3 main.py
+```
 
-The workflow intentionally publishes the static artifact directly to the `gh-pages` branch instead of using `actions/deploy-pages`, because the Pages deployment action can become stuck polling `deployment_queued`. GitHub Pages should be configured once in repository settings to serve from the `gh-pages` branch at `/`.
+The NiceGUI preview serves the committed public data and forwards browser console output to the development terminal.
 
-During deployment, the workflow prepares `_site` by copying:
+## Content administration
 
-- `index.html`
-- `main.js`
-- `CNAME`
-- `_headers` when present
-- `assets/`
-- `logo.png` and `banner.png` when present
+Start the local editor with:
 
-The workflow also verifies the deploy artifact before upload. It checks that:
+```bash
+python3 editor.py
+```
 
-- `_site/CNAME` contains `lacuisinederosalie.ca`
-- `_site/index.html` contains `Chargement de La cuisine de Rosalie`
-- `_site/index.html` contains a cache-busted `main.js?v=…` script reference
-- the deployed copies of `index.html` and `main.js` exactly match their source files
-- the deployed menu and item catalogue JSON files are present and non-empty
+Review the generated changes under `assets/data/` and `assets/images/` before committing them. The public site only receives content that has been committed and deployed. Operational instructions are available in `docs/ADMIN_GUIDE.md`.
 
-If GitHub Actions has stale runs, the workflow is configured with `cancel-in-progress: true` so newer runs cancel older queued/in-progress runs.
+## Checkout worker
 
-## Updating public content
+The Worker package requires Node.js and npm:
 
-The public storefront reads committed files from `assets/data/` and `assets/images/`. After editing data locally, commit and push the changed static files so GitHub Pages can deploy them.
+```bash
+cd worker
+npm install
+npm test
+npm run dev
+```
 
-See `docs/DEPLOYMENT.md` for more deployment notes.
+Configure the bindings and secrets expected by the selected checkout implementation before local or remote use. The browser should submit catalogue identifiers and customer fulfilment details only; the checkout service remains responsible for loading authoritative prices and enforcing order rules.
+
+The root `worker.js`, modular `worker/src/` implementation, and Node serverless example are alternative integration surfaces. Choose and deploy one checkout path rather than assuming that every example is active.
+
+## Stripe catalogue synchronization
+
+Run the local synchronization interface with:
+
+```bash
+python3 striper.py
+```
+
+Use a restricted test-mode Stripe key during beta testing. Inspect the proposed operations and generated report before applying catalogue changes. Production credentials and live transactions are outside the safe default scope of this prototype.
+
+## Deployment
+
+The static storefront can be hosted by GitHub Pages or another static hosting provider. Publish the HTML shell, JavaScript application, domain configuration, headers, and assets together. The checkout service must be deployed separately to a platform capable of protecting secrets and making outbound Stripe API requests.
+
+The custom domain is declared in `CNAME`. See `docs/DEPLOYMENT.md` for repository and Pages setup details.
+
+## Beta validation priorities
+
+Before a production launch, validate at least:
+
+- Stripe test-mode success, cancellation, duplicate submission, and failure paths;
+- server-side price, promotion, availability, ordering-window, and delivery validation;
+- mobile layout, keyboard navigation, screen-reader labels, and colour contrast;
+- customer consent, privacy handling, retention, refund, cancellation, and contact policies;
+- taxes, delivery fees, minimum orders, capacity limits, and fulfilment notifications;
+- monitoring, structured error reporting, backups, rollback, and secret rotation;
+- compatibility between edited JSON, the public renderer, Stripe mappings, and the deployed checkout endpoint.
+
+Use `docs/CLIENT_CONFIRMATION_CHECKLIST.md` as a launch-review starting point. Passing the existing automated tests does not make the prototype production-ready.
+
+## Testing
+
+Run the checkout tests:
+
+```bash
+cd worker
+npm test
+```
+
+Check Python syntax without starting the graphical tools:
+
+```bash
+python3 -m py_compile main.py editor.py striper.py
+```
+
+## Project scope
+
+This repository is an adaptable catering-commerce frame, not a complete hosted service. Inventory management, authenticated administration, customer accounts, webhook fulfilment, transactional messaging, observability, and jurisdiction-specific compliance can be added behind the existing boundaries as the prototype matures.

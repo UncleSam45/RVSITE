@@ -1,7 +1,3 @@
-// Cloudflare Worker for La cuisine de Rosalie Stripe Checkout.
-// Complete copy/paste reference. Supports paid menu items and the hidden
-// zero-dollar promotional gifts listed in current_menu.promotion_ids.
-
 const STRIPE_CHECKOUT_URL = 'https://api.stripe.com/v1/checkout/sessions';
 const GITHUB_API_URL = 'https://api.github.com';
 const DEFAULT_CURRENCY = 'cad';
@@ -238,8 +234,6 @@ export function buildStripeLineItems(lines, catalog, site, env) {
       }
       return { price: catalogPrice.priceId, quantity: line.qty };
     }
-    // Never dynamically manufacture a promotional product: it must use its real
-    // synchronized zero-dollar Stripe Price, as required by the catalogue.
     if (line.promotional) throw publicError(`Prix Stripe promotionnel manquant pour ${line.item.title || line.itemId}.`, 409);
     if (!allowDynamic) throw publicError(`Prix Stripe manquant pour ${line.item.title || line.itemId} / ${line.portionLabel}.`, 409);
     return { quantity: line.qty, price_data: { currency, unit_amount: line.unitAmount, product_data: { name: `${line.item.title || line.itemId} — ${line.portionLabel}`, description: line.item.description || 'La cuisine de Rosalie' } } };
@@ -261,8 +255,6 @@ function parseCatalogPrice(value) {
 }
 
 function readUnitAmount(value) {
-  // striper.py writes `amount` in dollars and the Stripe API-shaped formats use
-  // unit_amount/amount_cents in cents. Supporting both makes mismatch checks exact.
   const cents = value.unit_amount ?? value.amount_cents ?? value.unit_amount_decimal;
   if (cents !== undefined && cents !== null && cents !== '') return Number.isFinite(Number(cents)) ? Math.round(Number(cents)) : null;
   if (value.amount !== undefined && value.amount !== null && value.amount !== '') return Number.isFinite(Number(value.amount)) ? Math.round(Number(value.amount) * 100) : null;
