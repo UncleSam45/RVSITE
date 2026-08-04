@@ -1,12 +1,3 @@
-/**
- * Stripe Checkout session endpoint skeleton for La cuisine de Rosalie.
- *
- * Deploy as a Netlify/Vercel-style serverless function or adapt the same
- * validation flow for Cloudflare Workers. The browser must send only item IDs,
- * portion keys, quantities, delivery date, and customer details; this function
- * reloads official menu/pricing data before creating the Stripe session.
- */
-
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const Stripe = require('stripe');

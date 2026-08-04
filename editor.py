@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-"""NiceGUI menu manager for La cuisine de Rosalie.
-
-Edits the structured static data files used by the public site and keeps a
-SQLite audit history for menu/settings/delivery/promotion/item changes.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -26,7 +20,7 @@ from typing import Any
 
 try:
     from PIL import Image, ImageOps
-except ImportError:  # installed at runtime by ensure_dependencies
+except ImportError:
     Image = None
     ImageOps = None
 
@@ -173,13 +167,6 @@ def read_json(path: Path, fallback: dict[str, Any]) -> dict[str, Any]:
 
 
 def public_data_warnings(data_dir: Path) -> list[str]:
-    """Return warnings when a public data directory is missing meaningful site data.
-
-    The backup is meant to protect real menu content from being overwritten by
-    empty JSON files after a fresh pull/deploy. Valid JSON alone is not enough:
-    the core business settings, item list, and active menu references must also
-    contain data before we trust a folder as a backup source or destination.
-    """
     warnings: list[str] = []
 
     def load_required(filename: str) -> dict[str, Any] | None:

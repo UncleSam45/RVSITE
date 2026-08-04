@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""Bootstrap a minimal NiceGUI webframe.
-
-Features:
-- Ensures required dependencies are installed in the active virtual environment.
-- Creates a `main.js` starter frontend script next to this file.
-- Ensures `data/items.json` exists for editor compatibility.
-- Serves the public site directly from committed `assets/data/*.json` files.
-- Injects the frontend JavaScript into the page.
-- Forwards browser console output and uncaught JavaScript errors to this console.
-"""
-
 from __future__ import annotations
 
 import importlib.util
@@ -30,8 +19,7 @@ ITEMS_FILE = DATA_DIR / "items.json"
 
 DEFAULT_ITEMS = {"items": []}
 
-STARTER_JS = """// Starter frontend script for the webframe
-window.webframe = {
+STARTER_JS = """window.webframe = {
   version: '0.1.0',
   init() {
     const root = document.getElementById('webframe-root');
@@ -49,9 +37,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 """
 
-# This script must be loaded before ``main.js``. It preserves the browser's native
-# console behaviour while mirroring console calls and uncaught errors to the local
-# NiceGUI process, where they are visible alongside the application's Python logs.
 CONSOLE_FORWARDER_JS = r"""
 (() => {
   const endpoint = '/__frontend-console';
@@ -75,8 +60,6 @@ CONSOLE_FORWARDER_JS = r"""
     const message = values.map(formatValue).join(' ').slice(0, maxMessageLength);
     const payload = JSON.stringify({ level, message, page: window.location.href });
 
-    // keepalive lets messages survive a page navigation; fetch is used first so
-    // the request has a JSON content type and remains easy to inspect locally.
     if (window.fetch) {
       window.fetch(endpoint, {
         method: 'POST',
@@ -169,7 +152,6 @@ def find_available_port(preferred: int = 8888, max_tries: int = 50) -> int:
 
 
 def format_frontend_console_message(payload: Any, client_host: str | None) -> str:
-    """Create a bounded, one-line message for browser output received by the API."""
     if not isinstance(payload, dict):
         return "[frontend:error] Invalid console payload received"
 
@@ -190,7 +172,6 @@ def build_ui(port: int) -> None:
 
     @app.post("/__frontend-console")
     async def receive_frontend_console(request: Request) -> dict[str, bool]:
-        """Print browser console messages posted by the injected forwarding script."""
         try:
             payload = await request.json()
         except (json.JSONDecodeError, UnicodeDecodeError):
@@ -222,10 +203,6 @@ def main() -> None:
     ensure_dependencies(REQUIRED_PACKAGES)
     ensure_frontend_assets()
 
-    # Do not restore editor backups while launching the public site. The storefront
-    # must serve the committed assets/data/*.json files exactly as deployed;
-    # restoring a local "latest" backup here can overwrite the current menu with
-    # stale menu data and make the website appear unchanged after a deployment.
     ensure_data_files()
     port = find_available_port(8888)
     print(f"[run] Launching webframe on port {port}")

@@ -1,21 +1,4 @@
 #!/usr/bin/env python3
-"""RVSITE Stripe Manager — JSON-driven Stripe catalog sync tool.
-
-Standalone local admin dashboard for La cuisine de Rosalie / RVSITE.
-
-Version 0.5.0
-- Treats local RVSITE JSON as source of truth.
-- Reads assets/data/items.json and assets/data/menus.json from a selected repo.
-- Builds a preview sync plan before any Stripe mutation.
-- Creates/updates/archives only Stripe objects managed by this tool.
-- Writes Worker-ready assets/data/stripe_catalog.json and an admin sync report.
-
-Why this file does not `import stripe`:
-The original tool may be renamed stripe.py by users. Importing the official
-`stripe` package from a file with that name can cause import conflicts, so this
-app calls the Stripe REST API directly with requests instead.
-"""
-
 from __future__ import annotations
 
 import json
@@ -45,9 +28,6 @@ CONFIG_FILE = CONFIG_DIR / "settings.json"
 REQUIRED_PACKAGES = {"requests": "requests", "PySide6": "PySide6"}
 
 
-# -----------------------------------------------------------------------------
-# Dependency bootstrap
-# -----------------------------------------------------------------------------
 
 def module_available(module_name: str) -> bool:
     try:
@@ -64,9 +44,6 @@ def ensure_dependencies() -> None:
         subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
 
 
-# -----------------------------------------------------------------------------
-# Settings and small helpers
-# -----------------------------------------------------------------------------
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -132,9 +109,6 @@ def read_json_file(path: Path) -> dict[str, Any]:
     return data
 
 
-# -----------------------------------------------------------------------------
-# Data models
-# -----------------------------------------------------------------------------
 
 @dataclass
 class LocalItem:
@@ -220,9 +194,6 @@ class SyncPlan:
         return {key: len(self.by_type(key)) for key in keys} | {"WARNING": len(self.warnings), "ERROR": len(self.errors)}
 
 
-# -----------------------------------------------------------------------------
-# Local catalog builder
-# -----------------------------------------------------------------------------
 
 def product_hash_for(item: LocalItem, menu_id: str) -> str:
     return stable_hash({
@@ -262,7 +233,7 @@ def _item_from_raw(raw: dict[str, Any], source: str) -> LocalItem | None:
 
 
 def load_local_catalog(project_folder: Path, sync_mode: str = DEFAULT_SYNC_MODE, currency: str = DEFAULT_CURRENCY) -> LocalMenu:
-    del currency  # Currency affects Stripe prices, not local menu resolution.
+    del currency
     data_dir = project_folder / "assets" / "data"
     items_path = data_dir / "items.json"
     menus_path = data_dir / "menus.json"
@@ -338,9 +309,6 @@ def load_local_catalog(project_folder: Path, sync_mode: str = DEFAULT_SYNC_MODE,
     )
 
 
-# -----------------------------------------------------------------------------
-# Stripe API client and catalog fetcher
-# -----------------------------------------------------------------------------
 
 def stripe_request(method: str, path: str, api_key: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
     import requests
@@ -420,9 +388,6 @@ def fetch_managed_stripe_catalog(api_key: str, project_slug: str) -> StripeCatal
     return StripeCatalog(managed_products, prices, ignored, warnings, raw_products, raw_prices)
 
 
-# -----------------------------------------------------------------------------
-# Sync planner, executor, and output writers
-# -----------------------------------------------------------------------------
 
 def build_sync_plan(local_catalog: LocalMenu, stripe_catalog: StripeCatalog, options: dict[str, Any]) -> SyncPlan:
     project_slug = options.get("project_slug", DEFAULT_PROJECT_SLUG)
@@ -634,9 +599,6 @@ def write_sync_report(project_folder: Path, local_catalog: LocalMenu, stripe_cat
     return path
 
 
-# -----------------------------------------------------------------------------
-# UI
-# -----------------------------------------------------------------------------
 
 def run_app() -> None:
     from PySide6.QtCore import QObject, QThread, Signal, Qt
@@ -717,7 +679,7 @@ def run_app() -> None:
         def _open_folder(self) -> None:
             folder=self.project_input.text().strip()
             if folder and Path(folder).exists():
-                if sys.platform.startswith("win"): os.startfile(folder)  # type: ignore[attr-defined]
+                if sys.platform.startswith("win"): os.startfile(folder)
                 elif sys.platform == "darwin": subprocess.Popen(["open", folder])
                 else: subprocess.Popen(["xdg-open", folder])
 
