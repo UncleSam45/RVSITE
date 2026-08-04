@@ -466,8 +466,8 @@
       enabled: true,
       status,
       target: targetDate.toISOString(),
-      eyebrow: status.state === 'before' ? 'Ouverture des commandes dans' : 'Fin des commandes dans',
-      title: status.state === 'before' ? 'Préparez votre sélection' : 'Réservez votre menu avant la fermeture',
+      eyebrow: status.state === 'before' ? 'Prochain menu disponible dans' : 'Temps restant pour ce menu',
+      title: status.state === 'before' ? 'Un nouveau menu arrive bientôt' : 'Commandez le menu de la semaine',
       accent: status.state === 'before' ? 'soon' : 'live',
     };
   }
