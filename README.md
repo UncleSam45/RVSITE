@@ -1,8 +1,11 @@
 # La cuisine de Rosalie
 
+> [!CAUTION]
+> **Pre-alpha prototype — not production-ready.** This repository contains experimental infrastructure intended only for prototyping and proof-of-concept work. It has not been validated for production use; its architecture, interfaces, data, security controls, and workflows may change without notice. Do not use it to process real customer data, payments, or live business operations without a complete security, privacy, compliance, accessibility, reliability, and operational review.
+
 La cuisine de Rosalie is a skeleton-frame engine for a small online catering service. It provides the minimum architecture needed to publish a weekly menu, manage structured catalogue content, validate an order, and hand payment to Stripe without coupling the public storefront to a traditional application server.
 
-> **Project status:** beta testing and active prototyping. The interfaces, data schemas, checkout flow, deployment model, and administration tools may change. Review security, accessibility, privacy, tax, fulfilment, and payment requirements before using the project in production.
+> **Project status:** pre-alpha and actively prototyped. The interfaces, data schemas, checkout flow, deployment model, and administration tools may change.
 
 ## Architecture
 
