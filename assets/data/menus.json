@@ -1,41 +1,23 @@
 {
   "current_menu": {
-    "id": "menu-2026-07-31",
+    "id": "menu-2026-08-07",
     "active": true,
-    "title": "Nouveau menu maison",
-    "description": "Commandez au moins 72 heures à l’avance. Le ramassage peut être offert pendant cette période pour une plus grande flexibilité.",
-    "start_date": "2026-07-31",
+    "title": "Menu réduit pour les vacances",
+    "description": "Les vacances approchent et le menu est allégé pour cette période. Merci de votre compréhension! Commandez au moins 72 heures à l’avance.",
+    "start_date": "2026-08-07",
     "end_date": "2026-08-31",
     "item_ids": [
-      "fusilli-aux-legumes-et-crevettes_20260731",
-      "salade-tacos_20260731",
-      "macaroni-tomate-a-la-chair-de-saucisses_20260731",
-      "riz-chinois-au-poulet_20260731",
-      "pate-chinois_20260731",
-      "linguine-alfredo-au-bacon_20260731",
-      "saute-de-porc-asiatique_20260731"
+      "penne-sauce-rosee-saucisses-italiennes_20260807",
+      "macaroni-chinois-au-poulet_20260807",
+      "lanieres-porc-cremeuses-champignons-riz_20260807",
+      "boulettes-bacon-patates-pilees_20260807"
     ],
     "extra_ids": [
-      "soupe-aux-legumes_20260731",
-      "salade-cesar_20260731",
-      "sous-marin-pizza_20260731"
+      "soupe-poulet-nouilles_20260807",
+      "salade-grecque_20260807",
+      "sous-marin-jambon-fromage_20260807"
     ],
-    "promotion_ids": [
-      "promo-fusilli-aux-legumes-et-crevettes-petit-20260731",
-      "promo-salade-tacos-petit-20260731",
-      "promo-macaroni-tomate-a-la-chair-de-saucisses-petit-20260731",
-      "promo-riz-chinois-au-poulet-petit-20260731",
-      "promo-pate-chinois-petit-20260731",
-      "promo-linguine-alfredo-au-bacon-petit-20260731",
-      "promo-saute-de-porc-asiatique-petit-20260731",
-      "promo-fusilli-aux-legumes-et-crevettes-familial-20260731",
-      "promo-salade-tacos-familial-20260731",
-      "promo-macaroni-tomate-a-la-chair-de-saucisses-familial-20260731",
-      "promo-riz-chinois-au-poulet-familial-20260731",
-      "promo-pate-chinois-familial-20260731",
-      "promo-linguine-alfredo-au-bacon-familial-20260731",
-      "promo-saute-de-porc-asiatique-familial-20260731"
-    ]
+    "promotion_ids": []
   },
   "archive": []
 }

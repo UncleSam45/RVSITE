@@ -4,14 +4,13 @@ const DEFAULT_CURRENCY = 'cad';
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
-const PROMOTION_THRESHOLDS = { petit: 8000, familial: 12000 };
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request, env) });
     if (request.method === 'GET' && ['/api/health', '/health'].includes(url.pathname)) {
-      return json({ ok: true, service: 'la-cuisine-de-rosalie-checkout-worker', promotions: true }, 200, request, env);
+      return json({ ok: true, service: 'la-cuisine-de-rosalie-checkout-worker', promotions: false }, 200, request, env);
     }
     const routes = ['/api/create-checkout-session', '/create-checkout-session', '/api/create-checkout-session-v2', '/create-checkout-session-v2'];
     if (request.method === 'POST' && routes.includes(url.pathname)) {
@@ -121,7 +120,6 @@ export function validateOrder(payload, site, now = new Date()) {
   const activeIds = new Set([
     ...(Array.isArray(menu.item_ids) ? menu.item_ids : []),
     ...(Array.isArray(menu.extra_ids) ? menu.extra_ids : []),
-    ...(Array.isArray(menu.promotion_ids) ? menu.promotion_ids : []),
   ].map(String));
   const allItems = Array.isArray(site.items?.items) ? site.items.items : [];
   const itemById = new Map(allItems.map((item) => [String(item.id || ''), item]));
@@ -141,19 +139,15 @@ export function validateOrder(payload, site, now = new Date()) {
     const item = itemById.get(itemId);
     if (!item || !activeIds.has(itemId) || item.available === false) throw publicError('Un item du panier n’est plus disponible.', 400);
     const unitPrice = Number(item.pricing?.[portion]);
-    const promotional = item.promotional === true;
-    const promotionTier = clean(item.promotion_tier);
-    if (!portion || !Number.isFinite(unitPrice) || unitPrice < 0 || (!promotional && unitPrice === 0)) {
+    if (!portion || !Number.isFinite(unitPrice) || unitPrice <= 0) {
       throw publicError(`Format invalide pour ${item.title || itemId}.`, 400);
     }
-    if (promotional && !['petit', 'familial'].includes(promotionTier)) throw publicError(`Palier promotionnel invalide pour ${item.title || itemId}.`, 400);
     const unitAmount = Math.round(unitPrice * 100);
-    const line = { item, itemId, portion, portionLabel: PORTION_LABELS[portion] || portion, qty, unitAmount, promotional, promotionTier };
+    const line = { item, itemId, portion, portionLabel: PORTION_LABELS[portion] || portion, qty, unitAmount };
     lines.push(line);
-    if (!promotional) paidSubtotalCents += unitAmount * qty;
+    paidSubtotalCents += unitAmount * qty;
   }
 
-  validatePromotion(lines, paidSubtotalCents);
   const minimum = Number(site.settings?.ordering?.minimum_order || site.delivery?.rules?.minimum_order || 0);
   if (paidSubtotalCents < Math.round(minimum * 100)) throw publicError(`Minimum de commande: ${minimum.toFixed(2)} $.`, 400);
   return {
@@ -161,27 +155,7 @@ export function validateOrder(payload, site, now = new Date()) {
     customer, deliveryDate, deliveryWindow1, deliveryWindow2,
     coolerAvailable: payload.cooler_available === true,
     deliveryInstructions: clean(payload.delivery_instructions),
-    promotionTier: eligiblePromotionTier(paidSubtotalCents),
   };
-}
-
-function validatePromotion(lines, paidSubtotalCents) {
-  const gifts = lines.filter((line) => line.promotional);
-  if (gifts.length > 1) throw publicError('Un seul cadeau promotionnel est permis.', 400);
-  const eligibleTier = eligiblePromotionTier(paidSubtotalCents);
-  if (eligibleTier && !gifts.length) throw publicError('Choisissez votre cadeau promotionnel avant de passer au paiement.', 400);
-  if (!gifts.length) return;
-  const gift = gifts[0];
-  if (!eligibleTier) throw publicError('Le minimum de 80 $ pour le cadeau promotionnel n’est pas atteint.', 400);
-  if (gift.promotionTier !== eligibleTier) throw publicError('Le cadeau choisi ne correspond pas au palier promotionnel atteint.', 400);
-  if (gift.qty !== 1 || gift.unitAmount !== 0) throw publicError('Le cadeau promotionnel doit avoir une quantité de 1 et un prix de 0 $.', 400);
-  if (gift.portion !== gift.promotionTier) throw publicError('Le format du cadeau promotionnel est invalide.', 400);
-}
-
-function eligiblePromotionTier(cents) {
-  if (cents >= PROMOTION_THRESHOLDS.familial) return 'familial';
-  if (cents >= PROMOTION_THRESHOLDS.petit) return 'petit';
-  return '';
 }
 
 function validateMenuOrderingWindow(menu, now = new Date()) {
@@ -268,14 +242,14 @@ function normalizeCustomer(customer) {
 function buildMetadata(orderId, order, site) {
   const customer = order.customer;
   const address = [customer.street_number, customer.street_name, customer.apartment, customer.city, customer.province, customer.postal_code].filter(Boolean).join(', ');
-  const summary = order.lines.map((line) => `${line.qty}x ${line.item.title || line.itemId} (${line.portionLabel})${line.promotional ? ' [CADEAU GRATUIT]' : ''}`).join('; ');
+  const summary = order.lines.map((line) => `${line.qty}x ${line.item.title || line.itemId} (${line.portionLabel})`).join('; ');
   return {
     order_id: orderId, project: 'rvsite', business: site.settings?.business?.name || 'La cuisine de Rosalie',
     delivery_date: order.deliveryDate, delivery_window_1: order.deliveryWindow1, delivery_window_2: order.deliveryWindow2,
     cooler_available: order.coolerAvailable ? 'Oui' : 'Non', delivery_instructions: order.deliveryInstructions,
     customer_name: customer.name, customer_phone: customer.phone, customer_email: customer.email || '',
     delivery_city: customer.city, delivery_address: address, order_summary: summary,
-    subtotal_cents: String(order.paidSubtotalCents), promotion_tier: order.promotionTier || 'aucune',
+    subtotal_cents: String(order.paidSubtotalCents),
   };
 }
 
@@ -284,8 +258,8 @@ function buildOrderRecord(orderId, stripe, order, site) {
     order_id: orderId, created_at: new Date().toISOString(), payment_status: 'unconfirmed', stripe_checkout_session_id: stripe.id,
     business: site.settings?.business?.name || 'La cuisine de Rosalie', customer: order.customer,
     delivery: { date: order.deliveryDate, window_1: order.deliveryWindow1, window_2: order.deliveryWindow2, cooler_available: order.coolerAvailable, instructions: order.deliveryInstructions },
-    items: order.lines.map((line) => ({ item_id: line.itemId, title: line.item.title || line.itemId, portion: line.portion, portion_label: line.portionLabel, quantity: line.qty, unit_amount_cents: line.unitAmount, line_total_cents: line.unitAmount * line.qty, promotional: line.promotional, promotion_tier: line.promotionTier || null })),
-    subtotal_cents: order.paidSubtotalCents, promotion_tier: order.promotionTier || null,
+    items: order.lines.map((line) => ({ item_id: line.itemId, title: line.item.title || line.itemId, portion: line.portion, portion_label: line.portionLabel, quantity: line.qty, unit_amount_cents: line.unitAmount, line_total_cents: line.unitAmount * line.qty })),
+    subtotal_cents: order.paidSubtotalCents,
     currency: normalizeCurrency(stripe.currency || DEFAULT_CURRENCY),
   };
 }

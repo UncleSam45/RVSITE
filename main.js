@@ -300,27 +300,9 @@
     return { subtotal, count };
   }
 
-  function promotionTier(subtotal = cartTotals().subtotal) {
-    if (subtotal >= 120) return 'familial';
-    if (subtotal >= 80) return 'petit';
-    return '';
-  }
-
-  function promotionalItems(tier = promotionTier()) {
-    return (state.data?.items || []).filter((item) => item.promotional === true && item.promotion_tier === tier);
-  }
-
-  function selectedGift() {
-    return state.cart.items.find((line) => isPromotionalItem(line));
-  }
-
-  function reconcileGift() {
-    const tier = promotionTier();
-    state.cart.items = state.cart.items.filter((line) => !isPromotionalItem(line) || (tier && getItemById(line.itemId)?.promotion_tier === tier));
-  }
-
   function saveCart() {
-    reconcileGift();
+    // Remove gifts left in carts from the discontinued promotion.
+    state.cart.items = state.cart.items.filter((line) => !isPromotionalItem(line));
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.cart));
   }
 
@@ -626,6 +608,10 @@
     return Array.from(new Set([configured, '/.netlify/functions/create-checkout-session']));
   }
 
+  function isRetiredPromotionError(message) {
+    return /(?:cadeau|article) promotionnel|choisissez votre cadeau/i.test(String(message || ''));
+  }
+
   async function requestCheckoutSession(payload) {
     const endpoints = checkoutEndpoints();
     let lastError = null;
@@ -636,7 +622,9 @@
         if (response.ok && data.checkout_url) return data.checkout_url;
         const message = data.error || `Session Stripe indisponible (${response.status}).`;
         lastError = new Error(message);
-        if (response.status !== 404) break;
+        // A previously deployed checkout Worker may still enforce the retired
+        // gift offer. In that case, continue to the current serverless handler.
+        if (response.status !== 404 && !isRetiredPromotionError(message)) break;
       } catch (error) {
         lastError = error;
       }
@@ -949,14 +937,11 @@
     const totals = cartTotals();
     const rules = getSettingRules();
     const paidLines = state.cart.items.filter((line) => !isPromotionalItem(line)).map((line) => cartLineHtml(line)).join('');
-    const giftLines = state.cart.items.filter((line) => isPromotionalItem(line)).map((line) => cartLineHtml(line)).join('');
     const min = Number(rules.minimum_order || 0);
     const threshold = Number(rules.free_delivery_threshold || 0);
     return `<aside class="cart-panel card" aria-label="Votre panier"><h2>Votre panier</h2>
       ${paidLines ? `<div class="cart-lines">${paidLines}</div>` : `<div class="cart-empty">Votre panier est vide. Ajoutez un plat du menu de la semaine.</div>`}
-      ${giftLines ? `<div class="gift-heading" style="margin-top:16px">CADEAU PROMOTIONNEL</div><div class="cart-lines">${giftLines}</div>` : ''}
       <div class="cart-total"><span>Sous-total</span><span>${formatCurrency(totals.subtotal)}</span></div>
-      ${promotionProgressHtml(totals.subtotal)}
       ${totals.subtotal > 0 && totals.subtotal < min ? `<p class="notice">Minimum de commande: ${formatCurrency(min)}. Ajoutez ${formatCurrency(min - totals.subtotal)} pour commander.</p>` : ''}
       ${totals.subtotal >= threshold ? `<p class="notice success-note">Livraison gratuite atteinte (${formatCurrency(threshold)} et plus).</p>` : `<p class="notice">Livraison gratuite à partir de ${formatCurrency(threshold)}.</p>`}
       ${includeButton ? `<button class="btn btn-primary" data-page="commander" ${!getMenuOrderStatus().open ? 'disabled' : ''} style="width:100%;margin-top:12px">Voir le panier</button>` : ''}
@@ -964,17 +949,7 @@
   }
 
   function cartLineHtml(line) {
-    if (isPromotionalItem(line)) {
-      const item = getItemById(line.itemId);
-      return `<div class="cart-line gift-line"><div class="line-top"><div><div class="line-title">${escapeHtml(item?.gift_title || line.title.replace(/^PROMO — /, ''))}</div><div class="line-meta">${escapeHtml(line.portionLabel)}<br>Valeur régulière: ${formatCurrency(item?.regular_value || 0)}</div></div><span class="free-label">GRATUIT</span></div><div class="line-meta" style="margin-top:8px">Prix promotionnel: <strong>GRATUIT</strong> • Quantité 1</div></div>`;
-    }
     return `<div class="cart-line"><div class="line-top"><div><div class="line-title">${escapeHtml(line.title)}</div><div class="line-meta">${escapeHtml(line.portionLabel)} • ${formatCurrency(line.price)}</div></div><strong>${formatCurrency(line.price * line.qty)}</strong></div><div class="line-actions"><div class="qty"><button data-line-qty="${line.itemId}:${line.portion}:-1" aria-label="Réduire">−</button><span>${line.qty}</span><button data-line-qty="${line.itemId}:${line.portion}:1" aria-label="Augmenter">+</button></div><button class="remove-btn" data-remove="${line.itemId}:${line.portion}">Retirer</button></div></div>`;
-  }
-
-  function promotionProgressHtml(subtotal) {
-    if (subtotal < 80) return `<p class="promo-progress">🎁 Ajoutez encore ${formatCurrency(80 - subtotal)} à votre commande pour recevoir gratuitement un petit format de votre choix.</p>`;
-    if (subtotal < 120) return `<p class="promo-progress unlocked">🎉 Votre petit format gratuit est débloqué! Ajoutez encore ${formatCurrency(120 - subtotal)} pour le remplacer par un format familial gratuit.</p>`;
-    return `<p class="promo-progress unlocked">✨ Félicitations! Votre format familial gratuit est débloqué.</p>`;
   }
 
   function normalizeDeliveryDate() {
@@ -996,43 +971,14 @@
     normalizeDeliveryDate();
     const errors = validateOrder();
     const totals = cartTotals();
-    const tier = promotionTier(totals.subtotal);
-    const needsGift = tier && !selectedGift();
-    const checkoutLabel = tier === 'familial' ? 'CHOISIR MON FORMAT FAMILIAL GRATUIT' : 'CHOISIR MON PLAT GRATUIT';
     return `<div class="container"><div class="stepper" aria-label="Étapes de commande"><span class="step-pill active">1 Votre commande</span><span class="step-pill">2 Livraison</span><span class="step-pill">3 Coordonnées</span><span class="step-pill">4 Confirmation</span></div></div><div class="container checkout-grid">
       <div class="grid">
         <section class="card step"><h2><span class="step-number">1</span>Votre commande</h2>${cartPanelHtml(false)}</section>
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
         <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
       </div>
-      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" ${needsGift ? 'data-open-gifts' : 'data-checkout'} ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">${needsGift ? checkoutLabel : 'Passer au paiement sécurisé'}</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
+      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
     </div>`;
-  }
-
-  function giftSelectorHtml() {
-    if (!state.promotion.open) return '';
-    const tier = promotionTier();
-    const items = promotionalItems(tier);
-    const familial = tier === 'familial';
-    return `<div class="gift-overlay" role="presentation"><section class="gift-dialog" role="dialog" aria-modal="true" aria-labelledby="gift-title"><button class="gift-close" data-close-gifts aria-label="Fermer">×</button><div class="gift-intro"><div class="kicker">Votre cadeau vous attend</div><h2 id="gift-title">Félicitations!</h2><p class="lead">Votre commande vous donne droit à un ${familial ? 'format familial gratuit d’une valeur de 23 $' : 'petit format gratuit d’une valeur de 8 $'}.<br><strong>Choisissez votre plat préféré.</strong></p></div><div class="gift-grid">${items.map((item) => `<button class="gift-card" data-select-gift="${escapeHtml(item.id)}"><div>${itemImageHtml(item)}</div><span class="gift-card-body"><span class="free-label">GRATUIT</span><h3>${escapeHtml(item.gift_title || item.title)}</h3><small>${familial ? 'Format familial' : 'Petit format'} • Valeur ${formatCurrency(item.regular_value)}</small></span></button>`).join('')}</div></section></div>`;
-  }
-
-  async function chooseGift(itemId, button) {
-    const item = getItemById(itemId);
-    const tier = promotionTier();
-    if (!item?.promotional || item.promotion_tier !== tier || state.promotion.selecting) return;
-    state.promotion.selecting = true;
-    button?.classList.add('selecting');
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    state.cart.items = state.cart.items.filter((line) => !isPromotionalItem(line));
-    const portion = getPortions(item)[0];
-    state.cart.items.push({ itemId: item.id, title: item.title, portion: portion.key, portionLabel: portion.label, price: 0, qty: 1 });
-    state.promotion.open = false;
-    state.promotion.selecting = false;
-    saveCart();
-    showToast('Votre cadeau gratuit a été ajouté!');
-    render();
-    await checkout();
   }
 
   function dateSelectorHtml() {
@@ -1530,7 +1476,7 @@
   function render() {
     const root = document.getElementById('webframe-root');
     const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml, admin: adminHtml };
-    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}${adminLaunchHtml()}${giftSelectorHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
+    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}${adminLaunchHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
     bindEvents(root);
     bindGalleryEvents(root);
     bindCountdown(root);
@@ -1626,9 +1572,6 @@
       finally { stripe.updating = false; render(); }
     });
     root.querySelector('[data-checkout]')?.addEventListener('click', checkout);
-    root.querySelector('[data-open-gifts]')?.addEventListener('click', () => { state.promotion.open = true; render(); });
-    root.querySelector('[data-close-gifts]')?.addEventListener('click', () => { state.promotion.open = false; render(); });
-    root.querySelectorAll('[data-select-gift]').forEach((button) => button.addEventListener('click', () => chooseGift(button.dataset.selectGift, button)));
   }
 
   async function init() {
