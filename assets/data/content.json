@@ -1,12 +1,12 @@
 {
   "seo": {
-    "title": "La cuisine de Rosalie | Nouveau menu maison",
-    "description": "Sept plats maison en trois formats, extras et cadeau promotionnel automatique dès 80 $."
+    "title": "La cuisine de Rosalie | Menu réduit pour les vacances",
+    "description": "Menu maison allégé pour les vacances: quatre plats en trois formats, soupe, salade et sous-marin."
   },
   "home": {
     "headline": "La cuisine de Rosalie — fait maison",
-    "subheadline": "Service de traiteur et menu maison en formats Petit, Grand et Famille. Minimum de 35 $, préparation de 72 h et ramassage possiblement disponible.",
-    "primary_cta": "Voir les créations maison",
+    "subheadline": "Menu réduit pour les vacances en formats Petit, Grand et Famille. Minimum de 35 $ et préparation de 72 h.",
+    "primary_cta": "Voir le menu des vacances",
     "secondary_cta": "Nous contacter"
   },
   "business_rules_to_confirm": [

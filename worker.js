@@ -11,7 +11,7 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request, env) });
     if (request.method === 'GET' && ['/api/health', '/health'].includes(url.pathname)) {
-      return json({ ok: true, service: 'la-cuisine-de-rosalie-checkout-worker', promotions: true }, 200, request, env);
+      return json({ ok: true, service: 'la-cuisine-de-rosalie-checkout-worker', promotions: false }, 200, request, env);
     }
     const routes = ['/api/create-checkout-session', '/create-checkout-session', '/api/create-checkout-session-v2', '/create-checkout-session-v2'];
     if (request.method === 'POST' && routes.includes(url.pathname)) {
@@ -121,7 +121,6 @@ export function validateOrder(payload, site, now = new Date()) {
   const activeIds = new Set([
     ...(Array.isArray(menu.item_ids) ? menu.item_ids : []),
     ...(Array.isArray(menu.extra_ids) ? menu.extra_ids : []),
-    ...(Array.isArray(menu.promotion_ids) ? menu.promotion_ids : []),
   ].map(String));
   const allItems = Array.isArray(site.items?.items) ? site.items.items : [];
   const itemById = new Map(allItems.map((item) => [String(item.id || ''), item]));
@@ -141,19 +140,18 @@ export function validateOrder(payload, site, now = new Date()) {
     const item = itemById.get(itemId);
     if (!item || !activeIds.has(itemId) || item.available === false) throw publicError('Un item du panier n’est plus disponible.', 400);
     const unitPrice = Number(item.pricing?.[portion]);
-    const promotional = item.promotional === true;
-    const promotionTier = clean(item.promotion_tier);
-    if (!portion || !Number.isFinite(unitPrice) || unitPrice < 0 || (!promotional && unitPrice === 0)) {
+    if (item.promotional === true) throw publicError('Cette promotion est terminée. Retirez le cadeau de votre panier.', 400);
+    const promotional = false;
+    const promotionTier = '';
+    if (!portion || !Number.isFinite(unitPrice) || unitPrice <= 0) {
       throw publicError(`Format invalide pour ${item.title || itemId}.`, 400);
     }
-    if (promotional && !['petit', 'familial'].includes(promotionTier)) throw publicError(`Palier promotionnel invalide pour ${item.title || itemId}.`, 400);
     const unitAmount = Math.round(unitPrice * 100);
     const line = { item, itemId, portion, portionLabel: PORTION_LABELS[portion] || portion, qty, unitAmount, promotional, promotionTier };
     lines.push(line);
     if (!promotional) paidSubtotalCents += unitAmount * qty;
   }
 
-  validatePromotion(lines, paidSubtotalCents);
   const minimum = Number(site.settings?.ordering?.minimum_order || site.delivery?.rules?.minimum_order || 0);
   if (paidSubtotalCents < Math.round(minimum * 100)) throw publicError(`Minimum de commande: ${minimum.toFixed(2)} $.`, 400);
   return {
@@ -161,7 +159,7 @@ export function validateOrder(payload, site, now = new Date()) {
     customer, deliveryDate, deliveryWindow1, deliveryWindow2,
     coolerAvailable: payload.cooler_available === true,
     deliveryInstructions: clean(payload.delivery_instructions),
-    promotionTier: eligiblePromotionTier(paidSubtotalCents),
+    promotionTier: null,
   };
 }
 
