@@ -1,0 +1,23 @@
+{
+  "app": "RVSITE Stripe Manager",
+  "version": "0.5.0",
+  "project": "lacuisine_rosalie",
+  "environment": "live",
+  "currency": "cad",
+  "synced_at": null,
+  "source_files": {
+    "items_json": "assets/data/items.json",
+    "menus_json": "assets/data/menus.json"
+  },
+  "menu": {
+    "id": "menu-2026-08-07",
+    "title": "Menu réduit pour les vacances",
+    "start_date": "2026-08-07",
+    "end_date": "2026-08-31"
+  },
+  "items": {},
+  "archived": {
+    "products": [],
+    "prices": []
+  }
+}

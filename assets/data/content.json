@@ -1,0 +1,19 @@
+{
+  "seo": {
+    "title": "La cuisine de Rosalie | Menu réduit pour les vacances",
+    "description": "Menu maison allégé pour les vacances: quatre plats en trois formats, soupe, salade et sous-marin."
+  },
+  "home": {
+    "headline": "La cuisine de Rosalie — fait maison",
+    "subheadline": "Menu réduit pour les vacances en formats Petit, Grand et Famille. Minimum de 35 $ et préparation de 72 h.",
+    "primary_cta": "Voir le menu des vacances",
+    "secondary_cta": "Nous contacter"
+  },
+  "business_rules_to_confirm": [
+    "Minimum de commande exact: 30 $ ou 35 $?",
+    "Seuil de livraison gratuite et modalités.",
+    "Jours de livraison fixes ou variables selon le menu.",
+    "Paiement complet en ligne, dépôt ou paiement à la livraison.",
+    "Application du rabais de référence de 10 $."
+  ]
+}

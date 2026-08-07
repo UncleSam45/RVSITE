@@ -1,0 +1,110 @@
+{
+  "items": [
+    {
+      "id": "penne-sauce-rosee-saucisses-italiennes_20260807",
+      "title": "Penne sauce rosée et saucisses italiennes",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "macaroni-chinois-au-poulet_20260807",
+      "title": "Macaroni chinois au poulet",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "lanieres-porc-cremeuses-champignons-riz_20260807",
+      "title": "Lanières de porc crémeuses aux champignons et riz",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "boulettes-bacon-patates-pilees_20260807",
+      "title": "Boulettes au bacon + patates pilées",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "soupe-poulet-nouilles_20260807",
+      "title": "Soupe poulet nouilles",
+      "description": "Préparé maison.",
+      "category": "Les soupes",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 4
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "salade-grecque_20260807",
+      "title": "Salade grecque",
+      "description": "Préparé maison.",
+      "category": "Les salades",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 5
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "sous-marin-jambon-fromage_20260807",
+      "title": "Sous-marin jambon-fromage",
+      "description": "Préparé maison.",
+      "category": "Les sous-marins",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [],
+      "showcase": false
+    }
+  ]
+}

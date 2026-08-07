@@ -1,0 +1,28 @@
+{
+  "business": {
+    "name": "La cuisine de Rosalie",
+    "legal_name": "Les Entreprises Rosalie Vaisica",
+    "operating_name": "La Cuisine de Rosalie",
+    "owner_full_name": "Rosalie Vaisica",
+    "mapaq_certification_number": "0406479",
+    "tagline": "Fait maison • Service de traiteur",
+    "phone": "",
+    "email": "",
+    "facebook_url": "https://www.facebook.com/cuisine.rosalie/",
+    "messenger_url": "https://m.me/cuisine.rosalie"
+  },
+  "ordering": {
+    "enabled": true,
+    "order_notice_hours": 72,
+    "minimum_order": 35,
+    "free_delivery_threshold": 35,
+    "currency": "CAD",
+    "locale": "fr-CA",
+    "timezone": "America/Toronto",
+    "checkout_endpoint": "/api/create-checkout-session"
+  },
+  "trust": {
+    "hygiene_statement": "Formation en hygiène et salubrité alimentaires.",
+    "mapaq_wording_confirmed": false
+  }
+}
