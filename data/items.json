@@ -7,7 +7,7 @@
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "",
+      "image": "assets/images/items/PENNE SAUCE ROSEE ET SAUCISSES ITALIENNES.png",
       "pricing": {
         "petit": 8,
         "grand": 12,
@@ -39,7 +39,7 @@
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "",
+      "image": "assets/images/items/LANIERE DE PORC CREMEUSE AU CHAMPIGNON ET RIZ .png",
       "pricing": {
         "petit": 8,
         "grand": 12,
