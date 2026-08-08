@@ -372,7 +372,9 @@
   function setPage(page) {
     state.page = page;
     render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const menuItems = page === 'menu' ? document.getElementById('plats-principaux') : null;
+    const top = menuItems ? window.scrollY + menuItems.getBoundingClientRect().top - 118 : 0;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   }
 
   function escapeHtml(value) {
@@ -920,14 +922,14 @@
             <div class="chip-row"><span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Livraison locale disponible</span><span class="chip">Petit / Grand / Famille</span><span class="chip">Minimum ${formatCurrency(rules.minimum_order || 35)}</span></div>
           </section>
           ${!menu.active ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${menu.active && !orderStatus.open ? `<section class="section menu-empty">${menuOrderStatusMessage()}</section>` : ''}${menu.active && promos.length ? `<section class="section panel promo"><strong>${escapeHtml(promos[0].title)}</strong><p>${escapeHtml(promos[0].description)}</p></section>` : ''}
-          ${menu.active ? `${menuSectionHtml('Plats principaux', getMenuItems('items'))}${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}` : ''}
+          ${menu.active ? `${menuSectionHtml('Plats principaux', getMenuItems('items'), 'plats-principaux')}${menuSectionHtml('Accompagnements & extras', getMenuItems('extras'))}` : ''}
         </div>
         ${cartPanelHtml(true)}
       </div>`;
   }
 
-  function menuSectionHtml(title, items) {
-    return `<section class="section"><div class="menu-section-title"><h2>${escapeHtml(title)}</h2></div><div class="grid">${items.map(menuItemHtml).join('')}</div></section>`;
+  function menuSectionHtml(title, items, id = '') {
+    return `<section class="section"${id ? ` id="${escapeHtml(id)}"` : ''}><div class="menu-section-title"><h2>${escapeHtml(title)}</h2></div><div class="grid">${items.map(menuItemHtml).join('')}</div></section>`;
   }
 
   function menuItemHtml(item) {
