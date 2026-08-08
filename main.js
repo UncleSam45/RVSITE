@@ -101,6 +101,7 @@
       .hero>div:first-child{position:relative;z-index:2}.kicker{display:inline-flex;align-items:center;gap:9px;color:var(--deep-olive);letter-spacing:.16em}.kicker::before{content:'✦';color:#c99c28;font-size:.9rem;animation:premiumTwinkle 2.8s ease-in-out infinite}
       .hero h1{max-width:760px;letter-spacing:-.045em;text-wrap:balance;text-shadow:0 2px 0 rgba(255,255,255,.7)}.lead{text-wrap:pretty}
       .hero-visual{min-height:540px;border:1px solid rgba(255,255,255,.82);border-radius:38% 22% 34% 18% / 22% 38% 18% 34%;box-shadow:0 32px 65px rgba(37,73,58,.2);transform:rotate(1.2deg);transition:transform 1s var(--premium-ease),border-radius 1s var(--premium-ease)}.hero-visual:hover{transform:rotate(0) scale(1.018);border-radius:24px}.hero-visual img{min-height:540px;transition:transform 1.4s var(--premium-ease),filter .7s ease}.hero-visual:hover img{transform:scale(1.065);filter:saturate(1.08)}
+      .weekly-menu-visual{width:min(100%,460px);min-height:0;aspect-ratio:2/3;justify-self:center;border-radius:28px;transform:none;background:#fff;box-shadow:0 32px 65px rgba(37,73,58,.2)}.weekly-menu-visual:hover{border-radius:28px;transform:translateY(-4px)}.weekly-menu-visual img{width:100%;height:100%;min-height:0;object-fit:contain;background:#fff}.weekly-menu-visual:hover img{transform:none;filter:none}.weekly-menu-visual img.fallback{object-fit:cover}
       .hero-card{left:24px;right:24px;bottom:24px;border-color:rgba(255,255,255,.82);background:rgba(255,252,244,.82);box-shadow:0 18px 45px rgba(23,59,48,.18);transform:rotate(-1.2deg)}
       .btn{position:relative;overflow:hidden;transition:transform .35s var(--premium-ease),filter .25s ease,box-shadow .35s ease}.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.35) 48%,transparent 72%);transform:translateX(-150%);transition:transform .7s ease}.btn:hover::after{transform:translateX(150%)}.btn:hover{transform:translateY(-4px) scale(1.015)}.btn-primary{box-shadow:0 14px 30px rgba(159,104,47,.3)}
       .chip{transition:transform .35s var(--premium-ease),box-shadow .35s ease,border-color .35s ease}.chip:hover{transform:translateY(-3px) rotate(-1deg);border-color:rgba(47,111,85,.28);box-shadow:0 10px 25px rgba(47,111,85,.1)}
@@ -834,7 +835,8 @@
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
     const heroItems = getCurrentMenuImageItems();
     const activeHeroItem = heroItems.length ? heroItems[state.carousel.index % heroItems.length] : null;
-    const heroImage = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
+    const heroImage = localAssetPath('assets/images/items/MENU.png');
+    const heroImageFallback = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
     const orderWindow = getWeeklyOrderWindow();
     return `
       <section class="hero container">
@@ -846,9 +848,8 @@
           <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
           <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Formats Petit / Grand / Famille</span>` : '<span class="chip">Menu de la semaine</span>'}</div>
         </div>
-        <div class="hero-visual">
-          <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu de la semaine')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Famille • livraison à céduler avec le client` : 'Les commandes sont fermées pour le moment. Consultez le menu pour connaître la prochaine période de commande.'}</span></div>
+        <div class="hero-visual weekly-menu-visual">
+          <img src="${escapeHtml(heroImage)}" alt="Menu de la semaine de La cuisine de Rosalie" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${escapeHtml(heroImageFallback)}';this.classList.add('fallback')">
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
