@@ -101,6 +101,7 @@
       .hero>div:first-child{position:relative;z-index:2}.kicker{display:inline-flex;align-items:center;gap:9px;color:var(--deep-olive);letter-spacing:.16em}.kicker::before{content:'✦';color:#c99c28;font-size:.9rem;animation:premiumTwinkle 2.8s ease-in-out infinite}
       .hero h1{max-width:760px;letter-spacing:-.045em;text-wrap:balance;text-shadow:0 2px 0 rgba(255,255,255,.7)}.lead{text-wrap:pretty}
       .hero-visual{min-height:540px;border:1px solid rgba(255,255,255,.82);border-radius:38% 22% 34% 18% / 22% 38% 18% 34%;box-shadow:0 32px 65px rgba(37,73,58,.2);transform:rotate(1.2deg);transition:transform 1s var(--premium-ease),border-radius 1s var(--premium-ease)}.hero-visual:hover{transform:rotate(0) scale(1.018);border-radius:24px}.hero-visual img{min-height:540px;transition:transform 1.4s var(--premium-ease),filter .7s ease}.hero-visual:hover img{transform:scale(1.065);filter:saturate(1.08)}
+      .weekly-menu-visual{width:min(100%,460px);min-height:0;aspect-ratio:2/3;justify-self:center;border-radius:28px;transform:none;background:#fff;box-shadow:0 32px 65px rgba(37,73,58,.2)}.weekly-menu-visual:hover{border-radius:28px;transform:translateY(-4px)}.weekly-menu-visual img{width:100%;height:100%;min-height:0;object-fit:contain;background:#fff}.weekly-menu-visual:hover img{transform:none;filter:none}.weekly-menu-visual img.fallback{object-fit:cover}
       .hero-card{left:24px;right:24px;bottom:24px;border-color:rgba(255,255,255,.82);background:rgba(255,252,244,.82);box-shadow:0 18px 45px rgba(23,59,48,.18);transform:rotate(-1.2deg)}
       .btn{position:relative;overflow:hidden;transition:transform .35s var(--premium-ease),filter .25s ease,box-shadow .35s ease}.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.35) 48%,transparent 72%);transform:translateX(-150%);transition:transform .7s ease}.btn:hover::after{transform:translateX(150%)}.btn:hover{transform:translateY(-4px) scale(1.015)}.btn-primary{box-shadow:0 14px 30px rgba(159,104,47,.3)}
       .chip{transition:transform .35s var(--premium-ease),box-shadow .35s ease,border-color .35s ease}.chip:hover{transform:translateY(-3px) rotate(-1deg);border-color:rgba(47,111,85,.28);box-shadow:0 10px 25px rgba(47,111,85,.1)}
@@ -112,6 +113,22 @@
       .emotional-card,.catering-callout,.final-cta{position:relative;overflow:hidden}.emotional-card{background:radial-gradient(circle at 90% 15%,rgba(185,217,192,.5),transparent 30%),rgba(255,255,255,.9)}.catering-callout{background:radial-gradient(circle at 8% 100%,rgba(248,217,223,.72),transparent 32%),rgba(255,255,255,.92)}.final-cta{padding-block:clamp(48px,7vw,86px);box-shadow:0 35px 90px rgba(23,59,48,.25)}
       .footer{position:relative;overflow:hidden;margin-top:clamp(46px,8vw,100px);padding:clamp(32px,5vw,58px);box-shadow:0 30px 80px rgba(23,59,48,.22)}.footer::after{content:'Rosalie';position:absolute;right:-18px;bottom:-55px;color:rgba(255,255,255,.045);font-family:'Playfair Display',serif;font-size:clamp(7rem,17vw,15rem);line-height:1}
       .reveal-ready{opacity:0;transform:translateY(28px)}.reveal-ready.is-visible{opacity:1;transform:none;transition:opacity .7s var(--premium-ease),transform .7s var(--premium-ease)}.grid>.reveal-ready:nth-child(2){transition-delay:.07s}.grid>.reveal-ready:nth-child(3){transition-delay:.14s}.grid>.reveal-ready:nth-child(4){transition-delay:.21s}
+
+      /* Tropical editorial palette sampled from the weekly menu artwork. */
+      :root{--bg:#fffaf0;--card:#fffdf8;--text:#243c45;--muted:#58707a;--olive:#08a6a6;--deep-olive:#007f86;--gold:#ffb000;--brown:#e94d83;--border:rgba(0,166,166,.16);--success:#149b68;--warning:#ef7d20;--error:#d94261;--ink:#243c45;--cream:#fffaf0;--blush:#ffdbe6;--sage:#c9f1e5;--champagne:#ffe292;--premium-shadow:0 30px 80px rgba(0,127,134,.14)}
+      body{background:radial-gradient(circle at 4% 4%,rgba(255,92,139,.22),transparent 24%),radial-gradient(circle at 94% 9%,rgba(0,187,179,.2),transparent 28%),radial-gradient(circle at 82% 82%,rgba(255,176,0,.15),transparent 30%),linear-gradient(145deg,#fffaf1 0%,#f4fffb 48%,#fff6dc 100%)}
+      body::before{background:radial-gradient(circle at var(--pointer-x,18%) var(--pointer-y,12%),rgba(255,255,255,.96),transparent 23%),radial-gradient(circle at 82% 32%,rgba(255,176,0,.13),transparent 25%)}
+      .topbar{border:1px solid rgba(0,166,166,.18);background:rgba(255,255,251,.8);box-shadow:0 18px 55px rgba(0,127,134,.12),inset 0 1px 0 #fff}.brand-mark{background:linear-gradient(135deg,#ff5c8b,#ffb000 48%,#00b7b3);box-shadow:0 12px 30px rgba(233,77,131,.22)}
+      .nav-btn:hover,.nav-btn[aria-current=true]{background:#e7fbf7;border-color:#a9e6dc;color:#007f86}.cart-nav,.btn-olive,.step-pill.active{background:linear-gradient(135deg,#007f86,#00b7b3);border-color:transparent;color:#fff}.cart-badge{background:#ffcf45;color:#533b00}
+      .hero{border-color:rgba(0,166,166,.18);background:radial-gradient(circle at 0 0,rgba(255,92,139,.18),transparent 36%),radial-gradient(circle at 100% 100%,rgba(0,183,179,.17),transparent 35%),rgba(255,255,250,.86)}
+      .hero::before{border-color:rgba(233,77,131,.18);box-shadow:0 0 0 42px rgba(255,176,0,.045),0 0 0 84px rgba(0,183,179,.035)}.hero::after{background:radial-gradient(circle,rgba(255,176,0,.3),transparent 70%)}
+      .hero h1,.page-title,.section h2{color:#243c45}.kicker{color:#007f86}.kicker::before{color:#ff8a00}.btn-primary{background:linear-gradient(135deg,#ff5c8b,#ff7a45);border-color:transparent;color:#fff;box-shadow:0 15px 32px rgba(233,77,131,.28)}.btn-secondary{background:#e7fbf7;border-color:#a9e6dc;color:#007f86}.btn-ghost{background:#fff0f5;border-color:#ffc2d5;color:#c7356b}
+      .weekly-menu-visual{border:8px solid rgba(255,255,255,.92);box-shadow:0 38px 80px rgba(0,127,134,.2),0 12px 32px rgba(233,77,131,.12)}
+      .chip{background:rgba(255,255,255,.76);border-color:rgba(0,166,166,.2);color:#42636a;box-shadow:0 7px 20px rgba(0,127,134,.06)}.chip:nth-child(2n){border-color:rgba(233,77,131,.24);background:#fff5f8}
+      .availability-strip{border-color:rgba(0,166,166,.18)!important;background:rgba(255,255,251,.87)!important}.availability-strip span{background:linear-gradient(135deg,#edfffa,#fff9e7);border:1px solid rgba(0,166,166,.1);color:#58707a}.availability-strip span:nth-child(2n){background:linear-gradient(135deg,#fff1f6,#fff9e7)}
+      .card,.panel,.menu-header{background:rgba(255,255,251,.88);border-color:rgba(0,166,166,.14);box-shadow:0 20px 55px rgba(0,127,134,.1),inset 0 1px 0 #fff}.grid>.card:nth-child(3n+2){border-color:rgba(233,77,131,.22)}.grid>.card:nth-child(3n){border-color:rgba(255,176,0,.28)}
+      .badge{background:#dffaf4;color:#007f86}.menu-card:nth-child(3n+2) .badge{background:#ffe5ee;color:#bd3263}.menu-card:nth-child(3n) .badge{background:#fff0c5;color:#a65d00}.portion-btn.active,.date-btn.available.active{background:linear-gradient(135deg,#007f86,#00b7b3);border-color:transparent;color:#fff}
+      .showcase-shell{border-color:rgba(0,166,166,.18);background:radial-gradient(circle at 12% 0,rgba(255,92,139,.2),transparent 34%),radial-gradient(circle at 95% 10%,rgba(0,183,179,.2),transparent 34%),#fffdf5}.final-cta,.footer{background:radial-gradient(circle at 85% 0,rgba(255,176,0,.25),transparent 30%),linear-gradient(135deg,#006f78,#009d9b 58%,#087962)}
       @keyframes premiumTwinkle{0%,100%{transform:rotate(0) scale(.8);opacity:.65}50%{transform:rotate(180deg) scale(1.25);opacity:1}}
       @media(max-width:980px){.hero{min-height:0}.hero-visual,.hero-visual img{min-height:480px}.hero-visual{border-radius:28px;transform:none}.section{margin-top:50px}}
       @media(max-width:660px){.topbar:hover{transform:none}.hero{gap:26px}.hero-visual,.hero-visual img{min-height:400px}.hero-card{left:14px;right:14px;bottom:14px}.section{margin-top:40px}.menu-card:hover{transform:translateY(-4px)}.footer::after{display:none}}
@@ -834,7 +851,8 @@
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
     const heroItems = getCurrentMenuImageItems();
     const activeHeroItem = heroItems.length ? heroItems[state.carousel.index % heroItems.length] : null;
-    const heroImage = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
+    const heroImage = localAssetPath('assets/images/items/MENU.png');
+    const heroImageFallback = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
     const orderWindow = getWeeklyOrderWindow();
     return `
       <section class="hero container">
@@ -846,9 +864,8 @@
           <div class="cta-row">${menuIsActive ? '<button class="btn btn-primary" data-page="menu">Voir le menu de la semaine</button><button class="btn btn-secondary" data-page="commander">Planifier ma commande</button>' : '<button class="btn btn-primary" data-page="menu">Voir le message</button><button class="btn btn-secondary" data-page="contact">Nous contacter</button>'}</div>
           <div class="trust-chips"><span class="chip">Fait maison</span><span class="chip">Livraison locale</span>${menuIsActive ? `<span class="chip">Commande ${orderNoticeText()}</span><span class="chip">Formats Petit / Grand / Famille</span>` : '<span class="chip">Menu de la semaine</span>'}</div>
         </div>
-        <div class="hero-visual">
-          <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(activeHeroItem?.title || 'Repas maison préparé avec soin')}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=82'">
-          <div class="hero-card"><strong>${escapeHtml(menuIsActive ? activeHeroItem?.title || menu.title || 'Menu de la semaine' : 'Menu de la semaine')}</strong><span>${menuIsActive ? `${activeHeroItem ? 'Disponible cette semaine • ' : ''}Petit / Grand / Famille • livraison à céduler avec le client` : 'Les commandes sont fermées pour le moment. Consultez le menu pour connaître la prochaine période de commande.'}</span></div>
+        <div class="hero-visual weekly-menu-visual">
+          <img src="${escapeHtml(heroImage)}" alt="Menu de la semaine de La cuisine de Rosalie" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${escapeHtml(heroImageFallback)}';this.classList.add('fallback')">
         </div>
       </section>
       <section class="availability-strip container" aria-label="Disponibilité du menu">
