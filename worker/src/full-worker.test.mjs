@@ -20,4 +20,43 @@ assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)
 assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)] }, site, new Date('2026-08-05T16:00:00Z')), /vendredi à 1 h/);
 const catalog = { currency: 'cad', items: { paid: { prices: { familial: { price_id: 'price_paid', amount: 23 } } } } };
 assert.deepEqual(buildStripeLineItems(order.lines, catalog, site, {}), [{ price: 'price_paid', quantity: 4 }]);
+assert.deepEqual(buildStripeLineItems(order.lines, { currency: 'cad', allow_dynamic_price_data: true }, site, {}), [{
+  quantity: 4,
+  price_data: { currency: 'cad', unit_amount: 2300, product_data: { name: 'Plat — Familial', description: 'La cuisine de Rosalie' } },
+}]);
+
+const originalFetch = globalThis.fetch;
+globalThis.fetch = async (input) => {
+  const url = String(input);
+  if (url.includes('/assets/data/settings.json')) return Response.json(site.settings);
+  if (url.includes('/assets/data/menus.json')) return Response.json(site.menus);
+  if (url.includes('/assets/data/items.json')) return Response.json(site.items);
+  if (url.includes('/assets/data/delivery.json')) return Response.json(site.delivery);
+  if (url.includes('/assets/data/stripe_catalog.json')) return Response.json({ currency: 'cad', allow_dynamic_price_data: true });
+  if (url.includes('api.stripe.com')) return Response.json({ id: 'cs_test_ok', url: 'https://checkout.stripe.test/session' });
+  if (url.includes('api.github.com')) throw new Error('GitHub unavailable');
+  throw new Error(`Unexpected URL: ${url}`);
+};
+try {
+  const worker = (await import('../../worker.js')).default;
+  const response = await worker.fetch(new Request('https://example.test/api/create-checkout-session', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...base, items: [line('paid', 'familial', 4)] }),
+  }), { STRIPE_SECRET_KEY: 'sk_test_example', GITHUB_TOKEN: 'github_example' });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).checkout_url, 'https://checkout.stripe.test/session');
+
+  const { onRequest } = await import('../../functions/api/create-checkout-session.js');
+  const pagesResponse = await onRequest({
+    request: new Request('https://example.test/api/create-checkout-session', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...base, items: [line('paid', 'familial', 4)] }),
+    }),
+    env: { STRIPE_SECRET_KEY: 'sk_test_example' },
+  });
+  assert.equal(pagesResponse.status, 200);
+  assert.equal((await pagesResponse.json()).checkout_url, 'https://checkout.stripe.test/session');
+} finally {
+  globalThis.fetch = originalFetch;
+}
 console.log('full worker reference tests passed');
