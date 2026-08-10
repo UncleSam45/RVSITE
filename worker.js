@@ -100,6 +100,7 @@ function getPublicSiteOrigin(request, env) {
 }
 
 async function loadPublicSiteData(origin, env) {
+  if (env?.PUBLIC_SITE_DATA) return env.PUBLIC_SITE_DATA;
   const [settings, menus, items, delivery] = await Promise.all([
     fetchPublicJson(origin, 'assets/data/settings.json', env), fetchPublicJson(origin, 'assets/data/menus.json', env),
     fetchPublicJson(origin, 'assets/data/items.json', env), fetchPublicJson(origin, 'assets/data/delivery.json', env),
@@ -126,6 +127,7 @@ async function fetchPublicJson(origin, path, env) {
 }
 
 async function loadStripeCatalog(env, origin) {
+  if (env.STRIPE_CATALOG) return env.STRIPE_CATALOG;
   if (env.STRIPE_CATALOG_JSON) {
     try { return JSON.parse(env.STRIPE_CATALOG_JSON); } catch { throw publicError('STRIPE_CATALOG_JSON est invalide.', 500); }
   }

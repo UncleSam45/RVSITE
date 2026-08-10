@@ -47,21 +47,16 @@ try {
   assert.equal((await response.json()).checkout_url, 'https://checkout.stripe.test/session');
 
   const { onRequest } = await import('../../functions/api/create-checkout-session.js');
-  const assetFetch = async (input) => {
-    const url = String(input.url || input);
-    if (url.includes('/assets/data/settings.json')) return Response.json(site.settings);
-    if (url.includes('/assets/data/menus.json')) return Response.json(site.menus);
-    if (url.includes('/assets/data/items.json')) return Response.json(site.items);
-    if (url.includes('/assets/data/delivery.json')) return Response.json(site.delivery);
-    if (url.includes('/assets/data/stripe_catalog.json')) return Response.json({ currency: 'cad', allow_dynamic_price_data: true });
-    return new Response('Not found', { status: 404 });
-  };
   const pagesResponse = await onRequest({
     request: new Request('https://example.test/api/create-checkout-session', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...base, items: [line('paid', 'familial', 4)] }),
     }),
-    env: { STRIPE_SECRET_KEY: 'sk_test_example', ASSETS: { fetch: assetFetch } },
+    env: {
+      STRIPE_SECRET_KEY: 'sk_test_example',
+      PUBLIC_SITE_DATA: site,
+      STRIPE_CATALOG: { currency: 'cad', allow_dynamic_price_data: true },
+    },
   });
   assert.equal(pagesResponse.status, 200);
   assert.equal((await pagesResponse.json()).checkout_url, 'https://checkout.stripe.test/session');
