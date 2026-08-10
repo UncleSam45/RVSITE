@@ -45,6 +45,17 @@ try {
   }), { STRIPE_SECRET_KEY: 'sk_test_example', GITHUB_TOKEN: 'github_example' });
   assert.equal(response.status, 200);
   assert.equal((await response.json()).checkout_url, 'https://checkout.stripe.test/session');
+
+  const { onRequest } = await import('../../functions/api/create-checkout-session.js');
+  const pagesResponse = await onRequest({
+    request: new Request('https://example.test/api/create-checkout-session', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...base, items: [line('paid', 'familial', 4)] }),
+    }),
+    env: { STRIPE_SECRET_KEY: 'sk_test_example' },
+  });
+  assert.equal(pagesResponse.status, 200);
+  assert.equal((await pagesResponse.json()).checkout_url, 'https://checkout.stripe.test/session');
 } finally {
   globalThis.fetch = originalFetch;
 }

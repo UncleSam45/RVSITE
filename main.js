@@ -643,7 +643,8 @@
 
   function checkoutEndpoints() {
     const configured = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
-    return Array.from(new Set([configured, '/.netlify/functions/create-checkout-session']));
+    const fallback = state.data?.settings?.ordering?.checkout_fallback_endpoint;
+    return Array.from(new Set([configured, fallback].filter(Boolean)));
   }
 
   function isRetiredPromotionError(message) {
