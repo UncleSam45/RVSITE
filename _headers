@@ -4,7 +4,13 @@
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
 /main.js
-  Cache-Control: no-cache, must-revalidate, max-age=0
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+
+# Retired service-worker entry points must never be served from an HTTP cache.
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+/service-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
 
 # Menu, delivery, promotion, and content JSON should never be reused stale.
 /assets/data/*

@@ -10,14 +10,34 @@
   };
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
+  const APP_RELEASE = '20260810-cache-reset-v9';
   async function clearLegacyBrowserCaches() {
-    if (!('caches' in window)) return;
+    let removedController = false;
     try {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      if ('serviceWorker' in navigator) {
+        const controlled = Boolean(navigator.serviceWorker.controller);
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const results = await Promise.all(registrations.map((registration) => registration.unregister()));
+        removedController = controlled && results.some(Boolean);
+      }
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      }
     } catch (error) {
       console.warn('[La cuisine de Rosalie] Impossible de vider les caches navigateur hérités:', error);
     }
+    // An active service worker can keep controlling the current tab even after
+    // it is unregistered. Navigate once so the new document is uncontrolled.
+    const refreshKey = `lacuisine_rosalie_release_${APP_RELEASE}`;
+    if (removedController && !sessionStorage.getItem(refreshKey)) {
+      sessionStorage.setItem(refreshKey, '1');
+      const url = new URL(window.location.href);
+      url.searchParams.set('app_release', APP_RELEASE);
+      window.location.replace(url.toString());
+      return true;
+    }
+    return false;
   }
 
   function localAssetPath(path) {
@@ -1623,7 +1643,7 @@
     injectStyles();
     injectPremiumStyles();
     bindAmbientPointer();
-    await clearLegacyBrowserCaches();
+    if (await clearLegacyBrowserCaches()) return;
     loadCart();
     const rememberedAdminKey = localStorage.getItem(ADMIN_ACCESS_KEY_STORAGE_KEY);
     loadArchivedOrderIds();
