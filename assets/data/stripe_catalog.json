@@ -4,6 +4,7 @@
   "project": "lacuisine_rosalie",
   "environment": "live",
   "currency": "cad",
+  "allow_dynamic_price_data": true,
   "synced_at": null,
   "source_files": {
     "items_json": "assets/data/items.json",
