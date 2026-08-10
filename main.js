@@ -340,6 +340,25 @@
     }
   }
 
+  function reconcileCartWithCurrentMenu() {
+    const activeIds = currentMenuIds();
+    const reconciled = state.cart.items.flatMap((line) => {
+      const item = getItemById(line.itemId);
+      const portion = item && getPortions(item).find((option) => option.key === line.portion);
+      if (!item || item.available === false || !activeIds.has(item.id) || !portion) return [];
+      return [{
+        ...line,
+        title: item.title,
+        portionLabel: portion.label,
+        price: portion.price,
+        qty: Math.min(99, Math.max(1, Math.trunc(Number(line.qty) || 1))),
+      }];
+    });
+    const changed = JSON.stringify(reconciled) !== JSON.stringify(state.cart.items);
+    state.cart.items = reconciled;
+    if (changed) saveCart();
+  }
+
   function addToCart(item, portionKey, qty = 1) {
     const portion = getPortions(item).find((option) => option.key === portionKey);
     if (!portion || item.available === false || !getMenuOrderStatus().open) { showToast(menuOrderStatusMessage()); return; }
@@ -1603,6 +1622,9 @@
     loadArchivedOrderIds();
     if (rememberedAdminKey) { state.admin.token = rememberedAdminKey; state.admin.rememberKey = true; }
     state.data = await loadData();
+    // A cart can survive a weekly menu publication in localStorage. Remove old
+    // dishes and refresh trusted display prices before sending it to checkout.
+    reconcileCartWithCurrentMenu();
     setSeo(state.data.content);
     const first = firstAvailableDate();
     if (!state.cart.deliveryDate && first) state.cart.deliveryDate = first;
