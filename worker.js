@@ -1,5 +1,5 @@
 const STRIPE_CHECKOUT_URL = 'https://api.stripe.com/v1/checkout/sessions';
-const GITHUB_API_URL = 'https://api.github.com';
+const STRIPE_PRICES_URL = 'https://api.stripe.com/v1/prices';
 const DEFAULT_CURRENCY = 'cad';
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
@@ -18,7 +18,7 @@ export default {
         return await createCheckoutSession(request, env);
       } catch (error) {
         console.error('Checkout error:', error);
-        return json({ error: error.publicMessage || 'Impossible de préparer le paiement.' }, error.status || 400, request, env);
+        return json({ error: error.publicMessage || 'Le service de paiement est temporairement indisponible.' }, error.status || 500, request, env);
       }
     }
     return json({ error: 'Route API introuvable.' }, 404, request, env);
@@ -27,14 +27,11 @@ export default {
 
 async function createCheckoutSession(request, env) {
   if (!env.STRIPE_SECRET_KEY || !/^sk_(test|live)_/.test(env.STRIPE_SECRET_KEY)) throw publicError('Configuration Stripe manquante côté serveur.', 500);
-  if (!env.GITHUB_TOKEN) throw publicError('Configuration GitHub manquante côté serveur.', 500);
-
   const payload = await readJsonBody(request);
   const origin = getPublicSiteOrigin(request, env);
-  const site = await loadPublicSiteData(origin);
-  const catalog = await loadStripeCatalog(env, origin);
-  const order = validateOrder(payload, site);
-  const lineItems = buildStripeLineItems(order.lines, catalog, site, env);
+  const catalog = await loadCheckoutCatalog(env);
+  const order = validateCatalogOrder(payload, catalog);
+  const lineItems = buildStripeLineItems(order.lines, catalog, { settings: { ordering: { currency: catalog.currency || DEFAULT_CURRENCY } } }, env);
   const orderId = makeOrderId();
   const form = new URLSearchParams();
   form.set('mode', 'payment');
@@ -58,22 +55,75 @@ async function createCheckoutSession(request, env) {
     form.set(`line_items[${index}][quantity]`, String(line.quantity));
   });
 
-  const metadata = buildMetadata(orderId, order, site);
+  const metadata = buildMetadata(orderId, order, { settings: { business: { name: env.BUSINESS_NAME || 'La cuisine de Rosalie' } } });
   for (const [key, value] of Object.entries(metadata)) {
     form.set(`metadata[${key}]`, truncateMetadata(value));
     form.set(`payment_intent_data[metadata][${key}]`, truncateMetadata(value));
   }
 
-  const stripeResponse = await fetch(STRIPE_CHECKOUT_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: form,
-  });
+  let stripeResponse;
+  try {
+    stripeResponse = await fetch(STRIPE_CHECKOUT_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form,
+    });
+  } catch (error) {
+    console.error('Stripe connection error:', error);
+    throw publicError('Connexion à Stripe impossible. Veuillez réessayer dans quelques instants.', 502);
+  }
   const stripe = await stripeResponse.json().catch(() => ({}));
   if (!stripeResponse.ok || !stripe.url) throw publicError(stripe?.error?.message || 'Stripe a refusé la création de session.', 502);
 
-  await appendOrderToGitHub(buildOrderRecord(orderId, stripe, order, site), env);
   return json({ checkout_url: stripe.url, order_id: orderId, checkout_session_id: stripe.id }, 200, request, env);
+}
+
+async function loadCheckoutCatalog(env) {
+  if (env.STRIPE_CATALOG) return env.STRIPE_CATALOG;
+  if (env.STRIPE_CATALOG_JSON) {
+    try { return JSON.parse(env.STRIPE_CATALOG_JSON); } catch { throw publicError('STRIPE_CATALOG_JSON est invalide.', 500); }
+  }
+  const params = new URLSearchParams({ active: 'true', limit: '100', 'expand[]': 'data.product' });
+  let response;
+  try {
+    response = await fetch(`${STRIPE_PRICES_URL}?${params}`, { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } });
+  } catch (error) {
+    console.error('Stripe catalog connection error:', error);
+    throw publicError('Connexion au catalogue Stripe impossible.', 502);
+  }
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw publicError(result?.error?.message || 'Catalogue Stripe indisponible.', 502);
+  const catalog = { currency: DEFAULT_CURRENCY, items: {} };
+  for (const price of result.data || []) {
+    const product = typeof price.product === 'object' ? price.product : {};
+    const itemId = clean(price.metadata?.item_id || product.metadata?.item_id);
+    const portion = clean(price.metadata?.portion_key || product.metadata?.portion_key || price.nickname).toLowerCase();
+    if (!itemId || !portion || !price.id) continue;
+    catalog.currency = normalizeCurrency(price.currency || catalog.currency);
+    catalog.items[itemId] ||= { title: product.name || itemId, prices: {} };
+    catalog.items[itemId].prices[portion] = { price_id: price.id, unit_amount: Number(price.unit_amount || 0) };
+  }
+  if (!Object.keys(catalog.items).length) throw publicError('Aucun article du site n’est associé au catalogue Stripe.', 503);
+  return catalog;
+}
+
+function validateCatalogOrder(payload, catalog) {
+  if (!payload || !Array.isArray(payload.items) || !payload.items.length) throw publicError('Le panier est vide.', 400);
+  const customer = normalizeCustomer(payload.customer || {});
+  if (!customer.name || !customer.phone || !customer.street_number || !customer.street_name || !customer.city) throw publicError('Les coordonnées de livraison sont incomplètes.', 400);
+  if (customer.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(customer.email)) throw publicError('Le courriel est invalide.', 400);
+  const deliveryDate = normalizeIsoDate(payload.delivery_date);
+  const deliveryWindow1 = clean(payload.delivery_window_1);
+  const deliveryWindow2 = clean(payload.delivery_window_2);
+  if (!deliveryDate || !deliveryWindow1 || !deliveryWindow2 || deliveryWindow1 === deliveryWindow2) throw publicError('Les informations de livraison sont invalides.', 400);
+  const lines = payload.items.slice(0, 50).map((raw) => {
+    const itemId = clean(raw?.item_id); const portion = clean(raw?.portion); const qty = strictInt(raw?.qty, 1, 99);
+    const entry = catalog?.items?.[itemId]; const price = findCatalogPrice(catalog, itemId, portion);
+    if (!price?.priceId) throw publicError(`Prix Stripe introuvable pour ${entry?.title || itemId} / ${PORTION_LABELS[portion] || portion}.`, 409);
+    return { itemId, portion, portionLabel: PORTION_LABELS[portion] || portion, qty, unitAmount: price.unitAmount || 0, item: { title: entry?.title || itemId } };
+  });
+  const paidSubtotalCents = lines.reduce((sum, line) => sum + line.unitAmount * line.qty, 0);
+  return { lines, paidSubtotalCents, subtotalCents: paidSubtotalCents, customer, deliveryDate, deliveryWindow1, deliveryWindow2, coolerAvailable: payload.cooler_available === true, deliveryInstructions: clean(payload.delivery_instructions) };
 }
 
 async function readJsonBody(request) {
@@ -83,31 +133,6 @@ async function readJsonBody(request) {
 
 function getPublicSiteOrigin(request, env) {
   try { return new URL(env.PUBLIC_SITE_ORIGIN || new URL(request.url).origin).origin; } catch { return new URL(request.url).origin; }
-}
-
-async function loadPublicSiteData(origin) {
-  const [settings, menus, items, delivery] = await Promise.all([
-    fetchPublicJson(origin, 'assets/data/settings.json'), fetchPublicJson(origin, 'assets/data/menus.json'),
-    fetchPublicJson(origin, 'assets/data/items.json'), fetchPublicJson(origin, 'assets/data/delivery.json'),
-  ]);
-  return { settings, menus, items, delivery };
-}
-
-async function fetchPublicJson(origin, path) {
-  const response = await fetch(`${origin}/${path}?v=${Date.now()}`, { cache: 'no-store' });
-  if (!response.ok) throw publicError(`Données publiques indisponibles: ${path}`, 502);
-  try { return await response.json(); } catch { throw publicError(`JSON public invalide: ${path}`, 502); }
-}
-
-async function loadStripeCatalog(env, origin) {
-  if (env.STRIPE_CATALOG_JSON) {
-    try { return JSON.parse(env.STRIPE_CATALOG_JSON); } catch { throw publicError('STRIPE_CATALOG_JSON est invalide.', 500); }
-  }
-  try {
-    const response = await fetch(`${origin}/assets/data/stripe_catalog.json?v=${Date.now()}`, { cache: 'no-store' });
-    if (response.ok) return await response.json();
-  } catch (error) { console.warn('Catalogue Stripe public indisponible:', error); }
-  return {};
 }
 
 export function validateOrder(payload, site, now = new Date()) {
@@ -253,52 +278,6 @@ function buildMetadata(orderId, order, site) {
   };
 }
 
-function buildOrderRecord(orderId, stripe, order, site) {
-  return {
-    order_id: orderId, created_at: new Date().toISOString(), payment_status: 'unconfirmed', stripe_checkout_session_id: stripe.id,
-    business: site.settings?.business?.name || 'La cuisine de Rosalie', customer: order.customer,
-    delivery: { date: order.deliveryDate, window_1: order.deliveryWindow1, window_2: order.deliveryWindow2, cooler_available: order.coolerAvailable, instructions: order.deliveryInstructions },
-    items: order.lines.map((line) => ({ item_id: line.itemId, title: line.item.title || line.itemId, portion: line.portion, portion_label: line.portionLabel, quantity: line.qty, unit_amount_cents: line.unitAmount, line_total_cents: line.unitAmount * line.qty })),
-    subtotal_cents: order.paidSubtotalCents,
-    currency: normalizeCurrency(stripe.currency || DEFAULT_CURRENCY),
-  };
-}
-
-async function appendOrderToGitHub(order, env) {
-  const owner = env.GITHUB_OWNER || 'UncleSam45';
-  const repo = env.GITHUB_REPO || 'RVSITE_BRIDGE';
-  const branch = env.GITHUB_BRANCH || 'main';
-  const path = env.GITHUB_ORDERS_PATH || 'orders.json';
-  const api = `${GITHUB_API_URL}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`;
-  const headers = { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'rvsite-checkout-worker' };
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const currentResponse = await fetch(`${api}?ref=${encodeURIComponent(branch)}`, { headers, cache: 'no-store' });
-    let sha = null;
-    let file = { updated_at: null, orders: [] };
-    if (currentResponse.ok) {
-      const current = await currentResponse.json();
-      sha = current.sha;
-      try { file = JSON.parse(decodeBase64(current.content)); } catch { throw publicError('orders.json est invalide dans RVSITE_BRIDGE.', 500); }
-    } else if (currentResponse.status !== 404) throw publicError(`Lecture GitHub impossible (${currentResponse.status}).`, 502);
-    if (!Array.isArray(file.orders)) file.orders = [];
-    if (!file.orders.some((entry) => entry.stripe_checkout_session_id === order.stripe_checkout_session_id)) file.orders.unshift(order);
-    file.updated_at = new Date().toISOString();
-    const body = { message: `Log order ${order.order_id}`, content: encodeBase64(`${JSON.stringify(file, null, 2)}\n`), branch, ...(sha ? { sha } : {}) };
-    const save = await fetch(api, { method: 'PUT', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (save.ok) return;
-    if (![409, 422].includes(save.status) || attempt === 2) {
-      const error = await save.json().catch(() => ({}));
-      throw publicError(error.message || `Écriture GitHub impossible (${save.status}).`, 502);
-    }
-  }
-}
-
-function encodeBase64(value) {
-  const bytes = new TextEncoder().encode(value); let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-function decodeBase64(value) { return new TextDecoder().decode(Uint8Array.from(atob(String(value || '').replace(/\s/g, '')), (c) => c.charCodeAt(0))); }
 function normalizeIsoDate(value) { const text = clean(value); return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : ''; }
 function normalizeCurrency(value) { const currency = clean(value || DEFAULT_CURRENCY).toLowerCase(); return /^[a-z]{3}$/.test(currency) ? currency : DEFAULT_CURRENCY; }
 function strictInt(value, min, max) { const number = Number(value); if (!Number.isInteger(number) || number < min || number > max) throw publicError('Quantité invalide.', 400); return number; }
