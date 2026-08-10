@@ -26,8 +26,10 @@ assert.deepEqual(buildStripeLineItems(order.lines, { currency: 'cad', allow_dyna
 }]);
 
 const originalFetch = globalThis.fetch;
+const requestedUrls = [];
 globalThis.fetch = async (input) => {
   const url = String(input);
+  requestedUrls.push(url);
   if (url.includes('/assets/data/settings.json')) return Response.json(site.settings);
   if (url.includes('/assets/data/menus.json')) return Response.json(site.menus);
   if (url.includes('/assets/data/items.json')) return Response.json(site.items);
@@ -45,6 +47,8 @@ try {
   }), { STRIPE_SECRET_KEY: 'sk_test_example', GITHUB_TOKEN: 'github_example' });
   assert.equal(response.status, 200);
   assert.equal((await response.json()).checkout_url, 'https://checkout.stripe.test/session');
+  assert.ok(requestedUrls.some((url) => url.startsWith('https://raw.githubusercontent.com/UncleSam45/RVSITE/main/assets/data/settings.json')));
+  assert.ok(!requestedUrls.some((url) => url.startsWith('https://example.test/assets/data/')));
 
   const { onRequest } = await import('../../functions/api/create-checkout-session.js');
   const pagesResponse = await onRequest({
