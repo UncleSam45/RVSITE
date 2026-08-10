@@ -662,7 +662,10 @@
         lastError = new Error(message);
         // A previously deployed checkout Worker may still enforce the retired
         // gift offer. In that case, continue to the current serverless handler.
-        if (response.status !== 404 && !isRetiredPromotionError(message)) break;
+        // Try the independent serverless checkout when the primary Worker is
+        // missing or has an infrastructure failure. Validation errors remain
+        // authoritative and should be shown without creating a second request.
+        if (response.status < 500 && response.status !== 404 && !isRetiredPromotionError(message)) break;
       } catch (error) {
         lastError = error;
       }

@@ -18,7 +18,7 @@ export default {
         return await createCheckoutSession(request, env);
       } catch (error) {
         console.error('Checkout error:', error);
-        return json({ error: error.publicMessage || 'Impossible de préparer le paiement.' }, error.status || 400, request, env);
+        return json({ error: error.publicMessage || 'Le service de paiement est temporairement indisponible.' }, error.status || 500, request, env);
       }
     }
     return json({ error: 'Route API introuvable.' }, 404, request, env);
@@ -27,8 +27,6 @@ export default {
 
 async function createCheckoutSession(request, env) {
   if (!env.STRIPE_SECRET_KEY || !/^sk_(test|live)_/.test(env.STRIPE_SECRET_KEY)) throw publicError('Configuration Stripe manquante côté serveur.', 500);
-  if (!env.GITHUB_TOKEN) throw publicError('Configuration GitHub manquante côté serveur.', 500);
-
   const payload = await readJsonBody(request);
   const origin = getPublicSiteOrigin(request, env);
   const site = await loadPublicSiteData(origin);
@@ -72,7 +70,17 @@ async function createCheckoutSession(request, env) {
   const stripe = await stripeResponse.json().catch(() => ({}));
   if (!stripeResponse.ok || !stripe.url) throw publicError(stripe?.error?.message || 'Stripe a refusé la création de session.', 502);
 
-  await appendOrderToGitHub(buildOrderRecord(orderId, stripe, order, site), env);
+  // Order logging is useful operationally, but it must never prevent a customer
+  // from reaching a Checkout Session that Stripe has already created.
+  if (env.GITHUB_TOKEN) {
+    try {
+      await appendOrderToGitHub(buildOrderRecord(orderId, stripe, order, site), env);
+    } catch (error) {
+      console.error('Order log error:', error);
+    }
+  } else {
+    console.warn('Order log skipped: GITHUB_TOKEN is not configured.');
+  }
   return json({ checkout_url: stripe.url, order_id: orderId, checkout_session_id: stripe.id }, 200, request, env);
 }
 
