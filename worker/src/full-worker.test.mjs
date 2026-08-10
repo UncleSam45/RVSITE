@@ -20,4 +20,8 @@ assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)
 assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)] }, site, new Date('2026-08-05T16:00:00Z')), /vendredi à 1 h/);
 const catalog = { currency: 'cad', items: { paid: { prices: { familial: { price_id: 'price_paid', amount: 23 } } } } };
 assert.deepEqual(buildStripeLineItems(order.lines, catalog, site, {}), [{ price: 'price_paid', quantity: 4 }]);
+assert.deepEqual(buildStripeLineItems(order.lines, { currency: 'cad', allow_dynamic_price_data: true }, site, {}), [{
+  quantity: 4,
+  price_data: { currency: 'cad', unit_amount: 2300, product_data: { name: 'Plat — Familial', description: 'La cuisine de Rosalie' } },
+}]);
 console.log('full worker reference tests passed');
