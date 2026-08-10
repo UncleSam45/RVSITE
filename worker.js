@@ -18,7 +18,7 @@ export default {
         return await createCheckoutSession(request, env);
       } catch (error) {
         console.error('Checkout error:', error);
-        return json({ error: error.publicMessage || 'Impossible de préparer le paiement.' }, error.status || 400, request, env);
+        return json({ error: error.publicMessage || 'Le service de paiement est temporairement indisponible.' }, error.status || 500, request, env);
       }
     }
     return json({ error: 'Route API introuvable.' }, 404, request, env);
@@ -27,11 +27,9 @@ export default {
 
 async function createCheckoutSession(request, env) {
   if (!env.STRIPE_SECRET_KEY || !/^sk_(test|live)_/.test(env.STRIPE_SECRET_KEY)) throw publicError('Configuration Stripe manquante côté serveur.', 500);
-  if (!env.GITHUB_TOKEN) throw publicError('Configuration GitHub manquante côté serveur.', 500);
-
   const payload = await readJsonBody(request);
   const origin = getPublicSiteOrigin(request, env);
-  const site = await loadPublicSiteData(origin);
+  const site = await loadPublicSiteData(origin, env);
   const catalog = await loadStripeCatalog(env, origin);
   const order = validateOrder(payload, site);
   const lineItems = buildStripeLineItems(order.lines, catalog, site, env);
@@ -64,15 +62,31 @@ async function createCheckoutSession(request, env) {
     form.set(`payment_intent_data[metadata][${key}]`, truncateMetadata(value));
   }
 
-  const stripeResponse = await fetch(STRIPE_CHECKOUT_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: form,
-  });
+  let stripeResponse;
+  try {
+    stripeResponse = await fetch(STRIPE_CHECKOUT_URL, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form,
+    });
+  } catch (error) {
+    console.error('Stripe connection error:', error);
+    throw publicError('Connexion à Stripe impossible. Veuillez réessayer dans quelques instants.', 502);
+  }
   const stripe = await stripeResponse.json().catch(() => ({}));
   if (!stripeResponse.ok || !stripe.url) throw publicError(stripe?.error?.message || 'Stripe a refusé la création de session.', 502);
 
-  await appendOrderToGitHub(buildOrderRecord(orderId, stripe, order, site), env);
+  // Order logging is useful operationally, but it must never prevent a customer
+  // from reaching a Checkout Session that Stripe has already created.
+  if (env.GITHUB_TOKEN) {
+    try {
+      await appendOrderToGitHub(buildOrderRecord(orderId, stripe, order, site), env);
+    } catch (error) {
+      console.error('Order log error:', error);
+    }
+  } else {
+    console.warn('Order log skipped: GITHUB_TOKEN is not configured.');
+  }
   return json({ checkout_url: stripe.url, order_id: orderId, checkout_session_id: stripe.id }, 200, request, env);
 }
 
@@ -85,16 +99,28 @@ function getPublicSiteOrigin(request, env) {
   try { return new URL(env.PUBLIC_SITE_ORIGIN || new URL(request.url).origin).origin; } catch { return new URL(request.url).origin; }
 }
 
-async function loadPublicSiteData(origin) {
+async function loadPublicSiteData(origin, env) {
   const [settings, menus, items, delivery] = await Promise.all([
-    fetchPublicJson(origin, 'assets/data/settings.json'), fetchPublicJson(origin, 'assets/data/menus.json'),
-    fetchPublicJson(origin, 'assets/data/items.json'), fetchPublicJson(origin, 'assets/data/delivery.json'),
+    fetchPublicJson(origin, 'assets/data/settings.json', env), fetchPublicJson(origin, 'assets/data/menus.json', env),
+    fetchPublicJson(origin, 'assets/data/items.json', env), fetchPublicJson(origin, 'assets/data/delivery.json', env),
   ]);
   return { settings, menus, items, delivery };
 }
 
-async function fetchPublicJson(origin, path) {
-  const response = await fetch(`${origin}/${path}?v=${Date.now()}`, { cache: 'no-store' });
+async function fetchPublicJson(origin, path, env) {
+  const url = `${origin}/${path}?v=${Date.now()}`;
+  let response;
+  try {
+    // Pages Functions must use the ASSETS binding for same-deployment files.
+    // Fetching their public hostname from inside the Function can recurse back
+    // through the Worker and fail before Stripe is ever contacted.
+    response = env?.ASSETS?.fetch
+      ? await env.ASSETS.fetch(new Request(url, { headers: { Accept: 'application/json' } }))
+      : await fetch(url, { cache: 'no-store' });
+  } catch (error) {
+    console.error(`Public data connection error (${path}):`, error);
+    throw publicError(`Impossible de charger les données de commande (${path}).`, 502);
+  }
   if (!response.ok) throw publicError(`Données publiques indisponibles: ${path}`, 502);
   try { return await response.json(); } catch { throw publicError(`JSON public invalide: ${path}`, 502); }
 }
@@ -104,7 +130,10 @@ async function loadStripeCatalog(env, origin) {
     try { return JSON.parse(env.STRIPE_CATALOG_JSON); } catch { throw publicError('STRIPE_CATALOG_JSON est invalide.', 500); }
   }
   try {
-    const response = await fetch(`${origin}/assets/data/stripe_catalog.json?v=${Date.now()}`, { cache: 'no-store' });
+    const url = `${origin}/assets/data/stripe_catalog.json?v=${Date.now()}`;
+    const response = env?.ASSETS?.fetch
+      ? await env.ASSETS.fetch(new Request(url, { headers: { Accept: 'application/json' } }))
+      : await fetch(url, { cache: 'no-store' });
     if (response.ok) return await response.json();
   } catch (error) { console.warn('Catalogue Stripe public indisponible:', error); }
   return {};
