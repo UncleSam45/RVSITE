@@ -1,6 +1,7 @@
 const STRIPE_CHECKOUT_URL = 'https://api.stripe.com/v1/checkout/sessions';
 const STRIPE_PRICES_URL = 'https://api.stripe.com/v1/prices';
 const DEFAULT_CURRENCY = 'cad';
+const WORKER_VERSION = 'stripe-direct-v8';
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
@@ -10,7 +11,7 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders(request, env) });
     if (request.method === 'GET' && ['/api/health', '/health'].includes(url.pathname)) {
-      return json({ ok: true, service: 'la-cuisine-de-rosalie-checkout-worker', promotions: false }, 200, request, env);
+      return json({ ok: true, service: 'la-cuisine-de-rosalie-checkout-worker', version: WORKER_VERSION, catalog_source: 'stripe' }, 200, request, env);
     }
     const routes = ['/api/create-checkout-session', '/create-checkout-session', '/api/create-checkout-session-v2', '/create-checkout-session-v2'];
     if (request.method === 'POST' && routes.includes(url.pathname)) {
@@ -285,7 +286,7 @@ function makeOrderId() { return `rosalie_${new Date().toISOString().replace(/[-:
 function truncateMetadata(value) { return clean(value).slice(0, 500); }
 function clean(value) { return String(value ?? '').trim(); }
 function publicError(message, status = 400) { const error = new Error(message); error.publicMessage = message; error.status = status; return error; }
-function json(payload, status, request, env) { return new Response(JSON.stringify(payload), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...corsHeaders(request, env) } }); }
+function json(payload, status, request, env) { return new Response(JSON.stringify({ ...payload, worker_version: WORKER_VERSION }), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Checkout-Worker-Version': WORKER_VERSION, ...corsHeaders(request, env) } }); }
 function corsHeaders(request, env) {
   const requestOrigin = request.headers.get('Origin') || '';
   const allowedOrigin = env.ALLOWED_ORIGIN || '*';

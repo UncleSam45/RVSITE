@@ -39,7 +39,13 @@ try {
     body: JSON.stringify({ ...base, items: [line('paid', 'familial', 4)] }),
   }), { STRIPE_SECRET_KEY: 'sk_test_example' });
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).checkout_url, 'https://checkout.stripe.test/session');
+  assert.equal(response.headers.get('X-Checkout-Worker-Version'), 'stripe-direct-v8');
+  const checkout = await response.json();
+  assert.equal(checkout.checkout_url, 'https://checkout.stripe.test/session');
+  assert.equal(checkout.worker_version, 'stripe-direct-v8');
+
+  const health = await worker.fetch(new Request('https://example.test/api/health'), { STRIPE_SECRET_KEY: 'sk_test_example' });
+  assert.equal((await health.json()).version, 'stripe-direct-v8');
 } finally {
   globalThis.fetch = originalFetch;
 }
