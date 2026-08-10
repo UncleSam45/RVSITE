@@ -10,14 +10,34 @@
   };
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
+  const APP_RELEASE = '20260810-cache-reset-v9';
   async function clearLegacyBrowserCaches() {
-    if (!('caches' in window)) return;
+    let removedController = false;
     try {
-      const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      if ('serviceWorker' in navigator) {
+        const controlled = Boolean(navigator.serviceWorker.controller);
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const results = await Promise.all(registrations.map((registration) => registration.unregister()));
+        removedController = controlled && results.some(Boolean);
+      }
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      }
     } catch (error) {
       console.warn('[La cuisine de Rosalie] Impossible de vider les caches navigateur hérités:', error);
     }
+    // An active service worker can keep controlling the current tab even after
+    // it is unregistered. Navigate once so the new document is uncontrolled.
+    const refreshKey = `lacuisine_rosalie_release_${APP_RELEASE}`;
+    if (removedController && !sessionStorage.getItem(refreshKey)) {
+      sessionStorage.setItem(refreshKey, '1');
+      const url = new URL(window.location.href);
+      url.searchParams.set('app_release', APP_RELEASE);
+      window.location.replace(url.toString());
+      return true;
+    }
+    return false;
   }
 
   function localAssetPath(path) {
@@ -340,6 +360,25 @@
     }
   }
 
+  function reconcileCartWithCurrentMenu() {
+    const activeIds = currentMenuIds();
+    const reconciled = state.cart.items.flatMap((line) => {
+      const item = getItemById(line.itemId);
+      const portion = item && getPortions(item).find((option) => option.key === line.portion);
+      if (!item || item.available === false || !activeIds.has(item.id) || !portion) return [];
+      return [{
+        ...line,
+        title: item.title,
+        portionLabel: portion.label,
+        price: portion.price,
+        qty: Math.min(99, Math.max(1, Math.trunc(Number(line.qty) || 1))),
+      }];
+    });
+    const changed = JSON.stringify(reconciled) !== JSON.stringify(state.cart.items);
+    state.cart.items = reconciled;
+    if (changed) saveCart();
+  }
+
   function addToCart(item, portionKey, qty = 1) {
     const portion = getPortions(item).find((option) => option.key === portionKey);
     if (!portion || item.available === false || !getMenuOrderStatus().open) { showToast(menuOrderStatusMessage()); return; }
@@ -624,7 +663,8 @@
 
   function checkoutEndpoints() {
     const configured = state.data?.settings?.ordering?.checkout_endpoint || '/api/create-checkout-session';
-    return Array.from(new Set([configured, '/.netlify/functions/create-checkout-session']));
+    const fallback = state.data?.settings?.ordering?.checkout_fallback_endpoint;
+    return Array.from(new Set([configured, fallback].filter(Boolean)));
   }
 
   function isRetiredPromotionError(message) {
@@ -639,11 +679,17 @@
         const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const data = await response.json().catch(() => ({}));
         if (response.ok && data.checkout_url) return data.checkout_url;
-        const message = data.error || `Session Stripe indisponible (${response.status}).`;
+        const legacyWorker = /Impossible de charger les données de commande|assets\/data\/settings\.json/i.test(data.error || '');
+        const message = legacyWorker
+          ? 'L’ancienne version du service de paiement répond encore sur ce domaine. Vérifiez la route Cloudflare de /api/create-checkout-session (version attendue: stripe-direct-v8).'
+          : data.error || `Session Stripe indisponible (${response.status}).`;
         lastError = new Error(message);
         // A previously deployed checkout Worker may still enforce the retired
         // gift offer. In that case, continue to the current serverless handler.
-        if (response.status !== 404 && !isRetiredPromotionError(message)) break;
+        // Try the independent serverless checkout when the primary Worker is
+        // missing or has an infrastructure failure. Validation errors remain
+        // authoritative and should be shown without creating a second request.
+        if (response.status < 500 && response.status !== 404 && !isRetiredPromotionError(message)) break;
       } catch (error) {
         lastError = error;
       }
@@ -1597,12 +1643,15 @@
     injectStyles();
     injectPremiumStyles();
     bindAmbientPointer();
-    await clearLegacyBrowserCaches();
+    if (await clearLegacyBrowserCaches()) return;
     loadCart();
     const rememberedAdminKey = localStorage.getItem(ADMIN_ACCESS_KEY_STORAGE_KEY);
     loadArchivedOrderIds();
     if (rememberedAdminKey) { state.admin.token = rememberedAdminKey; state.admin.rememberKey = true; }
     state.data = await loadData();
+    // A cart can survive a weekly menu publication in localStorage. Remove old
+    // dishes and refresh trusted display prices before sending it to checkout.
+    reconcileCartWithCurrentMenu();
     setSeo(state.data.content);
     const first = firstAvailableDate();
     if (!state.cart.deliveryDate && first) state.cart.deliveryDate = first;

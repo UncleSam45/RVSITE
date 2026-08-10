@@ -20,4 +20,33 @@ assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)
 assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)] }, site, new Date('2026-08-05T16:00:00Z')), /vendredi à 1 h/);
 const catalog = { currency: 'cad', items: { paid: { prices: { familial: { price_id: 'price_paid', amount: 23 } } } } };
 assert.deepEqual(buildStripeLineItems(order.lines, catalog, site, {}), [{ price: 'price_paid', quantity: 4 }]);
+assert.deepEqual(buildStripeLineItems(order.lines, { currency: 'cad', allow_dynamic_price_data: true }, site, {}), [{
+  quantity: 4,
+  price_data: { currency: 'cad', unit_amount: 2300, product_data: { name: 'Plat — Familial', description: 'La cuisine de Rosalie' } },
+}]);
+
+const originalFetch = globalThis.fetch;
+globalThis.fetch = async (input) => {
+  const url = String(input);
+  if (url.includes('/v1/prices')) return Response.json({ data: [{ id: 'price_paid', currency: 'cad', unit_amount: 2300, nickname: 'familial', metadata: { item_id: 'paid', portion_key: 'familial' }, product: { name: 'Plat', metadata: { item_id: 'paid' } } }] });
+  if (url.includes('/v1/checkout/sessions')) return Response.json({ id: 'cs_test_ok', url: 'https://checkout.stripe.test/session' });
+  throw new Error(`Unexpected URL: ${url}`);
+};
+try {
+  const worker = (await import('../../worker.js')).default;
+  const response = await worker.fetch(new Request('https://example.test/api/create-checkout-session', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...base, items: [line('paid', 'familial', 4)] }),
+  }), { STRIPE_SECRET_KEY: 'sk_test_example' });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('X-Checkout-Worker-Version'), 'stripe-direct-v8');
+  const checkout = await response.json();
+  assert.equal(checkout.checkout_url, 'https://checkout.stripe.test/session');
+  assert.equal(checkout.worker_version, 'stripe-direct-v8');
+
+  const health = await worker.fetch(new Request('https://example.test/api/health'), { STRIPE_SECRET_KEY: 'sk_test_example' });
+  assert.equal((await health.json()).version, 'stripe-direct-v8');
+} finally {
+  globalThis.fetch = originalFetch;
+}
 console.log('full worker reference tests passed');
