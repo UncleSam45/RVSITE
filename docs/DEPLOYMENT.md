@@ -50,13 +50,24 @@ NiceGUI localement (`python main.py`) ou publié tel quel comme site statique.
 Ce dépôt contient maintenant un workflow GitHub Actions (`.github/workflows/pages.yml`)
 qui publie automatiquement les fichiers statiques requis depuis la racine du
 dépôt vers GitHub Pages. Il copie seulement `index.html`, `main.js`, `assets/`,
-`logo.png` et `banner.png` dans l'artefact publié.
+`logo.png`, `banner.png` et `CNAME` dans l'artefact publié. Le workflow déclare
+explicitement les permissions `pages: write` et `id-token: write` requises et
+demande à `actions/configure-pages` d'activer la ressource Pages si nécessaire.
 
 Si GitHub Pages affiche une erreur du type `docs/index.html` manquant, c'est que
 la source Pages du dépôt pointe probablement vers le dossier `/docs`. Ce dossier
 contient la documentation, pas le site public. Dans GitHub, allez dans
 **Settings → Pages → Build and deployment**, puis choisissez **GitHub Actions**
 comme source et lancez le workflow **Deploy static site to GitHub Pages**.
+
+Une erreur `HttpError: Not Found` lors de l'étape `actions/deploy-pages` signifie
+que l'artefact a bien été créé, mais que l'API GitHub ne trouve pas de site Pages
+activé pour le dépôt. Le workflow tente maintenant de corriger cet état avec
+`enablement: true`. Si une politique du dépôt empêche l'activation automatique,
+un propriétaire doit sélectionner **GitHub Actions** une fois dans **Settings →
+Pages → Build and deployment**, puis relancer le workflow. L'avertissement Node
+concernant le module `punycode` est émis par une dépendance de l'action et n'est
+pas la cause de l'échec du déploiement.
 
 ## Stripe Checkout
 
