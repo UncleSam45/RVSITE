@@ -106,6 +106,12 @@ Configure these Cloudflare secrets (never commit their values):
 
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `GITHUB_TOKEN`.
 
+Stripe and GitHub configuration is validated independently from email delivery.
+Consequently, a missing `RESEND_API_KEY` or `EMAIL_FROM` does not prevent a valid
+payment from being marked paid; the order instead records an email configuration
+failure for follow-up. If the template file is missing or malformed, the Worker uses
+its built-in safe French confirmation template.
+
 Configure `GITHUB_OWNER`, `GITHUB_ORDER_REPO`, and `EMAIL_FROM`, plus the optional
 `GITHUB_ORDER_BRANCH`, `GITHUB_ORDER_PATH`, `RVSITE_REPO`, `RVSITE_BRANCH`,
 `EMAIL_TEMPLATE_PATH`, and `BUSINESS_NAME` variables. The GitHub token needs only

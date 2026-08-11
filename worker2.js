@@ -34,7 +34,7 @@ export default {
     }
 
     try {
-      requireConfiguration(env);
+      requireCoreConfiguration(env);
       const rawBody = await request.text();
       const signature = request.headers.get('Stripe-Signature');
       if (!signature || !(await verifyStripeSignature(rawBody, signature, env.STRIPE_WEBHOOK_SECRET))) {
@@ -71,6 +71,14 @@ export default {
         return json({ received: true, paid: true, email: 'already_sent' });
       }
 
+      const missingEmailConfig = missingEmailConfiguration(env);
+      if (missingEmailConfig.length) {
+        const message = `Missing email configuration: ${missingEmailConfig.join(', ')}`;
+        await recordEmailFailure(env, orderId, message);
+        console.error(message, { order_id: orderId });
+        return json({ received: true, paid: true, email: 'failed_not_configured' });
+      }
+
       const template = await loadTemplate(env);
       if (!template.enabled) return json({ received: true, paid: true, email: 'disabled' });
 
@@ -90,31 +98,27 @@ export default {
       order = claim.value;
       if (order.confirmation_email?.status === 'sent') return json({ received: true, paid: true, email: 'already_sent' });
 
+      const rendered = renderConfirmationEmail(order, session, template, env);
+      let delivery;
       try {
-        const rendered = renderConfirmationEmail(order, session, template, env);
-        const delivery = await sendEmail({
+        delivery = await sendEmail({
           from: env.EMAIL_FROM,
           to: customerEmail(order, session),
           subject: interpolate(template.subject, order),
           html: rendered,
           orderId,
         }, env.RESEND_API_KEY);
-        await mutateOrders(env, (document) => {
-          const current = findOrder(document.data, orderId);
-          current.confirmation_email = {
-            status: 'sent', sent_at: new Date().toISOString(), provider: 'resend',
-            provider_message_id: delivery.id, template: 'order_confirmation', last_attempt_at: attemptedAt,
-          };
-          return { changed: true, value: null };
-        }, `Record confirmation email for ${orderId}`);
-        return json({ received: true, paid: true, email: 'sent' });
       } catch (error) {
         await recordEmailFailure(env, orderId, safeError(error));
-        // Payment has already been durably recorded. A 200 avoids endless Stripe
-        // webhook retries; the failed state can be retried by a later admin action.
         console.error('Confirmation email failed', { order_id: orderId, error: safeError(error) });
         return json({ received: true, paid: true, email: 'failed' });
       }
+
+      // Delivery succeeded. If this write fails, propagate a non-2xx response so
+      // Stripe retries. The Resend idempotency key prevents a duplicate delivery;
+      // importantly, we never mislabel a delivered message as failed.
+      await recordEmailSuccess(env, orderId, delivery.id, attemptedAt);
+      return json({ received: true, paid: true, email: 'sent' });
     } catch (error) {
       console.error('Payment webhook failed', { error: safeError(error) });
       return json({ error: safeError(error) }, error.status || 500);
@@ -122,10 +126,14 @@ export default {
   },
 };
 
-function requireConfiguration(env) {
-  const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'RESEND_API_KEY', 'GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_ORDER_REPO', 'EMAIL_FROM'];
+export function requireCoreConfiguration(env) {
+  const required = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'GITHUB_TOKEN', 'GITHUB_OWNER', 'GITHUB_ORDER_REPO'];
   const missing = required.filter((name) => !env[name]);
   if (missing.length) throw new Error(`Missing Worker configuration: ${missing.join(', ')}`);
+}
+
+export function missingEmailConfiguration(env) {
+  return ['RESEND_API_KEY', 'EMAIL_FROM'].filter((name) => !env[name]);
 }
 
 export async function verifyStripeSignature(payload, header, secret, nowSeconds = Math.floor(Date.now() / 1000)) {
@@ -176,7 +184,13 @@ export function validateOrderAgainstSession(order, orderId, session) {
   if (clean(order.order_id) !== orderId) throw permanent('RVSITE order ID conflict');
   const storedSession = clean(order.stripe_checkout_session_id || order.payment?.checkout_session_id);
   if (!storedSession || storedSession !== session.id) throw permanent('Stripe Checkout Session ID conflict');
-  const expectedAmount = firstInteger(order.amount_total_cents, order.total_cents, order.payment?.amount_total_cents, moneyToCents(order.total));
+  const expectedAmount = firstInteger(
+    order.amount_total_cents,
+    order.total_cents,
+    order.subtotal_cents,
+    order.payment?.amount_total_cents,
+    moneyToCents(order.total),
+  );
   if (expectedAmount !== null && expectedAmount !== Number(session.amount_total)) throw permanent('Stripe amount conflicts with RVSITE order');
   const expectedCurrency = clean(order.currency || order.payment?.currency).toLowerCase();
   if (expectedCurrency && expectedCurrency !== clean(session.currency).toLowerCase()) throw permanent('Stripe currency conflicts with RVSITE order');
@@ -218,34 +232,46 @@ function orderRepo(env) {
 }
 
 async function readGithubJson(env, repo, path) {
-  const url = githubContentsUrl(repo, path);
+  const url = githubReadUrl(repo, path);
   const response = await fetch(url, { headers: githubHeaders(env.GITHUB_TOKEN) });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw upstream(`GitHub read failed (${response.status}): ${body.message || path}`);
+  if (!response.ok) throw upstream(`GitHub read failed (${response.status}): ${body.message || path}`, { githubStatus: response.status });
   try { return { data: JSON.parse(decodeBase64(body.content)), sha: body.sha }; }
   catch { throw permanent(`GitHub file is not valid JSON: ${path}`); }
 }
 
 async function writeGithubJson(env, repo, path, data, sha, message) {
-  return fetch(githubContentsUrl(repo, path), {
+  return fetch(githubContentsBaseUrl(repo, path), {
     method: 'PUT', headers: { ...githubHeaders(env.GITHUB_TOKEN), 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, content: encodeBase64(`${JSON.stringify(data, null, 2)}\n`), sha, branch: repo.branch }),
   });
 }
 
-function githubContentsUrl(repo, path) {
-  return `https://api.github.com/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(repo.branch)}`;
+export function githubContentsBaseUrl(repo, path) {
+  return `https://api.github.com/repos/${encodeURIComponent(repo.owner)}/${encodeURIComponent(repo.repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+export function githubReadUrl(repo, path) {
+  return `${githubContentsBaseUrl(repo, path)}?ref=${encodeURIComponent(repo.branch)}`;
 }
 
 function githubHeaders(token) {
   return { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'rvsite-payment-events' };
 }
 
-async function loadTemplate(env) {
+export async function loadTemplate(env) {
   const repo = { owner: env.GITHUB_OWNER, repo: env.RVSITE_REPO || 'RVSITE', branch: env.RVSITE_BRANCH || 'main' };
   const path = env.EMAIL_TEMPLATE_PATH || 'assets/data/email_templates.json';
-  const document = await readGithubJson(env, repo, path);
-  return normalizeTemplate(document.data?.order_confirmation);
+  try {
+    const document = await readGithubJson(env, repo, path);
+    return normalizeTemplate(document.data?.order_confirmation);
+  } catch (error) {
+    if (error.githubStatus === 404 || error.status === 422) {
+      console.warn('Email template unavailable; using safe defaults', { path, error: safeError(error) });
+      return normalizeTemplate();
+    }
+    throw error;
+  }
 }
 
 export function normalizeTemplate(value) {
@@ -294,16 +320,53 @@ async function recordEmailFailure(env, orderId, error) {
   }, `Record confirmation email failure for ${orderId}`);
 }
 
+async function recordEmailSuccess(env, orderId, providerMessageId, attemptedAt) {
+  await mutateOrders(env, (document) => {
+    const order = findOrder(document.data, orderId);
+    if (order.confirmation_email?.status === 'sent') return { changed: false, value: null };
+    order.confirmation_email = {
+      status: 'sent', sent_at: new Date().toISOString(), provider: 'resend',
+      provider_message_id: providerMessageId, template: 'order_confirmation', last_attempt_at: attemptedAt,
+    };
+    return { changed: true, value: null };
+  }, `Record confirmation email for ${orderId}`);
+}
+
 function customerEmail(order, session) { return clean(order.customer?.email || order.customer_email || order.email || session.customer_details?.email || session.customer_email); }
 function customerName(order, session) { return clean(order.customer?.name || order.customer_name || order.name || session.customer_details?.name); }
-function deliveryDetails(order) {
+export function normalizeDelivery(order) {
   const customer = order.customer || {};
-  const address = order.delivery_address || [customer.street_number, customer.street_name, customer.apartment, customer.city, customer.postal_code].filter(Boolean).join(' ');
-  return [order.delivery_date, [order.delivery_window_1, order.delivery_window_2].filter(Boolean).join(' / '), address].filter(Boolean).join('\n');
+  const delivery = order.delivery || {};
+  return {
+    date: delivery.date || order.delivery_date || '',
+    window1: delivery.window_1 || order.delivery_window_1 || '',
+    window2: delivery.window_2 || order.delivery_window_2 || '',
+    address: order.delivery_address || [
+      customer.street_number,
+      customer.street_name,
+      customer.apartment,
+      customer.city,
+      customer.province,
+      customer.postal_code,
+    ].filter(Boolean).join(' '),
+  };
+}
+function deliveryDetails(order) {
+  const delivery = normalizeDelivery(order);
+  return [delivery.date, [delivery.window1, delivery.window2].filter(Boolean).join(' / '), delivery.address].filter(Boolean).join('\n');
 }
 function interpolate(text, order) {
   const name = customerName(order, {}) || '';
-  return String(text).replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_, key) => ({ customer_name: name, customer_first_name: firstName(name), order_id: order.order_id || '', delivery_date: order.delivery_date || '', delivery_window_1: order.delivery_window_1 || '', delivery_window_2: order.delivery_window_2 || '', delivery_address: order.delivery_address || '' }[key] ?? ''));
+  const delivery = normalizeDelivery(order);
+  return String(text).replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_, key) => ({
+    customer_name: name,
+    customer_first_name: firstName(name),
+    order_id: order.order_id || '',
+    delivery_date: delivery.date,
+    delivery_window_1: delivery.window1,
+    delivery_window_2: delivery.window2,
+    delivery_address: delivery.address,
+  }[key] ?? ''));
 }
 function formatMoney(cents, currency) { return new Intl.NumberFormat('fr-CA', { style: 'currency', currency: clean(currency).toUpperCase() || 'CAD' }).format(cents / 100); }
 function firstName(name) { return clean(name).split(/\s+/)[0]; }
@@ -314,7 +377,7 @@ function moneyToCents(value) { const number = Number(value); return Number.isFin
 function snapshot(value) { return JSON.parse(JSON.stringify(value)); }
 function safeError(error) { return String(error?.message || 'Internal error').slice(0, 500); }
 function permanent(message) { return Object.assign(new Error(message), { status: 422 }); }
-function upstream(message) { return Object.assign(new Error(message), { status: 502 }); }
+function upstream(message, details = {}) { return Object.assign(new Error(message), { status: 502, ...details }); }
 function json(body, status = 200) { return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } }); }
 function decodeBase64(value) { const bytes = Uint8Array.from(atob(String(value).replace(/\s/g, '')), (character) => character.charCodeAt(0)); return new TextDecoder().decode(bytes); }
 function encodeBase64(value) { const bytes = new TextEncoder().encode(value); let binary = ''; for (let offset = 0; offset < bytes.length; offset += 0x8000) binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000)); return btoa(binary); }
