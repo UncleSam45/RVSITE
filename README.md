@@ -31,6 +31,7 @@ This skeleton keeps prices and availability in repository-managed data rather th
 | `assets/images/` | Product and storefront media. |
 | `worker/src/` | Modular Cloudflare Worker checkout implementation and tests. |
 | `worker.js` | Standalone Worker-compatible checkout entry point. |
+| `worker2.js` | Standalone Stripe webhook, payment confirmation, GitHub order update, and Resend email Worker. |
 | `serverless/create-checkout-session.js` | Alternative Node serverless checkout endpoint skeleton. |
 | `editor.py` | NiceGUI catalogue and content editor for local administration. |
 | `main.py` | NiceGUI development preview and browser-console bridge. |
@@ -93,6 +94,26 @@ npm run dev
 Configure the bindings and secrets expected by the selected checkout implementation before local or remote use. The browser should submit catalogue identifiers and customer fulfilment details only; the checkout service remains responsible for loading authoritative prices and enforcing order rules.
 
 The root `worker.js`, modular `worker/src/` implementation, and Node serverless example are alternative integration surfaces. Choose and deploy one checkout path rather than assuming that every example is active.
+
+### Payment confirmation worker
+
+Copy `worker2.js` into a separate Cloudflare module Worker. It exposes `GET /health`
+and `POST /stripe/webhook`; the webhook route verifies the raw Stripe signature,
+reloads the authoritative Checkout Session, safely updates the GitHub order record,
+and delivers the repository-controlled confirmation email through Resend.
+
+Configure these Cloudflare secrets (never commit their values):
+
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `GITHUB_TOKEN`.
+
+Configure `GITHUB_OWNER`, `GITHUB_ORDER_REPO`, and `EMAIL_FROM`, plus the optional
+`GITHUB_ORDER_BRANCH`, `GITHUB_ORDER_PATH`, `RVSITE_REPO`, `RVSITE_BRANCH`,
+`EMAIL_TEMPLATE_PATH`, and `BUSINESS_NAME` variables. The GitHub token needs only
+Contents read/write access to the order repository and Contents read access to this
+repository. Register `/stripe/webhook` for `checkout.session.completed` and
+`checkout.session.async_payment_succeeded` in Stripe. Rosalie's editable copy and
+section switches live in `assets/data/email_templates.json`; no HTML or credentials
+are exposed there.
 
 ## Stripe catalogue synchronization
 
