@@ -1,0 +1,13 @@
+{
+  "order_confirmation": {
+    "enabled": true,
+    "subject": "Confirmation de votre commande",
+    "headline": "Merci pour votre commande!",
+    "intro": "Votre paiement a été reçu et votre commande est confirmée.",
+    "delivery_message": "Nous communiquerons avec vous au besoin concernant la livraison.",
+    "signature": "Merci et à bientôt! — Rosalie",
+    "show_order_summary": true,
+    "show_delivery_details": true,
+    "show_payment_details": true
+  }
+}
