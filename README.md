@@ -21,6 +21,33 @@ The project separates customer-facing delivery, editable business data, checkout
 
 This skeleton keeps prices and availability in repository-managed data rather than trusting values submitted by the browser. It is intentionally small enough to adapt for another caterer while preserving clear boundaries between presentation, content, order validation, and payments.
 
+## Quick start
+
+The storefront has no build step. From the repository root, start a local static
+server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://127.0.0.1:8000/`. The menu and site content are loaded directly
+from `assets/data/`, so edits to those JSON files are visible after a browser
+refresh. A static preview does not provide a working Stripe checkout endpoint; use
+Stripe test mode and configure one of the server-side checkout options before
+testing payments.
+
+To run the checkout test suite:
+
+```bash
+cd worker
+npm install
+npm test
+```
+
+Python 3 is sufficient for the static preview. The optional administration and
+preview applications also require NiceGUI, while the checkout tests require a
+current Node.js/npm installation.
+
 ## Components
 
 | Path | Role |
@@ -32,6 +59,7 @@ This skeleton keeps prices and availability in repository-managed data rather th
 | `worker/src/` | Modular Cloudflare Worker checkout implementation and tests. |
 | `worker.js` | Standalone Worker-compatible checkout entry point. |
 | `worker2.js` | Standalone Stripe webhook, payment confirmation, GitHub order update, and Resend email Worker. |
+| `functions/api/create-checkout-session.js` | Cloudflare Pages Function adapter for the checkout Worker. |
 | `serverless/create-checkout-session.js` | Alternative Node serverless checkout endpoint skeleton. |
 | `editor.py` | NiceGUI catalogue and content editor for local administration. |
 | `main.py` | NiceGUI development preview and browser-console bridge. |
@@ -52,19 +80,12 @@ The storefront is driven by committed JSON files:
 
 Treat the deployed JSON as public information. Secrets such as Stripe keys, GitHub tokens, and credentials must be supplied through environment variables or deployment-platform secret storage and must never be committed.
 
-## Local storefront preview
+## NiceGUI storefront preview
 
-The static site can be served with Python:
-
-```bash
-python3 -m http.server 8000
-```
-
-Open `http://127.0.0.1:8000/`.
-
-For the NiceGUI preview, install the required Python dependency and run:
+For the optional NiceGUI preview, install NiceGUI and run:
 
 ```bash
+python3 -m pip install nicegui
 python3 main.py
 ```
 
