@@ -1,24 +1,8 @@
 {
   "items": [
     {
-      "id": "penne-sauce-rosee-saucisses-italiennes_20260807",
-      "title": "Penne sauce rosée et saucisses italiennes",
-      "description": "Plat maison préparé avec soin.",
-      "category": "Les plats",
-      "available": true,
-      "featured": false,
-      "image": "assets/images/items/PENNE SAUCE ROSEE ET SAUCISSES ITALIENNES.png",
-      "pricing": {
-        "petit": 8,
-        "grand": 12,
-        "familial": 23
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "macaroni-chinois-au-poulet_20260807",
-      "title": "Macaroni chinois au poulet",
+      "id": "spaghetti-sauce-viande_20260814",
+      "title": "Spaghetti sauce à la viande",
       "description": "Plat maison préparé avec soin.",
       "category": "Les plats",
       "available": true,
@@ -33,24 +17,8 @@
       "showcase": false
     },
     {
-      "id": "lanieres-porc-cremeuses-champignons-riz_20260807",
-      "title": "Lanières de porc crémeuses aux champignons et riz",
-      "description": "Plat maison préparé avec soin.",
-      "category": "Les plats",
-      "available": true,
-      "featured": false,
-      "image": "assets/images/items/LANIERE DE PORC CREMEUSE AU CHAMPIGNON ET RIZ .png",
-      "pricing": {
-        "petit": 8,
-        "grand": 12,
-        "familial": 23
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "boulettes-bacon-patates-pilees_20260807",
-      "title": "Boulettes au bacon + patates pilées",
+      "id": "poulet-beurre-riz_20260814",
+      "title": "Poulet au beurre avec riz",
       "description": "Plat maison préparé avec soin.",
       "category": "Les plats",
       "available": true,
@@ -65,8 +33,40 @@
       "showcase": false
     },
     {
-      "id": "soupe-poulet-nouilles_20260807",
-      "title": "Soupe poulet nouilles",
+      "id": "pizza-pepperoni-pain-naan_20260814",
+      "title": "Pizza pepperoni sur pain naan",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "salade-repas-poulet-marine-legumes_20260814",
+      "title": "Salade repas au poulet mariné et légumes",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "soupe-legumes_20260814",
+      "title": "Soupe aux légumes",
       "description": "Préparé maison.",
       "category": "Les soupes",
       "available": true,
@@ -79,7 +79,35 @@
       "showcase": false
     },
     {
-      "id": "salade-grecque_20260807",
+      "id": "salade-chef_20260814",
+      "title": "Salade chef",
+      "description": "Préparé maison.",
+      "category": "Les salades",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 5
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "salade-cesar_20260814",
+      "title": "Salade César",
+      "description": "Préparé maison.",
+      "category": "Les salades",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 5
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "salade-grecque_20260814",
       "title": "Salade grecque",
       "description": "Préparé maison.",
       "category": "Les salades",
@@ -93,8 +121,36 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-jambon-fromage_20260807",
-      "title": "Sous-marin jambon-fromage",
+      "id": "sous-marin-pizza_20260814",
+      "title": "Sous-marin pizza",
+      "description": "Préparé maison.",
+      "category": "Les sous-marins",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "sous-marin-viandes-froides_20260814",
+      "title": "Sous-marin aux viandes froides",
+      "description": "Préparé maison.",
+      "category": "Les sous-marins",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "sous-marin-poulet-bbq_20260814",
+      "title": "Sous-marin au poulet BBQ",
       "description": "Préparé maison.",
       "category": "Les sous-marins",
       "available": true,

@@ -1,23 +1,48 @@
 {
   "current_menu": {
-    "id": "menu-2026-08-07",
+    "id": "menu-2026-08-14",
     "active": true,
-    "title": "Menu réduit pour les vacances",
-    "description": "Les vacances approchent et le menu est allégé pour cette période. Merci de votre compréhension! Commandez au moins 72 heures à l’avance.",
-    "start_date": "2026-08-07",
+    "title": "Dernière semaine du menu réduit",
+    "description": "Dernière semaine du menu réduit avant les vacances. Merci de votre compréhension! Commandez au moins 72 heures à l’avance.",
+    "start_date": "2026-08-14",
     "end_date": "2026-08-31",
     "item_ids": [
-      "penne-sauce-rosee-saucisses-italiennes_20260807",
-      "macaroni-chinois-au-poulet_20260807",
-      "lanieres-porc-cremeuses-champignons-riz_20260807",
-      "boulettes-bacon-patates-pilees_20260807"
+      "spaghetti-sauce-viande_20260814",
+      "poulet-beurre-riz_20260814",
+      "pizza-pepperoni-pain-naan_20260814",
+      "salade-repas-poulet-marine-legumes_20260814"
     ],
     "extra_ids": [
-      "soupe-poulet-nouilles_20260807",
-      "salade-grecque_20260807",
-      "sous-marin-jambon-fromage_20260807"
+      "soupe-legumes_20260814",
+      "salade-chef_20260814",
+      "salade-cesar_20260814",
+      "salade-grecque_20260814",
+      "sous-marin-pizza_20260814",
+      "sous-marin-viandes-froides_20260814",
+      "sous-marin-poulet-bbq_20260814"
     ],
     "promotion_ids": []
   },
-  "archive": []
+  "archive": [
+    {
+      "id": "menu-2026-08-07",
+      "active": true,
+      "title": "Menu réduit pour les vacances",
+      "description": "Les vacances approchent et le menu est allégé pour cette période. Merci de votre compréhension! Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-08-07",
+      "end_date": "2026-08-31",
+      "item_ids": [
+        "penne-sauce-rosee-saucisses-italiennes_20260807",
+        "macaroni-chinois-au-poulet_20260807",
+        "lanieres-porc-cremeuses-champignons-riz_20260807",
+        "boulettes-bacon-patates-pilees_20260807"
+      ],
+      "extra_ids": [
+        "soupe-poulet-nouilles_20260807",
+        "salade-grecque_20260807",
+        "sous-marin-jambon-fromage_20260807"
+      ],
+      "promotion_ids": []
+    }
+  ]
 }
