@@ -116,6 +116,33 @@ Configure the bindings and secrets expected by the selected checkout implementat
 
 The root `worker.js`, modular `worker/src/` implementation, and Node serverless example are alternative integration surfaces. Choose and deploy one checkout path rather than assuming that every example is active.
 
+### Checkout configuration
+
+The root Worker accepts `GET /health` (or `/api/health`) for health checks and
+`POST /create-checkout-session` (or `/api/create-checkout-session`) for checkout.
+Configure its runtime through deployment-platform secrets and variables:
+
+| Name | Required | Purpose |
+| --- | --- | --- |
+| `STRIPE_SECRET_KEY` | Yes | Stripe secret key used to retrieve prices and create Checkout Sessions. Use a test-mode key while developing. |
+| `STRIPE_CATALOG` or `STRIPE_CATALOG_JSON` | Recommended | Authoritative Stripe catalogue binding or JSON value. Without one, the Worker retrieves the active Stripe prices. |
+| `ALLOWED_ORIGIN` | Recommended | Exact storefront origin allowed by CORS. The default `*` is intended only for early prototyping. |
+| `PUBLIC_SITE_ORIGIN` | Recommended | Canonical storefront origin used when constructing redirects and validating requests. |
+| `CHECKOUT_SUCCESS_URL` | Optional | Overrides the default successful-payment return URL. |
+| `CHECKOUT_CANCEL_URL` | Optional | Overrides the default cancelled-payment return URL. |
+| `BUSINESS_NAME` | Optional | Business name stored in Stripe session metadata. |
+| `ALLOW_DYNAMIC_PRICE_DATA` | Optional | Set to `true` only when intentionally allowing validated catalogue price data instead of Stripe price IDs. |
+
+Keep `STRIPE_SECRET_KEY` in secret storage; do not add it to the JSON catalogue or
+client-side code. Before connecting the storefront, verify the deployment with:
+
+```bash
+curl https://YOUR-WORKER.example/health
+```
+
+For implementation-specific deployment details, see `worker/README.md` and
+`docs/DEPLOYMENT.md`.
+
 ### Payment confirmation worker
 
 Copy `worker2.js` into a separate Cloudflare module Worker. It exposes `GET /health`
