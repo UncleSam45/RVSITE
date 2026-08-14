@@ -11,9 +11,9 @@
     "menus_json": "assets/data/menus.json"
   },
   "menu": {
-    "id": "menu-2026-08-07",
-    "title": "Menu réduit pour les vacances",
-    "start_date": "2026-08-07",
+    "id": "menu-2026-08-14",
+    "title": "Dernière semaine du menu réduit",
+    "start_date": "2026-08-14",
     "end_date": "2026-08-31"
   },
   "items": {},
