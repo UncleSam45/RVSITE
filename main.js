@@ -10,7 +10,7 @@
   };
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
-  const APP_RELEASE = '20260810-cache-reset-v9';
+  const APP_RELEASE = '20260816-checkout-cart-reset-v10';
   async function clearLegacyBrowserCaches() {
     let removedController = false;
     try {
@@ -80,6 +80,7 @@
     toastTimer: null,
     lastAddedKey: '',
     dateMessage: '',
+    checkoutSuccess: false,
     carousel: { index: 0, timer: null, paused: false, touchStartX: 0 },
     countdownTimer: null,
     promotion: { open: false, selecting: false },
@@ -358,6 +359,29 @@
     } catch (error) {
       console.warn('Panier local illisible.', error);
     }
+  }
+
+  function clearCartAfterSuccessfulCheckout() {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('checkout') !== 'success') return;
+
+    state.cart.items = [];
+    state.cart.deliveryDate = '';
+    state.cart.deliveryWindow1 = '';
+    state.cart.deliveryWindow2 = '';
+    state.cart.coolerAvailable = false;
+    state.cart.deliveryInstructions = '';
+    state.cart.customer = {
+      name: '', phone: '', email: '', streetNumber: '', streetName: '', apartment: '', city: '', province: 'QC', postalCode: '', notes: '',
+    };
+    localStorage.removeItem(CART_STORAGE_KEY);
+    state.checkoutSuccess = true;
+
+    // Consume the Stripe return marker so refreshing this page cannot erase a
+    // new cart that the customer starts after completing their order.
+    url.searchParams.delete('checkout');
+    url.searchParams.delete('session_id');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
   }
 
   function reconcileCartWithCurrentMenu() {
@@ -1541,7 +1565,10 @@
   function render() {
     const root = document.getElementById('webframe-root');
     const pages = { home: homeHtml, menu: menuPageHtml, commander: commanderHtml, traiteur: traiteurHtml, livraison: livraisonHtml, contact: contactHtml, admin: adminHtml };
-    root.innerHTML = `<div class="site">${navHtml()}<main>${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}${adminLaunchHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
+    const checkoutConfirmation = state.checkoutSuccess
+      ? '<section class="container notice success-note" role="status" style="margin-top:18px"><strong>Commande confirmée!</strong><br>Votre paiement a été reçu et votre panier a été vidé. Merci pour votre commande.</section>'
+      : '';
+    root.innerHTML = `<div class="site">${navHtml()}<main>${checkoutConfirmation}${(pages[state.page] || homeHtml)()}</main>${footerHtml()}${mobileCartBarHtml()}${adminLaunchHtml()}<div class="toast" role="status" aria-live="polite"></div></div>`;
     bindEvents(root);
     bindGalleryEvents(root);
     bindCountdown(root);
@@ -1645,6 +1672,7 @@
     bindAmbientPointer();
     if (await clearLegacyBrowserCaches()) return;
     loadCart();
+    clearCartAfterSuccessfulCheckout();
     const rememberedAdminKey = localStorage.getItem(ADMIN_ACCESS_KEY_STORAGE_KEY);
     loadArchivedOrderIds();
     if (rememberedAdminKey) { state.admin.token = rememberedAdminKey; state.admin.rememberKey = true; }
