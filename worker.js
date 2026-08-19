@@ -110,6 +110,7 @@ async function loadCheckoutCatalog(env) {
 
 function validateCatalogOrder(payload, catalog) {
   if (!payload || !Array.isArray(payload.items) || !payload.items.length) throw publicError('Le panier est vide.', 400);
+  if (payload.items.length > 50) throw publicError('Le panier ne peut pas contenir plus de 50 articles.', 400);
   const customer = normalizeCustomer(payload.customer || {});
   if (!customer.name || !customer.phone || !customer.street_number || !customer.street_name || !customer.city) throw publicError('Les coordonnées de livraison sont incomplètes.', 400);
   if (customer.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(customer.email)) throw publicError('Le courriel est invalide.', 400);
@@ -117,7 +118,7 @@ function validateCatalogOrder(payload, catalog) {
   const deliveryWindow1 = clean(payload.delivery_window_1);
   const deliveryWindow2 = clean(payload.delivery_window_2);
   if (!deliveryDate || !deliveryWindow1 || !deliveryWindow2 || deliveryWindow1 === deliveryWindow2) throw publicError('Les informations de livraison sont invalides.', 400);
-  const lines = payload.items.slice(0, 50).map((raw) => {
+  const lines = payload.items.map((raw) => {
     const itemId = clean(raw?.item_id); const portion = clean(raw?.portion); const qty = strictInt(raw?.qty, 1, 99);
     const entry = catalog?.items?.[itemId]; const price = findCatalogPrice(catalog, itemId, portion);
     if (!price?.priceId) throw publicError(`Prix Stripe introuvable pour ${entry?.title || itemId} / ${PORTION_LABELS[portion] || portion}.`, 409);
@@ -139,6 +140,7 @@ function getPublicSiteOrigin(request, env) {
 export function validateOrder(payload, site, now = new Date()) {
   if (!payload || typeof payload !== 'object') throw publicError('Commande invalide.', 400);
   if (!Array.isArray(payload.items) || !payload.items.length) throw publicError('Le panier est vide.', 400);
+  if (payload.items.length > 50) throw publicError('Le panier ne peut pas contenir plus de 50 articles.', 400);
   if (site.settings?.ordering?.enabled === false) throw publicError('Les commandes en ligne sont désactivées.', 400);
 
   const menu = site.menus?.current_menu || {};
@@ -158,7 +160,7 @@ export function validateOrder(payload, site, now = new Date()) {
 
   const lines = [];
   let paidSubtotalCents = 0;
-  for (const raw of payload.items.slice(0, 50)) {
+  for (const raw of payload.items) {
     const itemId = clean(raw?.item_id);
     const portion = clean(raw?.portion);
     const qty = strictInt(raw?.qty, 1, 99);

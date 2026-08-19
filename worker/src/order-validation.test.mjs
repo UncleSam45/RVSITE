@@ -6,4 +6,5 @@ const site = { menus: { current_menu: { item_ids: ['paid'] } }, items: { items: 
 const line = (item_id, portion, qty = 1) => ({ item_id, portion, qty });
 assert.equal(validateOrderItems([line('paid', 'familial', 4)], site).paidSubtotalCents, 9200);
 assert.throws(() => validateOrderItems([line('paid', 'familial', 4), line('zero-priced', 'standard')], site), /disponible|Format invalide/);
+assert.throws(() => validateOrderItems(Array.from({ length: 51 }, () => line('paid', 'familial')), site), /plus de 50 articles/);
 console.log('order validation passed');

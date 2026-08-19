@@ -16,6 +16,7 @@ const order = validate({ ...base, items: [line('paid', 'familial', 4)] });
 assert.equal(order.paidSubtotalCents, 9200);
 assert.equal(order.lines[0].unitAmount, 2300);
 assert.throws(() => validate({ ...base, items: [line('paid', 'familial', 4), line('zero-priced', 'standard')] }), /disponible|Format invalide/);
+assert.throws(() => validate({ ...base, items: Array.from({ length: 51 }, () => line('paid', 'familial')) }), /plus de 50 articles/);
 assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)] }, site, new Date('2026-07-31T04:45:00Z')), /vendredi à 1 h/);
 assert.throws(() => validateOrder({ ...base, items: [line('paid', 'familial', 4)] }, site, new Date('2026-08-05T16:00:00Z')), /vendredi à 1 h/);
 const catalog = { currency: 'cad', items: { paid: { prices: { familial: { price_id: 'price_paid', amount: 23 } } } } };
@@ -43,6 +44,13 @@ try {
   const checkout = await response.json();
   assert.equal(checkout.checkout_url, 'https://checkout.stripe.test/session');
   assert.equal(checkout.worker_version, 'stripe-direct-v8');
+
+  const oversizedResponse = await worker.fetch(new Request('https://example.test/api/create-checkout-session', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...base, items: Array.from({ length: 51 }, () => line('paid', 'familial')) }),
+  }), { STRIPE_SECRET_KEY: 'sk_test_example' });
+  assert.equal(oversizedResponse.status, 400);
+  assert.match((await oversizedResponse.json()).error, /plus de 50 articles/);
 
   const health = await worker.fetch(new Request('https://example.test/api/health'), { STRIPE_SECRET_KEY: 'sk_test_example' });
   assert.equal((await health.json()).version, 'stripe-direct-v8');
