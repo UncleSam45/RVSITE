@@ -3,6 +3,8 @@ import { checkoutError } from './checkout-error.js';
 const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
 
 export function validateOrderItems(payloadItems, site) {
+  if (!Array.isArray(payloadItems) || !payloadItems.length) throw checkoutError('Le panier est vide.');
+  if (payloadItems.length > 50) throw checkoutError('Le panier ne peut pas contenir plus de 50 articles.');
   const menu = site.menus?.current_menu || {};
   const activeIds = new Set([
     ...(Array.isArray(menu.item_ids) ? menu.item_ids : []),
@@ -13,7 +15,7 @@ export function validateOrderItems(payloadItems, site) {
   const lines = [];
   let paidSubtotalCents = 0;
 
-  for (const rawLine of payloadItems.slice(0, 50)) {
+  for (const rawLine of payloadItems) {
     const itemId = String(rawLine?.item_id || '').trim();
     const portion = String(rawLine?.portion || '').trim();
     const qty = Math.floor(Number(rawLine?.qty));
