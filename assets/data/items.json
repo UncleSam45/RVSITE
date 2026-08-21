@@ -1,8 +1,8 @@
 {
   "items": [
     {
-      "id": "spaghetti-sauce-viande_20260814",
-      "title": "Spaghetti sauce à la viande",
+      "id": "rotini-alfredo-bacon_20260821",
+      "title": "Rotini alfredo bacon",
       "description": "Plat maison préparé avec soin.",
       "category": "Les plats",
       "available": true,
@@ -17,8 +17,8 @@
       "showcase": false
     },
     {
-      "id": "poulet-beurre-riz_20260814",
-      "title": "Poulet au beurre avec riz",
+      "id": "porc-general-tao-riz_20260821",
+      "title": "Porc général tao avec riz",
       "description": "Plat maison préparé avec soin.",
       "category": "Les plats",
       "available": true,
@@ -33,8 +33,8 @@
       "showcase": false
     },
     {
-      "id": "pizza-pepperoni-pain-naan_20260814",
-      "title": "Pizza pepperoni sur pain naan",
+      "id": "poulet-marine-riz-legumes_20260821",
+      "title": "Poulet mariné, riz et légumes",
       "description": "Plat maison préparé avec soin.",
       "category": "Les plats",
       "available": true,
@@ -49,8 +49,8 @@
       "showcase": false
     },
     {
-      "id": "salade-repas-poulet-marine-legumes_20260814",
-      "title": "Salade repas au poulet mariné et légumes",
+      "id": "riz-chinois-boeuf-legumes_20260821",
+      "title": "Riz chinois au bœuf et légumes",
       "description": "Plat maison préparé avec soin.",
       "category": "Les plats",
       "available": true,
@@ -65,7 +65,23 @@
       "showcase": false
     },
     {
-      "id": "soupe-legumes_20260814",
+      "id": "lasagne-pepperoni-fromage_20260821",
+      "title": "Lasagne pepperoni fromage",
+      "description": "Plat maison préparé avec soin.",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "soupe-legumes_20260821",
       "title": "Soupe aux légumes",
       "description": "Préparé maison.",
       "category": "Les soupes",
@@ -79,7 +95,7 @@
       "showcase": false
     },
     {
-      "id": "salade-chef_20260814",
+      "id": "salade-chef_20260821",
       "title": "Salade chef",
       "description": "Préparé maison.",
       "category": "Les salades",
@@ -93,7 +109,7 @@
       "showcase": false
     },
     {
-      "id": "salade-cesar_20260814",
+      "id": "salade-cesar_20260821",
       "title": "Salade César",
       "description": "Préparé maison.",
       "category": "Les salades",
@@ -107,7 +123,7 @@
       "showcase": false
     },
     {
-      "id": "salade-grecque_20260814",
+      "id": "salade-grecque_20260821",
       "title": "Salade grecque",
       "description": "Préparé maison.",
       "category": "Les salades",
@@ -121,7 +137,7 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-pizza_20260814",
+      "id": "sous-marin-pizza_20260821",
       "title": "Sous-marin pizza",
       "description": "Préparé maison.",
       "category": "Les sous-marins",
@@ -135,7 +151,7 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-viandes-froides_20260814",
+      "id": "sous-marin-viandes-froides_20260821",
       "title": "Sous-marin aux viandes froides",
       "description": "Préparé maison.",
       "category": "Les sous-marins",
@@ -149,7 +165,7 @@
       "showcase": false
     },
     {
-      "id": "sous-marin-poulet-bbq_20260814",
+      "id": "sous-marin-poulet-bbq_20260821",
       "title": "Sous-marin au poulet BBQ",
       "description": "Préparé maison.",
       "category": "Les sous-marins",

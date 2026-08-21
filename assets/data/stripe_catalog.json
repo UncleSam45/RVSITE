@@ -11,9 +11,9 @@
     "menus_json": "assets/data/menus.json"
   },
   "menu": {
-    "id": "menu-2026-08-14",
-    "title": "Dernière semaine du menu réduit",
-    "start_date": "2026-08-14",
+    "id": "menu-2026-08-21",
+    "title": "Nouveau menu",
+    "start_date": "2026-08-21",
     "end_date": "2026-08-31"
   },
   "items": {},

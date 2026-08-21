@@ -1,29 +1,54 @@
 {
   "current_menu": {
-    "id": "menu-2026-08-14",
+    "id": "menu-2026-08-21",
     "active": true,
-    "title": "Dernière semaine du menu réduit",
-    "description": "Dernière semaine du menu réduit avant les vacances. Merci de votre compréhension! Commandez au moins 72 heures à l’avance.",
-    "start_date": "2026-08-14",
+    "title": "Nouveau menu",
+    "description": "Découvrez cinq plats maison en formats Petit, Grand et Famille, ainsi que notre soupe, nos salades et nos sous-marins. Commandez au moins 72 heures à l’avance.",
+    "start_date": "2026-08-21",
     "end_date": "2026-08-31",
     "item_ids": [
-      "spaghetti-sauce-viande_20260814",
-      "poulet-beurre-riz_20260814",
-      "pizza-pepperoni-pain-naan_20260814",
-      "salade-repas-poulet-marine-legumes_20260814"
+      "rotini-alfredo-bacon_20260821",
+      "porc-general-tao-riz_20260821",
+      "poulet-marine-riz-legumes_20260821",
+      "riz-chinois-boeuf-legumes_20260821",
+      "lasagne-pepperoni-fromage_20260821"
     ],
     "extra_ids": [
-      "soupe-legumes_20260814",
-      "salade-chef_20260814",
-      "salade-cesar_20260814",
-      "salade-grecque_20260814",
-      "sous-marin-pizza_20260814",
-      "sous-marin-viandes-froides_20260814",
-      "sous-marin-poulet-bbq_20260814"
+      "soupe-legumes_20260821",
+      "salade-chef_20260821",
+      "salade-cesar_20260821",
+      "salade-grecque_20260821",
+      "sous-marin-pizza_20260821",
+      "sous-marin-viandes-froides_20260821",
+      "sous-marin-poulet-bbq_20260821"
     ],
     "promotion_ids": []
   },
   "archive": [
+    {
+      "id": "menu-2026-08-14",
+      "active": true,
+      "title": "Dernière semaine du menu réduit",
+      "description": "Dernière semaine du menu réduit avant les vacances. Merci de votre compréhension! Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-08-14",
+      "end_date": "2026-08-31",
+      "item_ids": [
+        "spaghetti-sauce-viande_20260814",
+        "poulet-beurre-riz_20260814",
+        "pizza-pepperoni-pain-naan_20260814",
+        "salade-repas-poulet-marine-legumes_20260814"
+      ],
+      "extra_ids": [
+        "soupe-legumes_20260814",
+        "salade-chef_20260814",
+        "salade-cesar_20260814",
+        "salade-grecque_20260814",
+        "sous-marin-pizza_20260814",
+        "sous-marin-viandes-froides_20260814",
+        "sous-marin-poulet-bbq_20260814"
+      ],
+      "promotion_ids": []
+    },
     {
       "id": "menu-2026-08-07",
       "active": true,
