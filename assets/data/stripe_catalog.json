@@ -11,10 +11,10 @@
     "menus_json": "assets/data/menus.json"
   },
   "menu": {
-    "id": "menu-2026-08-21",
-    "title": "Nouveau menu",
-    "start_date": "2026-08-21",
-    "end_date": "2026-08-31"
+    "id": "menu-2026-08-28",
+    "title": "Petit menu — semaine de réorganisation",
+    "start_date": "2026-08-28",
+    "end_date": "2026-09-03"
   },
   "items": {},
   "archived": {
