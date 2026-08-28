@@ -1,12 +1,12 @@
 {
   "seo": {
-    "title": "La cuisine de Rosalie | Nouveau menu",
-    "description": "Nouveau menu maison : cinq plats en trois formats, soupe, salades et sous-marins."
+    "title": "La cuisine de Rosalie | Petit menu — semaine de réorganisation",
+    "description": "Petit menu maison de la semaine : macaroni à la viande, pizza au jambon sur pitas, muffin, soupe, salades et sous-marins."
   },
   "home": {
     "headline": "La cuisine de Rosalie — fait maison",
-    "subheadline": "Découvrez le nouveau menu en formats Petit, Grand et Famille. Minimum de 35 $ et préparation de 72 h.",
-    "primary_cta": "Voir le nouveau menu",
+    "subheadline": "Découvrez notre petit menu de la semaine de réorganisation en formats Petit, Grand et Famille. Minimum de 35 $ et préparation de 72 h.",
+    "primary_cta": "Voir le menu de la semaine",
     "secondary_cta": "Nous contacter"
   },
   "business_rules_to_confirm": [

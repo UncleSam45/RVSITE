@@ -1,30 +1,53 @@
 {
   "current_menu": {
-    "id": "menu-2026-08-21",
+    "id": "menu-2026-08-28",
     "active": true,
-    "title": "Nouveau menu",
-    "description": "Découvrez cinq plats maison en formats Petit, Grand et Famille, ainsi que notre soupe, nos salades et nos sous-marins. Commandez au moins 72 heures à l’avance.",
-    "start_date": "2026-08-21",
-    "end_date": "2026-08-31",
+    "title": "Petit menu — semaine de réorganisation",
+    "description": "Cette semaine, profitez d’un petit menu maison en formats Petit, Grand et Famille, accompagné de notre dessert, de la soupe, des salades et des sous-marins. Commandez au moins 72 heures à l’avance.",
+    "start_date": "2026-08-28",
+    "end_date": "2026-09-03",
     "item_ids": [
-      "rotini-alfredo-bacon_20260821",
-      "porc-general-tao-riz_20260821",
-      "poulet-marine-riz-legumes_20260821",
-      "riz-chinois-boeuf-legumes_20260821",
-      "lasagne-pepperoni-fromage_20260821"
+      "macaroni-viande_20260828",
+      "pizza-jambon-pitas_20260828",
+      "muffin-pepites-chocolat_20260828"
     ],
     "extra_ids": [
-      "soupe-legumes_20260821",
-      "salade-chef_20260821",
-      "salade-cesar_20260821",
-      "salade-grecque_20260821",
-      "sous-marin-pizza_20260821",
-      "sous-marin-viandes-froides_20260821",
-      "sous-marin-poulet-bbq_20260821"
+      "soupe-legumes_20260828",
+      "salade-chef_20260828",
+      "salade-cesar_20260828",
+      "salade-grecque_20260828",
+      "sous-marin-pizza_20260828",
+      "sous-marin-viandes-froides_20260828",
+      "sous-marin-poulet-bbq_20260828"
     ],
     "promotion_ids": []
   },
   "archive": [
+    {
+      "id": "menu-2026-08-21",
+      "active": true,
+      "title": "Nouveau menu",
+      "description": "Découvrez cinq plats maison en formats Petit, Grand et Famille, ainsi que notre soupe, nos salades et nos sous-marins. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-08-21",
+      "end_date": "2026-08-31",
+      "item_ids": [
+        "rotini-alfredo-bacon_20260821",
+        "porc-general-tao-riz_20260821",
+        "poulet-marine-riz-legumes_20260821",
+        "riz-chinois-boeuf-legumes_20260821",
+        "lasagne-pepperoni-fromage_20260821"
+      ],
+      "extra_ids": [
+        "soupe-legumes_20260821",
+        "salade-chef_20260821",
+        "salade-cesar_20260821",
+        "salade-grecque_20260821",
+        "sous-marin-pizza_20260821",
+        "sous-marin-viandes-froides_20260821",
+        "sous-marin-poulet-bbq_20260821"
+      ],
+      "promotion_ids": []
+    },
     {
       "id": "menu-2026-08-14",
       "active": true,
