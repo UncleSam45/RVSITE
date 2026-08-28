@@ -7,9 +7,9 @@ import os
 import socket
 import subprocess
 import sys
-from contextlib import contextmanager
+import types
 from pathlib import Path
-from typing import Any, Iterable, Iterator
+from typing import Any, Iterable
 
 
 REQUIRED_PACKAGES = ["nicegui"]
@@ -134,31 +134,59 @@ def module_importable(module_name: str) -> bool:
     return result.returncode == 0
 
 
-@contextmanager
-def hide_module_from_discovery(module_name: str, *, enabled: bool) -> Iterator[None]:
-    """Temporarily make a broken optional module appear unavailable.
+def install_orjson_fallback() -> None:
+    """Provide the small orjson API used by NiceGUI and FastAPI.
 
-    NiceGUI can fall back to Python's standard JSON implementation when orjson
-    cannot be loaded. FastAPI, however, checks only whether orjson is installed
-    before importing it. Hiding a known-broken installation during framework
-    startup lets both libraries consistently select their supported fallback.
+    Windows Application Control can allow the Python package while blocking its
+    native DLL. FastAPI detects the installed package and imports it even after
+    NiceGUI has caught that DLL error, so merely hiding it from ``find_spec`` is
+    not reliable. A module backed by the standard library keeps the optional
+    acceleration disabled without preventing the application from starting.
     """
-    if not enabled:
-        yield
-        return
+    fallback = types.ModuleType("orjson")
+    fallback.__spec__ = importlib.util.spec_from_loader("orjson", loader=None)
+    fallback.__version__ = "standard-library-fallback"
 
-    original_find_spec = importlib.util.find_spec
+    # These flags are combined by NiceGUI and FastAPI. JSON's encoder already
+    # handles non-string primitive keys; unsupported acceleration-only flags can
+    # safely be no-ops for the data sent by this application.
+    for name, value in {
+        "OPT_APPEND_NEWLINE": 1,
+        "OPT_INDENT_2": 2,
+        "OPT_NAIVE_UTC": 4,
+        "OPT_NON_STR_KEYS": 8,
+        "OPT_OMIT_MICROSECONDS": 16,
+        "OPT_PASSTHROUGH_DATACLASS": 32,
+        "OPT_PASSTHROUGH_DATETIME": 64,
+        "OPT_PASSTHROUGH_SUBCLASS": 128,
+        "OPT_SERIALIZE_DATACLASS": 256,
+        "OPT_SERIALIZE_NUMPY": 512,
+        "OPT_SERIALIZE_UUID": 1024,
+        "OPT_SORT_KEYS": 2048,
+        "OPT_STRICT_INTEGER": 4096,
+        "OPT_UTC_Z": 8192,
+    }.items():
+        setattr(fallback, name, value)
 
-    def find_spec_without_broken_module(name: str, package: str | None = None):
-        if name == module_name:
-            return None
-        return original_find_spec(name, package)
+    def dumps(value: Any, *, default: Any = None, option: int | None = None) -> bytes:
+        option = option or 0
+        result = json.dumps(
+            value,
+            default=default,
+            ensure_ascii=False,
+            indent=2 if option & fallback.OPT_INDENT_2 else None,
+            sort_keys=bool(option & fallback.OPT_SORT_KEYS),
+            separators=None if option & fallback.OPT_INDENT_2 else (",", ":"),
+        )
+        if option & fallback.OPT_APPEND_NEWLINE:
+            result += "\n"
+        return result.encode("utf-8")
 
-    importlib.util.find_spec = find_spec_without_broken_module
-    try:
-        yield
-    finally:
-        importlib.util.find_spec = original_find_spec
+    fallback.dumps = dumps
+    fallback.loads = json.loads
+    fallback.JSONEncodeError = TypeError
+    fallback.JSONDecodeError = json.JSONDecodeError
+    sys.modules["orjson"] = fallback
 
 
 def ensure_frontend_assets() -> None:
@@ -212,10 +240,10 @@ def build_ui(port: int) -> None:
             "[warning] orjson is installed but cannot be loaded; "
             "using the standard-library JSON fallback."
         )
+        install_orjson_fallback()
 
-    with hide_module_from_discovery("orjson", enabled=not orjson_works):
-        from nicegui import app, ui
-        from fastapi import Request
+    from nicegui import app, ui
+    from fastapi import Request
 
     @app.post("/__frontend-console")
     async def receive_frontend_console(request: Request) -> dict[str, bool]:
