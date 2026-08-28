@@ -7,8 +7,9 @@ import os
 import socket
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Iterator
 
 
 REQUIRED_PACKAGES = ["nicegui"]
@@ -122,6 +123,44 @@ def ensure_dependencies(packages: Iterable[str]) -> None:
             print(f"[setup] Dependency already available: {package}")
 
 
+def module_importable(module_name: str) -> bool:
+    """Check an optional binary module without risking the launcher process."""
+    result = subprocess.run(
+        [sys.executable, "-c", f"import {module_name}"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+@contextmanager
+def hide_module_from_discovery(module_name: str, *, enabled: bool) -> Iterator[None]:
+    """Temporarily make a broken optional module appear unavailable.
+
+    NiceGUI can fall back to Python's standard JSON implementation when orjson
+    cannot be loaded. FastAPI, however, checks only whether orjson is installed
+    before importing it. Hiding a known-broken installation during framework
+    startup lets both libraries consistently select their supported fallback.
+    """
+    if not enabled:
+        yield
+        return
+
+    original_find_spec = importlib.util.find_spec
+
+    def find_spec_without_broken_module(name: str, package: str | None = None):
+        if name == module_name:
+            return None
+        return original_find_spec(name, package)
+
+    importlib.util.find_spec = find_spec_without_broken_module
+    try:
+        yield
+    finally:
+        importlib.util.find_spec = original_find_spec
+
+
 def ensure_frontend_assets() -> None:
     if not JS_FILE.exists():
         JS_FILE.write_text(STARTER_JS, encoding="utf-8")
@@ -167,8 +206,16 @@ def format_frontend_console_message(payload: Any, client_host: str | None) -> st
 
 
 def build_ui(port: int) -> None:
-    from nicegui import app, ui
-    from fastapi import Request
+    orjson_works = module_importable("orjson")
+    if not orjson_works and module_installed("orjson"):
+        print(
+            "[warning] orjson is installed but cannot be loaded; "
+            "using the standard-library JSON fallback."
+        )
+
+    with hide_module_from_discovery("orjson", enabled=not orjson_works):
+        from nicegui import app, ui
+        from fastapi import Request
 
     @app.post("/__frontend-console")
     async def receive_frontend_console(request: Request) -> dict[str, bool]:

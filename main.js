@@ -11,6 +11,9 @@
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
   const APP_RELEASE = '20260816-checkout-cart-reset-v10';
+  // main.js is always revalidated by the host, so this value changes on every
+  // page load. Use it for replace-in-place assets whose filename stays stable.
+  const STATIC_ASSET_VERSION = Date.now();
   async function clearLegacyBrowserCaches() {
     let removedController = false;
     try {
@@ -43,6 +46,12 @@
   function localAssetPath(path) {
     if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path;
     return `${STATIC_ASSET_BASE}${path}`;
+  }
+
+  function freshLocalAssetPath(path) {
+    const assetPath = localAssetPath(path);
+    const separator = assetPath.includes('?') ? '&' : '?';
+    return `${assetPath}${separator}v=${STATIC_ASSET_VERSION}`;
   }
 
   const CART_STORAGE_KEY = 'lacuisine_rosalie_cart_v2';
@@ -923,7 +932,10 @@
     const zones = getEnabledZones().map((zone) => zone.city).join(', ');
     const heroItems = getCurrentMenuImageItems();
     const activeHeroItem = heroItems.length ? heroItems[state.carousel.index % heroItems.length] : null;
-    const heroImage = localAssetPath('assets/images/items/MENU.png');
+    // MENU.png is deliberately replaced in place by the weekly publishing
+    // workflow. Give each page load a fresh URL so browser and CDN image caches
+    // cannot keep showing the previous week's menu.
+    const heroImage = freshLocalAssetPath('assets/images/items/MENU.png');
     const heroImageFallback = itemImagePath(activeHeroItem, 'hero') || state.data.content.home?.hero_image || localAssetPath('banner.png');
     const orderWindow = getWeeklyOrderWindow();
     return `

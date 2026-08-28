@@ -16,6 +16,10 @@
 /assets/data/*
   Cache-Control: no-cache, no-store, must-revalidate
 
+# The weekly menu image is replaced in place and must be revalidated immediately.
+/assets/images/items/MENU.png
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+
 # Image assets can be cached by the browser/CDN; replace filenames when changing an image.
 /assets/images/*
   Cache-Control: public, max-age=604800
