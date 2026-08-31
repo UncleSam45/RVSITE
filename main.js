@@ -10,7 +10,7 @@
   };
 
   const STATIC_ASSET_BASE = (document.currentScript?.getAttribute('src') || '').includes('/static/') ? '/static/' : '';
-  const APP_RELEASE = '20260816-checkout-cart-reset-v10';
+  const APP_RELEASE = '20260830-ux-reliability-v11';
   // main.js is always revalidated by the host, so this value changes on every
   // page load. Use it for replace-in-place assets whose filename stays stable.
   const STATIC_ASSET_VERSION = Date.now();
@@ -90,6 +90,7 @@
     lastAddedKey: '',
     dateMessage: '',
     checkoutSuccess: false,
+    checkoutLoading: false,
     carousel: { index: 0, timer: null, paused: false, touchStartX: 0 },
     countdownTimer: null,
     promotion: { open: false, selecting: false },
@@ -731,6 +732,7 @@
   }
 
   async function checkout() {
+    if (state.checkoutLoading) return;
     const errors = validateOrder();
     if (errors.length) {
       showToast(errors[0]);
@@ -738,10 +740,14 @@
       return;
     }
     const payload = buildCheckoutPayload();
+    state.checkoutLoading = true;
+    render();
     try {
       const checkoutUrl = await requestCheckoutSession(payload);
       window.location.assign(checkoutUrl);
     } catch (error) {
+      state.checkoutLoading = false;
+      render();
       showToast(error.message || 'Impossible de créer la session de paiement.');
       console.warn('Erreur de paiement:', error, payload);
     }
@@ -1078,7 +1084,7 @@
         <section class="card step"><h2><span class="step-number">2</span>Livraison</h2>${deliveryInfoHtml()}${dateSelectorHtml()}${deliveryPreferencesHtml()}</section>
         <section class="card step"><h2><span class="step-number">3</span>Coordonnées</h2>${customerFormHtml()}</section>
       </div>
-      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">Commande prête pour le paiement sécurisé.</div>`}<button class="btn btn-primary" data-checkout ${errors.length ? 'disabled' : ''} style="width:100%;margin-top:12px">Passer au paiement sécurisé</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
+      <aside class="card cart-panel checkout-confirmation"><h2>Confirmation</h2>${checkoutDeliverySummaryHtml()}<div class="summary-row"><span>Total</span><span>${formatCurrency(totals.subtotal)}</span></div>${errors.length ? `<div class="notice">${errors.map(escapeHtml).join('<br>')}</div>` : `<div class="notice success-note">${state.checkoutLoading ? 'Connexion au paiement sécurisé…' : 'Commande prête pour le paiement sécurisé.'}</div>`}<button class="btn btn-primary" data-checkout ${(errors.length || state.checkoutLoading) ? 'disabled' : ''} aria-busy="${state.checkoutLoading ? 'true' : 'false'}" style="width:100%;margin-top:12px">${state.checkoutLoading ? 'Ouverture de Stripe…' : 'Passer au paiement sécurisé'}</button><p class="line-meta">Vous serez redirigé vers un paiement sécurisé. Aucune information de carte n’est conservée sur ce site.</p></aside>
     </div>`;
   }
 
@@ -1698,5 +1704,13 @@
     render();
   }
 
-  window.addEventListener('DOMContentLoaded', init);
+  function renderStartupError(error) {
+    console.error('[La cuisine de Rosalie] Échec du démarrage:', error);
+    const root = document.getElementById('webframe-root');
+    if (!root) return;
+    root.innerHTML = `<main class="container" style="padding:32px 16px"><section class="panel" role="alert"><div class="kicker">Connexion interrompue</div><h1 class="page-title" style="font-size:clamp(2rem,5vw,3.5rem)">La page n’a pas pu charger</h1><p>Vérifiez votre connexion, puis réessayez. Votre panier enregistré sur cet appareil est conservé.</p><button class="btn btn-primary" type="button" data-retry>Réessayer</button></section></main>`;
+    root.querySelector('[data-retry]')?.addEventListener('click', () => window.location.reload());
+  }
+
+  window.addEventListener('DOMContentLoaded', () => init().catch(renderStartupError));
 })();
