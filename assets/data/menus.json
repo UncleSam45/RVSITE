@@ -5,7 +5,7 @@
     "title": "Petit menu — semaine de réorganisation",
     "description": "Cette semaine, profitez d’un petit menu maison en formats Petit, Grand et Famille, accompagné de notre dessert, de la soupe, des salades et des sous-marins. Commandez au moins 72 heures à l’avance.",
     "start_date": "2026-08-28",
-    "end_date": "2026-09-03",
+    "end_date": "2026-09-01",
     "item_ids": [
       "macaroni-viande_20260828",
       "pizza-jambon-pitas_20260828",
@@ -89,6 +89,29 @@
         "soupe-poulet-nouilles_20260807",
         "salade-grecque_20260807",
         "sous-marin-jambon-fromage_20260807"
+      ],
+      "promotion_ids": []
+    },
+    {
+      "id": "menu-2026-08-28",
+      "active": true,
+      "title": "Petit menu — semaine de réorganisation",
+      "description": "Cette semaine, profitez d’un petit menu maison en formats Petit, Grand et Famille, accompagné de notre dessert, de la soupe, des salades et des sous-marins. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-08-28",
+      "end_date": "2026-09-03",
+      "item_ids": [
+        "macaroni-viande_20260828",
+        "pizza-jambon-pitas_20260828",
+        "muffin-pepites-chocolat_20260828"
+      ],
+      "extra_ids": [
+        "soupe-legumes_20260828",
+        "salade-chef_20260828",
+        "salade-cesar_20260828",
+        "salade-grecque_20260828",
+        "sous-marin-pizza_20260828",
+        "sous-marin-viandes-froides_20260828",
+        "sous-marin-poulet-bbq_20260828"
       ],
       "promotion_ids": []
     }
