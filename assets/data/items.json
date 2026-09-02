@@ -36,7 +36,7 @@
       "id": "muffin-pepites-chocolat_20260828",
       "title": "Poulet parmesan",
       "description": "Préparé maison avec soin.",
-      "category": "Les desserts",
+      "category": "Les plats",
       "available": true,
       "featured": false,
       "image": "",
@@ -148,7 +148,7 @@
     },
     {
       "title": "Porc à la Grecque avec patates cubes",
-      "description": "",
+      "description": "Préparé maison avec soin.",
       "category": "Plats",
       "pricing": {
         "petit": 8,
@@ -161,7 +161,7 @@
     },
     {
       "title": "Nouilles sauté aux légumes",
-      "description": "",
+      "description": "Préparé maison avec soin.",
       "category": "Plats",
       "pricing": {
         "petit": 8,
