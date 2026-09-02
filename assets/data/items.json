@@ -2,7 +2,7 @@
   "items": [
     {
       "id": "macaroni-viande_20260828",
-      "title": "Macaroni à la viande",
+      "title": "Macaroni Fromage bacon",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
       "available": true,
@@ -18,7 +18,7 @@
     },
     {
       "id": "pizza-jambon-pitas_20260828",
-      "title": "Pizza au jambon sur pitas",
+      "title": "Pâté chinois",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
       "available": true,
@@ -34,7 +34,7 @@
     },
     {
       "id": "muffin-pepites-chocolat_20260828",
-      "title": "Muffin aux pépites de chocolat",
+      "title": "Poulet parmesan",
       "description": "Préparé maison avec soin.",
       "category": "Les desserts",
       "available": true,
@@ -64,7 +64,7 @@
     },
     {
       "id": "salade-chef_20260828",
-      "title": "Salade chef",
+      "title": "Salade mexicaine ",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
       "available": true,
@@ -78,14 +78,14 @@
     },
     {
       "id": "salade-cesar_20260828",
-      "title": "Salade César",
+      "title": "Salade thon",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "standard": 5
+        "standard": 7
       },
       "tags": [],
       "showcase": false
@@ -145,6 +145,76 @@
       },
       "tags": [],
       "showcase": false
+    },
+    {
+      "title": "Porc à la Grecque avec patates cubes",
+      "description": "",
+      "category": "Plats",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "available": true,
+      "featured": false,
+      "id": "porc-a-la-grecque-avec-patates-cubes_20260902"
+    },
+    {
+      "title": "Nouilles sauté aux légumes",
+      "description": "",
+      "category": "Plats",
+      "pricing": {
+        "petit": 8,
+        "grand": 12,
+        "familial": 23
+      },
+      "available": true,
+      "featured": false,
+      "id": "nouilles-saute-aux-legumes_20260902"
+    },
+    {
+      "title": "Collation raisin fromage",
+      "description": "",
+      "category": "Collation",
+      "pricing": {
+        "standard": 5
+      },
+      "available": true,
+      "featured": false,
+      "id": "collation-raisin-fromage_20260902"
+    },
+    {
+      "title": "Collation céleri fromage à la crème",
+      "description": "",
+      "category": "Collation",
+      "pricing": {
+        "standard": 5
+      },
+      "available": true,
+      "featured": false,
+      "id": "collation-celeri-fromage-a-la-creme_20260902"
+    },
+    {
+      "title": "Collation carottes brocolis trempette maison",
+      "description": "",
+      "category": "Collation",
+      "pricing": {
+        "standard": 5
+      },
+      "available": true,
+      "featured": false,
+      "id": "collation-carottes-brocolis-trempette-maison_20260902"
+    },
+    {
+      "title": "Collation bleuets yogourt grecque",
+      "description": "",
+      "category": "Collation",
+      "pricing": {
+        "standard": 6
+      },
+      "available": true,
+      "featured": false,
+      "id": "collation-bleuets-yogourt-grecque_20260902"
     }
   ]
 }
