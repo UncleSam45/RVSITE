@@ -1,7 +1,7 @@
 const STRIPE_CHECKOUT_URL = 'https://api.stripe.com/v1/checkout/sessions';
 const STRIPE_PRICES_URL = 'https://api.stripe.com/v1/prices';
 const DEFAULT_CURRENCY = 'cad';
-const WORKER_VERSION = 'stripe-direct-v8';
+const WORKER_VERSION = 'stripe-direct-v9';
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
@@ -31,8 +31,9 @@ async function createCheckoutSession(request, env) {
   const payload = await readJsonBody(request);
   const origin = getPublicSiteOrigin(request, env);
   const catalog = await loadCheckoutCatalog(env);
-  const order = validateCatalogOrder(payload, catalog);
-  const lineItems = buildStripeLineItems(order.lines, catalog, { settings: { ordering: { currency: catalog.currency || DEFAULT_CURRENCY } } }, env);
+  const site = loadSiteData(env);
+  const order = validateOrder(payload, site);
+  const lineItems = buildStripeLineItems(order.lines, catalog, site, env);
   const orderId = makeOrderId();
   const form = new URLSearchParams();
   form.set('mode', 'payment');
@@ -56,7 +57,7 @@ async function createCheckoutSession(request, env) {
     form.set(`line_items[${index}][quantity]`, String(line.quantity));
   });
 
-  const metadata = buildMetadata(orderId, order, { settings: { business: { name: env.BUSINESS_NAME || 'La cuisine de Rosalie' } } });
+  const metadata = buildMetadata(orderId, order, site);
   for (const [key, value] of Object.entries(metadata)) {
     form.set(`metadata[${key}]`, truncateMetadata(value));
     form.set(`payment_intent_data[metadata][${key}]`, truncateMetadata(value));
@@ -108,24 +109,12 @@ async function loadCheckoutCatalog(env) {
   return catalog;
 }
 
-function validateCatalogOrder(payload, catalog) {
-  if (!payload || !Array.isArray(payload.items) || !payload.items.length) throw publicError('Le panier est vide.', 400);
-  if (payload.items.length > 50) throw publicError('Le panier ne peut pas contenir plus de 50 articles.', 400);
-  const customer = normalizeCustomer(payload.customer || {});
-  if (!customer.name || !customer.phone || !customer.street_number || !customer.street_name || !customer.city) throw publicError('Les coordonnées de livraison sont incomplètes.', 400);
-  if (customer.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(customer.email)) throw publicError('Le courriel est invalide.', 400);
-  const deliveryDate = normalizeIsoDate(payload.delivery_date);
-  const deliveryWindow1 = clean(payload.delivery_window_1);
-  const deliveryWindow2 = clean(payload.delivery_window_2);
-  if (!deliveryDate || !deliveryWindow1 || !deliveryWindow2 || deliveryWindow1 === deliveryWindow2) throw publicError('Les informations de livraison sont invalides.', 400);
-  const lines = payload.items.map((raw) => {
-    const itemId = clean(raw?.item_id); const portion = clean(raw?.portion); const qty = strictInt(raw?.qty, 1, 99);
-    const entry = catalog?.items?.[itemId]; const price = findCatalogPrice(catalog, itemId, portion);
-    if (!price?.priceId) throw publicError(`Prix Stripe introuvable pour ${entry?.title || itemId} / ${PORTION_LABELS[portion] || portion}.`, 409);
-    return { itemId, portion, portionLabel: PORTION_LABELS[portion] || portion, qty, unitAmount: price.unitAmount || 0, item: { title: entry?.title || itemId } };
-  });
-  const paidSubtotalCents = lines.reduce((sum, line) => sum + line.unitAmount * line.qty, 0);
-  return { lines, paidSubtotalCents, subtotalCents: paidSubtotalCents, customer, deliveryDate, deliveryWindow1, deliveryWindow2, coolerAvailable: payload.cooler_available === true, deliveryInstructions: clean(payload.delivery_instructions) };
+function loadSiteData(env) {
+  let site = env.PUBLIC_SITE_DATA;
+  if (typeof site === 'string') { try { site = JSON.parse(site); } catch { throw publicError('PUBLIC_SITE_DATA est invalide.', 500); } }
+  if (!site?.settings || !site?.menus || !site?.items || !site?.delivery) throw publicError('Configuration publique de commande manquante.', 503);
+  if (!Array.isArray(site.delivery.fulfillment_options) || !site.delivery.delivery_policy?.version) throw publicError('Configuration de livraison incomplète.', 503);
+  return site;
 }
 
 async function readJsonBody(request) {
@@ -151,12 +140,11 @@ export function validateOrder(payload, site, now = new Date()) {
   ].map(String));
   const allItems = Array.isArray(site.items?.items) ? site.items.items : [];
   const itemById = new Map(allItems.map((item) => [String(item.id || ''), item]));
+  const fulfillment = resolveFulfillment(payload, site.delivery);
   const customer = normalizeCustomer(payload.customer || {});
-  validateCustomer(customer, site.delivery);
+  validateCustomer(customer, site.delivery, fulfillment.requiresAddress);
   const deliveryDate = normalizeIsoDate(payload.delivery_date);
-  const deliveryWindow1 = clean(payload.delivery_window_1);
-  const deliveryWindow2 = clean(payload.delivery_window_2);
-  validateDelivery(deliveryDate, deliveryWindow1, deliveryWindow2, site);
+  validateDeliveryDate(deliveryDate, site);
 
   const lines = [];
   let paidSubtotalCents = 0;
@@ -180,8 +168,8 @@ export function validateOrder(payload, site, now = new Date()) {
   if (paidSubtotalCents < Math.round(minimum * 100)) throw publicError(`Minimum de commande: ${minimum.toFixed(2)} $.`, 400);
   return {
     lines, subtotalCents: paidSubtotalCents, paidSubtotalCents,
-    customer, deliveryDate, deliveryWindow1, deliveryWindow2,
-    coolerAvailable: payload.cooler_available === true,
+    customer, deliveryDate, fulfillment,
+    coolerAvailable: fulfillment.type === 'delivery' && payload.cooler_available === true,
     deliveryInstructions: clean(payload.delivery_instructions),
   };
 }
@@ -198,12 +186,21 @@ function validateMenuOrderingWindow(menu, now = new Date()) {
   if (!open) throw publicError('Les commandes sont ouvertes du vendredi à 1 h au mercredi à midi (heure de Montréal).', 400);
 }
 
-function validateDelivery(date, window1, window2, site) {
-  validateDeliveryDate(date, site);
-  if (!window1 || !window2) throw publicError('Veuillez choisir deux plages horaires de livraison.', 400);
-  if (window1 === window2) throw publicError('Veuillez choisir deux plages horaires différentes.', 400);
-  const allowed = Array.isArray(site.delivery?.delivery_windows) ? site.delivery.delivery_windows.map(clean) : [];
-  if (allowed.length && (!allowed.includes(window1) || !allowed.includes(window2))) throw publicError('Une plage horaire de livraison est invalide.', 400);
+function resolveFulfillment(payload, delivery) {
+  const policyVersion = clean(delivery?.delivery_policy?.version);
+  const hasLegacy = !payload.fulfillment_option_id && (payload.delivery_window_1 || payload.delivery_window_2);
+  let id = clean(payload.fulfillment_option_id);
+  if (id && (payload.delivery_window_1 || payload.delivery_window_2)) throw publicError('Choisissez exactement un mode de livraison ou de ramassage.', 400);
+  if (hasLegacy) {
+    const legacy = clean(payload.delivery_window_1);
+    id = /17\s*h.*19/i.test(legacy) ? 'delivery_17_19' : /16\s*h.*18/i.test(legacy) ? 'delivery_16_18' : 'delivery_flexible_day';
+  }
+  if (!id) throw publicError('Veuillez choisir un mode de livraison ou de ramassage.', 400);
+  if (!/^[a-z0-9_]+$/.test(id)) throw publicError('Le mode de livraison ou de ramassage est invalide.', 400);
+  const option = delivery.fulfillment_options.find((entry) => clean(entry?.id) === id);
+  if (!option || option.enabled === false || !['delivery', 'pickup'].includes(option.type) || typeof option.label !== 'string') throw publicError('Le mode de livraison ou de ramassage est inconnu ou indisponible.', 400);
+  if (!hasLegacy && (payload.delivery_policy_accepted !== true || clean(payload.delivery_policy_version) !== policyVersion)) throw publicError('Vous devez accepter la politique de livraison en vigueur.', 400);
+  return { id, type: option.type, label: clean(option.label), requiresAddress: option.requires_address === true, policyVersion };
 }
 
 function validateDeliveryDate(dateIso, site) {
@@ -215,10 +212,11 @@ function validateDeliveryDate(dateIso, site) {
   if (WEEKEND_DAYS.has(WEEKDAYS[date.getUTCDay()])) throw publicError('La livraison n’est pas offerte les samedis et dimanches.', 400);
 }
 
-function validateCustomer(customer, delivery) {
+function validateCustomer(customer, delivery, requiresAddress) {
   if (!customer.name) throw publicError('Le nom complet est requis.', 400);
   if (!customer.phone) throw publicError('Le téléphone est requis.', 400);
   if (customer.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(customer.email)) throw publicError('Le courriel est invalide.', 400);
+  if (!requiresAddress) { customer.street_number = ''; customer.street_name = ''; customer.apartment = ''; customer.city = ''; customer.postal_code = ''; return; }
   if (!customer.street_number || !customer.street_name) throw publicError('L’adresse de livraison est requise.', 400);
   if (!customer.city) throw publicError('La ville est requise.', 400);
   const cities = (Array.isArray(delivery?.zones) ? delivery.zones : []).filter((z) => z.enabled !== false).map((z) => clean(z.city).toLowerCase()).filter(Boolean);
@@ -273,7 +271,8 @@ function buildMetadata(orderId, order, site) {
   const summary = order.lines.map((line) => `${line.qty}x ${line.item.title || line.itemId} (${line.portionLabel})`).join('; ');
   return {
     order_id: orderId, project: 'rvsite', business: site.settings?.business?.name || 'La cuisine de Rosalie',
-    delivery_date: order.deliveryDate, delivery_window_1: order.deliveryWindow1, delivery_window_2: order.deliveryWindow2,
+    fulfillment_type: order.fulfillment.type, fulfillment_option_id: order.fulfillment.id, fulfillment_label: order.fulfillment.label,
+    delivery_date: order.deliveryDate, delivery_policy_version: order.fulfillment.policyVersion,
     cooler_available: order.coolerAvailable ? 'Oui' : 'Non', delivery_instructions: order.deliveryInstructions,
     customer_name: customer.name, customer_phone: customer.phone, customer_email: customer.email || '',
     delivery_city: customer.city, delivery_address: address, order_summary: summary,
