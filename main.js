@@ -718,7 +718,7 @@
         if (response.ok && data.checkout_url) return data.checkout_url;
         const legacyWorker = /Impossible de charger les données de commande|assets\/data\/settings\.json/i.test(data.error || '');
         const message = legacyWorker
-          ? 'L’ancienne version du service de paiement répond encore sur ce domaine. Vérifiez la route Cloudflare de /api/create-checkout-session (version attendue: stripe-direct-v9).'
+          ? 'L’ancienne version du service de paiement répond encore sur ce domaine. Vérifiez la route Cloudflare de /api/create-checkout-session (version attendue: stripe-direct-v10).'
           : data.error || `Session Stripe indisponible (${response.status}).`;
         lastError = new Error(message);
         // A previously deployed checkout Worker may still enforce the retired

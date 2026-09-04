@@ -26,13 +26,23 @@ const order = validate();
 const catalog = { currency: 'cad', items: { paid: { prices: { familial: { price_id: 'price_paid', amount: 23 } } } } };
 assert.deepEqual(buildStripeLineItems(order.lines, catalog, site, {}), [{ price: 'price_paid', quantity: 4 }]);
 let checkoutForm; const originalFetch = globalThis.fetch;
-globalThis.fetch = async (_input, init) => { checkoutForm = new URLSearchParams(init.body); return Response.json({ id: 'cs_test_ok', url: 'https://checkout.stripe.test/session' }); };
+globalThis.fetch = async (input, init) => {
+  const url = String(input);
+  const published = { settings: site.settings, menus: site.menus, items: site.items, delivery: site.delivery };
+  const match = url.match(/\/assets\/data\/(settings|menus|items|delivery)\.json$/);
+  if (match) return Response.json(published[match[1]]);
+  checkoutForm = new URLSearchParams(init.body);
+  return Response.json({ id: 'cs_test_ok', url: 'https://checkout.stripe.test/session' });
+};
 try {
   const env = { STRIPE_SECRET_KEY: 'sk_test_example', PUBLIC_SITE_DATA: site, STRIPE_CATALOG: catalog };
   const response = await worker.fetch(new Request('https://example.test/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(base) }), env);
-  assert.equal(response.status, 200); assert.equal(response.headers.get('X-Checkout-Worker-Version'), 'stripe-direct-v9');
+  assert.equal(response.status, 200); assert.equal(response.headers.get('X-Checkout-Worker-Version'), 'stripe-direct-v10');
   assert.equal(checkoutForm.get('metadata[fulfillment_option_id]'), 'delivery_flexible_day'); assert.equal(checkoutForm.has('metadata[delivery_window_1]'), false);
-  const missing = await worker.fetch(new Request('https://example.test/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(base) }), { STRIPE_SECRET_KEY: 'sk_test_example', STRIPE_CATALOG: catalog }); assert.equal(missing.status, 503);
-  assert.equal((await (await worker.fetch(new Request('https://example.test/api/health'), env)).json()).version, 'stripe-direct-v9');
+  // The standalone production Worker has no Pages import binding. It must load
+  // the authoritative published JSON instead of returning the regression 503.
+  const standalone = await worker.fetch(new Request('https://example.test/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(base) }), { STRIPE_SECRET_KEY: 'sk_test_example', STRIPE_CATALOG: catalog });
+  assert.equal(standalone.status, 200);
+  assert.equal((await (await worker.fetch(new Request('https://example.test/api/health'), env)).json()).version, 'stripe-direct-v10');
 } finally { globalThis.fetch = originalFetch; }
 console.log('full worker fulfillment tests passed');

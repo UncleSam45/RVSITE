@@ -1,7 +1,7 @@
 const STRIPE_CHECKOUT_URL = 'https://api.stripe.com/v1/checkout/sessions';
 const STRIPE_PRICES_URL = 'https://api.stripe.com/v1/prices';
 const DEFAULT_CURRENCY = 'cad';
-const WORKER_VERSION = 'stripe-direct-v9';
+const WORKER_VERSION = 'stripe-direct-v10';
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
@@ -31,7 +31,7 @@ async function createCheckoutSession(request, env) {
   const payload = await readJsonBody(request);
   const origin = getPublicSiteOrigin(request, env);
   const catalog = await loadCheckoutCatalog(env);
-  const site = loadSiteData(env);
+  const site = await loadSiteData(request, env);
   const order = validateOrder(payload, site);
   const lineItems = buildStripeLineItems(order.lines, catalog, site, env);
   const orderId = makeOrderId();
@@ -109,10 +109,29 @@ async function loadCheckoutCatalog(env) {
   return catalog;
 }
 
-function loadSiteData(env) {
+async function loadSiteData(request, env) {
   let site = env.PUBLIC_SITE_DATA;
   if (typeof site === 'string') { try { site = JSON.parse(site); } catch { throw publicError('PUBLIC_SITE_DATA est invalide.', 500); } }
-  if (!site?.settings || !site?.menus || !site?.items || !site?.delivery) throw publicError('Configuration publique de commande manquante.', 503);
+  // Pages Functions inject PUBLIC_SITE_DATA through the adapter, while the
+  // independently deployed checkout Worker cannot import repository JSON.
+  // Load the same published files in that deployment instead of taking the
+  // storefront down when the optional binding is absent.
+  if (!site) {
+    const origin = getPublicSiteOrigin(request, env);
+    const paths = ['settings', 'menus', 'items', 'delivery'];
+    try {
+      const responses = await Promise.all(paths.map((name) => fetch(`${origin}/assets/data/${name}.json`, {
+        headers: { Accept: 'application/json' }, cf: { cacheTtl: 60, cacheEverything: true },
+      })));
+      if (responses.some((response) => !response.ok)) throw new Error(`HTTP ${responses.map((response) => response.status).join('/')}`);
+      const documents = await Promise.all(responses.map((response) => response.json()));
+      site = Object.fromEntries(paths.map((name, index) => [name, documents[index]]));
+    } catch (error) {
+      console.error('Public site data loading failed:', error);
+      throw publicError('La configuration de commande est temporairement indisponible. Veuillez réessayer.', 503);
+    }
+  }
+  if (!site?.settings || !site?.menus || !site?.items || !site?.delivery) throw publicError('Configuration publique de commande incomplète.', 503);
   if (!Array.isArray(site.delivery.fulfillment_options) || !site.delivery.delivery_policy?.version) throw publicError('Configuration de livraison incomplète.', 503);
   return site;
 }
