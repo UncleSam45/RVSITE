@@ -67,6 +67,9 @@ const nestedDeliveryOrder = {
 };
 assert.deepEqual(normalizeDelivery(nestedDeliveryOrder), {
   date: '2026-08-14',
+  type: '',
+  optionId: '',
+  label: '13h à 15h / 17h à 19h',
   window1: '13h à 15h',
   window2: '17h à 19h',
   address: '10 Principale Contrecoeur Québec J0L 1C0',
@@ -97,6 +100,11 @@ assert.match(html, /Allô Marie/);
 assert.match(html, /66,00/);
 assert.match(html, /&lt;Penne rosée&gt;/);
 assert.doesNotMatch(html, /<Penne rosée>/);
+
+const pickupOrder = { ...order, fulfillment_type: 'pickup', fulfillment_option_id: 'pickup_vercheres_after_19', fulfillment_label: 'Ramassage à Verchères après 19 h' };
+assert.equal(normalizeDelivery(pickupOrder).address, '');
+assert.match(renderConfirmationEmail(pickupOrder, session, template), /Ramassage à Verchères après 19 h/);
+
 const nestedHtml = renderConfirmationEmail(nestedDeliveryOrder, session, {
   ...template,
   delivery_message: '{{delivery_date}} — {{delivery_window_1}} / {{delivery_window_2}} — {{delivery_address}}',
