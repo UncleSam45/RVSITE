@@ -32,9 +32,20 @@
     "free_delivery_threshold": 35,
     "scheduling_note": "La livraison est planifiée avec le client."
   },
-  "delivery_windows": [
-    "13h à 15h",
-    "15h à 17h",
-    "17h à 19h"
+  "delivery_policy": {
+    "version": "2026-09-04",
+    "title": "Politique de livraison",
+    "body": [
+      "Lors de la livraison, une plage horaire est convenue à l’avance. Si vous êtes absent(e) au moment convenu, votre commande devra être récupérée le lendemain à Verchères.",
+      "En cas de doute sur votre disponibilité, nous vous recommandons fortement l’option glacière, qui permet de préserver la fraîcheur de vos plats même en votre absence."
+    ],
+    "acknowledgement_required": true,
+    "acknowledgement_label": "J’ai lu et compris les modalités de livraison ou de ramassage."
+  },
+  "fulfillment_options": [
+    { "id": "delivery_flexible_day", "type": "delivery", "label": "Option flexible — disponible toute la journée", "requires_address": true, "enabled": true },
+    { "id": "delivery_16_18", "type": "delivery", "label": "16 h à 18 h", "requires_address": true, "enabled": true },
+    { "id": "delivery_17_19", "type": "delivery", "label": "17 h à 19 h", "requires_address": true, "enabled": true },
+    { "id": "pickup_vercheres_after_19", "type": "pickup", "label": "Ramassage à Verchères après 19 h", "requires_address": false, "enabled": true }
   ]
 }

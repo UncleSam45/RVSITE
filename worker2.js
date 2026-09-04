@@ -337,11 +337,15 @@ function customerName(order, session) { return clean(order.customer?.name || ord
 export function normalizeDelivery(order) {
   const customer = order.customer || {};
   const delivery = order.delivery || {};
+  const legacyLabel = [delivery.window_1 || order.delivery_window_1, delivery.window_2 || order.delivery_window_2].filter(Boolean).join(' / ');
   return {
     date: delivery.date || order.delivery_date || '',
+    type: delivery.fulfillment_type || order.fulfillment_type || '',
+    optionId: delivery.fulfillment_option_id || order.fulfillment_option_id || '',
+    label: delivery.fulfillment_label || order.fulfillment_label || legacyLabel,
     window1: delivery.window_1 || order.delivery_window_1 || '',
     window2: delivery.window_2 || order.delivery_window_2 || '',
-    address: order.delivery_address || [
+    address: (delivery.fulfillment_type || order.fulfillment_type) === 'pickup' ? '' : order.delivery_address || [
       customer.street_number,
       customer.street_name,
       customer.apartment,
@@ -353,7 +357,7 @@ export function normalizeDelivery(order) {
 }
 function deliveryDetails(order) {
   const delivery = normalizeDelivery(order);
-  return [delivery.date, [delivery.window1, delivery.window2].filter(Boolean).join(' / '), delivery.address].filter(Boolean).join('\n');
+  return [delivery.date, delivery.label, delivery.address].filter(Boolean).join('\n');
 }
 function interpolate(text, order) {
   const name = customerName(order, {}) || '';
@@ -363,7 +367,10 @@ function interpolate(text, order) {
     customer_first_name: firstName(name),
     order_id: order.order_id || '',
     delivery_date: delivery.date,
-    delivery_window_1: delivery.window1,
+    fulfillment_type: delivery.type,
+    fulfillment_option_id: delivery.optionId,
+    fulfillment_label: delivery.label,
+    delivery_window_1: delivery.window1, // historical template compatibility
     delivery_window_2: delivery.window2,
     delivery_address: delivery.address,
   }[key] ?? ''));
