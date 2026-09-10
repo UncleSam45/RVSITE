@@ -24,47 +24,33 @@
     },
     {
       "id": "pizza-jambon-pitas_20260828",
-      "title": "Pâté chinois",
+      "title": "Riz mexicain au boeuf",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "assets/images/items/pizza-jambon-pitas_20260828/card.webp",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
       "tags": [],
-      "showcase": false,
-      "images": {
-        "original": "assets/images/items/pizza-jambon-pitas_20260828/original.png",
-        "thumb": "assets/images/items/pizza-jambon-pitas_20260828/thumb.webp",
-        "card": "assets/images/items/pizza-jambon-pitas_20260828/card.webp",
-        "hero": "assets/images/items/pizza-jambon-pitas_20260828/hero.webp"
-      }
+      "showcase": false
     },
     {
       "id": "muffin-pepites-chocolat_20260828",
-      "title": "Poulet parmesan",
+      "title": "Poulet chasseur",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "assets/images/items/muffin-pepites-chocolat_20260828/card.webp",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
       "tags": [],
-      "showcase": false,
-      "images": {
-        "original": "assets/images/items/muffin-pepites-chocolat_20260828/original.png",
-        "thumb": "assets/images/items/muffin-pepites-chocolat_20260828/thumb.webp",
-        "card": "assets/images/items/muffin-pepites-chocolat_20260828/card.webp",
-        "hero": "assets/images/items/muffin-pepites-chocolat_20260828/hero.webp"
-      }
+      "showcase": false
     },
     {
       "id": "soupe-legumes_20260828",
@@ -82,7 +68,7 @@
     },
     {
       "id": "salade-chef_20260828",
-      "title": "Salade mexicaine ",
+      "title": "Salade césar ",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
       "available": true,
@@ -165,7 +151,7 @@
       "showcase": false
     },
     {
-      "title": "Porc à la Grecque avec patates cubes",
+      "title": "Penne sauce rosée avec saucisse italiennes",
       "description": "Préparé maison avec soin.",
       "category": "Plats",
       "pricing": {
@@ -175,17 +161,10 @@
       },
       "available": true,
       "featured": false,
-      "id": "porc-a-la-grecque-avec-patates-cubes_20260902",
-      "image": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/card.webp",
-      "images": {
-        "original": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/original.png",
-        "thumb": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/thumb.webp",
-        "card": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/card.webp",
-        "hero": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/hero.webp"
-      }
+      "id": "porc-a-la-grecque-avec-patates-cubes_20260902"
     },
     {
-      "title": "Nouilles sauté aux légumes",
+      "title": "Spaguetti sauce à la viande et parmesan",
       "description": "Préparé maison avec soin.",
       "category": "Plats",
       "pricing": {
@@ -195,14 +174,7 @@
       },
       "available": true,
       "featured": false,
-      "id": "nouilles-saute-aux-legumes_20260902",
-      "image": "assets/images/items/nouilles-saute-aux-legumes_20260902/card.webp",
-      "images": {
-        "original": "assets/images/items/nouilles-saute-aux-legumes_20260902/original.jpg",
-        "thumb": "assets/images/items/nouilles-saute-aux-legumes_20260902/thumb.webp",
-        "card": "assets/images/items/nouilles-saute-aux-legumes_20260902/card.webp",
-        "hero": "assets/images/items/nouilles-saute-aux-legumes_20260902/hero.webp"
-      }
+      "id": "nouilles-saute-aux-legumes_20260902"
     },
     {
       "title": "Collation raisin fromage",
@@ -216,7 +188,7 @@
       "id": "collation-raisin-fromage_20260902"
     },
     {
-      "title": "Collation céleri fromage à la crème",
+      "title": "Collation carotte céleri trempette maison",
       "description": "Collation ",
       "category": "Collation",
       "pricing": {
