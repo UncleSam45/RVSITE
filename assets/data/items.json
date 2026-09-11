@@ -35,7 +35,14 @@
         "familial": 23
       },
       "tags": [],
-      "showcase": false
+      "showcase": false,
+      "image": "assets/images/items/pizza-jambon-pitas_20260828/card.webp",
+      "images": {
+        "original": "assets/images/items/pizza-jambon-pitas_20260828/original.jpg",
+        "thumb": "assets/images/items/pizza-jambon-pitas_20260828/thumb.webp",
+        "card": "assets/images/items/pizza-jambon-pitas_20260828/card.webp",
+        "hero": "assets/images/items/pizza-jambon-pitas_20260828/hero.webp"
+      }
     },
     {
       "id": "muffin-pepites-chocolat_20260828",
@@ -50,7 +57,14 @@
         "familial": 23
       },
       "tags": [],
-      "showcase": false
+      "showcase": false,
+      "image": "assets/images/items/muffin-pepites-chocolat_20260828/card.webp",
+      "images": {
+        "original": "assets/images/items/muffin-pepites-chocolat_20260828/original.jpg",
+        "thumb": "assets/images/items/muffin-pepites-chocolat_20260828/thumb.webp",
+        "card": "assets/images/items/muffin-pepites-chocolat_20260828/card.webp",
+        "hero": "assets/images/items/muffin-pepites-chocolat_20260828/hero.webp"
+      }
     },
     {
       "id": "soupe-legumes_20260828",
@@ -161,7 +175,14 @@
       },
       "available": true,
       "featured": false,
-      "id": "porc-a-la-grecque-avec-patates-cubes_20260902"
+      "id": "porc-a-la-grecque-avec-patates-cubes_20260902",
+      "image": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/card.webp",
+      "images": {
+        "original": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/original.jpg",
+        "thumb": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/thumb.webp",
+        "card": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/card.webp",
+        "hero": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/hero.webp"
+      }
     },
     {
       "title": "Spaguetti sauce à la viande et parmesan",
@@ -174,7 +195,14 @@
       },
       "available": true,
       "featured": false,
-      "id": "nouilles-saute-aux-legumes_20260902"
+      "id": "nouilles-saute-aux-legumes_20260902",
+      "image": "assets/images/items/nouilles-saute-aux-legumes_20260902/card.webp",
+      "images": {
+        "original": "assets/images/items/nouilles-saute-aux-legumes_20260902/original.jpg",
+        "thumb": "assets/images/items/nouilles-saute-aux-legumes_20260902/thumb.webp",
+        "card": "assets/images/items/nouilles-saute-aux-legumes_20260902/card.webp",
+        "hero": "assets/images/items/nouilles-saute-aux-legumes_20260902/hero.webp"
+      }
     },
     {
       "title": "Collation raisin fromage",
