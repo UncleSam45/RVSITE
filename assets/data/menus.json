@@ -4,8 +4,8 @@
     "active": true,
     "title": "Nouveau menu",
     "description": "NOUVEAU MENU , de nouveaux plats et de nouvelles collations pour tous. Commandez au moins 72 heures à l’avance.",
-    "start_date": "2026-09-04",
-    "end_date": "2026-09-09",
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-16",
     "item_ids": [
       "macaroni-viande_20260828",
       "pizza-jambon-pitas_20260828",
@@ -19,7 +19,6 @@
       "salade-grecque_20260828",
       "sous-marin-pizza_20260828",
       "sous-marin-viandes-froides_20260828",
-      "collation-raisin-fromage_20260902",
       "collation-celeri-fromage-a-la-creme_20260902",
       "collation-bleuets-yogourt-grecque_20260902"
     ],
@@ -193,6 +192,32 @@
         "collation-raisin-fromage_20260902",
         "collation-celeri-fromage-a-la-creme_20260902",
         "collation-carottes-brocolis-trempette-maison_20260902",
+        "collation-bleuets-yogourt-grecque_20260902"
+      ],
+      "promotion_ids": []
+    },
+    {
+      "id": "menu-2026-08-28",
+      "active": true,
+      "title": "Nouveau menu",
+      "description": "NOUVEAU MENU , de nouveaux plats et de nouvelles collations pour tous. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-09-04",
+      "end_date": "2026-09-09",
+      "item_ids": [
+        "macaroni-viande_20260828",
+        "pizza-jambon-pitas_20260828",
+        "muffin-pepites-chocolat_20260828",
+        "porc-a-la-grecque-avec-patates-cubes_20260902",
+        "nouilles-saute-aux-legumes_20260902"
+      ],
+      "extra_ids": [
+        "soupe-legumes_20260828",
+        "salade-chef_20260828",
+        "salade-grecque_20260828",
+        "sous-marin-pizza_20260828",
+        "sous-marin-viandes-froides_20260828",
+        "collation-raisin-fromage_20260902",
+        "collation-celeri-fromage-a-la-creme_20260902",
         "collation-bleuets-yogourt-grecque_20260902"
       ],
       "promotion_ids": []
