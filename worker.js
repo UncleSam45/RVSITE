@@ -1,7 +1,7 @@
 const STRIPE_CHECKOUT_URL = 'https://api.stripe.com/v1/checkout/sessions';
 const STRIPE_PRICES_URL = 'https://api.stripe.com/v1/prices';
 const DEFAULT_CURRENCY = 'cad';
-const WORKER_VERSION = 'stripe-direct-v10';
+const WORKER_VERSION = 'stripe-direct-v11';
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 const PORTION_LABELS = { petit: 'Petit', grand: 'Grand', familial: 'Familial', standard: 'Format unique' };
@@ -53,6 +53,9 @@ async function createCheckoutSession(request, env) {
       form.set(`line_items[${index}][price_data][unit_amount]`, String(line.price_data.unit_amount));
       form.set(`line_items[${index}][price_data][product_data][name]`, line.price_data.product_data.name);
       if (line.price_data.product_data.description) form.set(`line_items[${index}][price_data][product_data][description]`, line.price_data.product_data.description);
+      for (const [key, value] of Object.entries(line.price_data.product_data.metadata || {})) {
+        form.set(`line_items[${index}][price_data][product_data][metadata][${key}]`, String(value));
+      }
     }
     form.set(`line_items[${index}][quantity]`, String(line.quantity));
   });
@@ -85,25 +88,42 @@ async function loadCheckoutCatalog(env) {
   if (env.STRIPE_CATALOG_JSON) {
     try { return JSON.parse(env.STRIPE_CATALOG_JSON); } catch { throw publicError('STRIPE_CATALOG_JSON est invalide.', 500); }
   }
-  const params = new URLSearchParams({ active: 'true', limit: '100', 'expand[]': 'data.product' });
-  let response;
-  try {
-    response = await fetch(`${STRIPE_PRICES_URL}?${params}`, { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } });
-  } catch (error) {
-    console.error('Stripe catalog connection error:', error);
-    throw publicError('Connexion au catalogue Stripe impossible.', 502);
-  }
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw publicError(result?.error?.message || 'Catalogue Stripe indisponible.', 502);
   const catalog = { currency: DEFAULT_CURRENCY, items: {} };
-  for (const price of result.data || []) {
-    const product = typeof price.product === 'object' ? price.product : {};
-    const itemId = clean(price.metadata?.item_id || product.metadata?.item_id);
-    const portion = clean(price.metadata?.portion_key || product.metadata?.portion_key || price.nickname).toLowerCase();
-    if (!itemId || !portion || !price.id) continue;
-    catalog.currency = normalizeCurrency(price.currency || catalog.currency);
-    catalog.items[itemId] ||= { title: product.name || itemId, prices: {} };
-    catalog.items[itemId].prices[portion] = { price_id: price.id, unit_amount: Number(price.unit_amount || 0) };
+  let cursor = '';
+  for (let pageNumber = 0; pageNumber < 50; pageNumber += 1) {
+    const params = new URLSearchParams({ active: 'true', limit: '100', 'expand[]': 'data.product' });
+    if (cursor) params.set('starting_after', cursor);
+    let response;
+    try {
+      response = await fetch(`${STRIPE_PRICES_URL}?${params}`, { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } });
+    } catch (error) {
+      console.error('Stripe catalog connection error:', error);
+      throw publicError('Connexion au catalogue Stripe impossible.', 502);
+    }
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw publicError(result?.error?.message || 'Catalogue Stripe indisponible.', 502);
+    if (!Array.isArray(result.data) || typeof result.has_more !== 'boolean') throw publicError('Catalogue Stripe invalide.', 502);
+    for (const price of result.data) {
+      const product = typeof price.product === 'object' && price.product ? price.product : {};
+      if (product.active === false) continue;
+      const itemId = clean(price.metadata?.item_id || product.metadata?.item_id);
+      const portion = clean(price.metadata?.portion_key || product.metadata?.portion_key || price.nickname).toLowerCase();
+      if (!itemId || !portion || !price.id) continue;
+      catalog.currency = normalizeCurrency(price.currency || catalog.currency);
+      catalog.items[itemId] ||= { prices: {} };
+      catalog.items[itemId].prices[portion] ||= [];
+      catalog.items[itemId].prices[portion].push({
+        price_id: price.id,
+        unit_amount: Number.isFinite(Number(price.unit_amount)) ? Number(price.unit_amount) : null,
+        product_id: clean(product.id),
+        product_name: clean(product.name),
+      });
+    }
+    if (!result.has_more) break;
+    const next = result.data.at(-1)?.id;
+    if (!next || next === cursor) throw publicError('Pagination du catalogue Stripe invalide.', 502);
+    cursor = next;
+    if (pageNumber === 49) throw publicError('Catalogue Stripe trop volumineux pour une vérification sûre.', 503);
   }
   if (!Object.keys(catalog.items).length) throw publicError('Aucun article du site n’est associé au catalogue Stripe.', 503);
   return catalog;
@@ -246,31 +266,84 @@ export function buildStripeLineItems(lines, catalog, site, env) {
   const currency = normalizeCurrency(catalog?.currency || site.settings?.ordering?.currency || DEFAULT_CURRENCY);
   const allowDynamic = env.ALLOW_DYNAMIC_PRICE_DATA === 'true' || catalog?.allow_dynamic_price_data === true;
   return lines.map((line) => {
-    const catalogPrice = findCatalogPrice(catalog, line.itemId, line.portion);
-    if (catalogPrice?.priceId) {
-      if (catalogPrice.unitAmount !== null && catalogPrice.unitAmount !== line.unitAmount) {
-        throw publicError(`Le catalogue Stripe est désynchronisé pour ${line.item.title || line.itemId}.`, 409);
-      }
-      return { price: catalogPrice.priceId, quantity: line.qty };
+    const resolution = resolveCatalogPrice(catalog, line);
+    if (resolution.status === 'matched') return { price: resolution.price.priceId, quantity: line.qty };
+    if (line.promotional) throw publicError(`Prix Stripe promotionnel non vérifiable pour ${line.item.title || line.itemId}.`, 409);
+    if (!allowDynamic) {
+      if (resolution.status === 'conflict') throw publicError(`Le catalogue Stripe associe ${line.item.title || line.itemId} à un autre produit. La commande a été bloquée avant paiement.`, 409);
+      throw publicError(`Prix Stripe manquant pour ${line.item.title || line.itemId} / ${line.portionLabel}.`, 409);
     }
-    if (line.promotional) throw publicError(`Prix Stripe promotionnel manquant pour ${line.item.title || line.itemId}.`, 409);
-    if (!allowDynamic) throw publicError(`Prix Stripe manquant pour ${line.item.title || line.itemId} / ${line.portionLabel}.`, 409);
-    return { quantity: line.qty, price_data: { currency, unit_amount: line.unitAmount, product_data: { name: `${line.item.title || line.itemId} — ${line.portionLabel}`, description: line.item.description || 'La cuisine de Rosalie' } } };
+    return dynamicPriceLine(line, currency, site);
   });
 }
 
-function findCatalogPrice(catalog, itemId, portion) {
-  const candidates = [catalog?.items?.[itemId]?.prices?.[portion], catalog?.products?.[itemId]?.prices?.[portion], catalog?.prices?.[itemId]?.[portion], catalog?.prices?.[`${itemId}:${portion}`], catalog?.prices?.[portion], catalog?.portion_prices?.[portion]];
-  for (const value of candidates) { const parsed = parseCatalogPrice(value); if (parsed?.priceId) return parsed; }
-  return null;
+function identityText(value) {
+  return clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
 }
 
-function parseCatalogPrice(value) {
+function priceValues(value) {
+  if (value === undefined || value === null) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function catalogPriceCandidates(catalog, itemId, portion) {
+  const candidates = [];
+  const add = (value, fallbackName = '') => {
+    for (const entry of priceValues(value)) {
+      const parsed = parseCatalogPrice(entry, fallbackName);
+      if (parsed?.priceId) candidates.push(parsed);
+    }
+  };
+  const item = catalog?.items?.[itemId];
+  const product = catalog?.products?.[itemId];
+  add(item?.prices?.[portion], item?.title);
+  add(product?.prices?.[portion], product?.title || product?.name);
+  add(catalog?.prices?.[itemId]?.[portion]);
+  add(catalog?.prices?.[`${itemId}:${portion}`]);
+  return candidates;
+}
+
+function resolveCatalogPrice(catalog, line) {
+  const candidates = catalogPriceCandidates(catalog, line.itemId, line.portion);
+  if (!candidates.length) return { status: 'missing', price: null, candidates: [] };
+  const expectedTitle = identityText(line.item?.title || line.itemId);
+  const matching = candidates.filter((candidate) => {
+    const amountMatches = candidate.unitAmount === null || candidate.unitAmount === line.unitAmount;
+    const titleMatches = candidate.productName && identityText(candidate.productName) === expectedTitle;
+    return amountMatches && titleMatches;
+  });
+  if (matching.length) return { status: 'matched', price: matching[0], candidates };
+  return { status: 'conflict', price: null, candidates };
+}
+
+function parseCatalogPrice(value, fallbackName = '') {
   if (!value) return null;
-  if (typeof value === 'string') return { priceId: value, unitAmount: null };
+  if (typeof value === 'string') return { priceId: value, unitAmount: null, productId: '', productName: clean(fallbackName) };
   if (typeof value !== 'object') return null;
   const priceId = clean(value.stripe_price_id || value.price_id || value.price || value.id);
-  return priceId ? { priceId, unitAmount: readUnitAmount(value) } : null;
+  if (!priceId) return null;
+  return {
+    priceId,
+    unitAmount: readUnitAmount(value),
+    productId: clean(value.product_id || value.product?.id),
+    productName: clean(value.product_name || value.productName || value.name || value.product?.name || fallbackName),
+  };
+}
+
+function dynamicPriceLine(line, currency, site) {
+  const menuId = clean(site.menus?.current_menu?.id);
+  return {
+    quantity: line.qty,
+    price_data: {
+      currency,
+      unit_amount: line.unitAmount,
+      product_data: {
+        name: `${line.item.title || line.itemId} — ${line.portionLabel}`,
+        description: line.item.description || 'La cuisine de Rosalie',
+        metadata: { source: 'rvsite_checkout', item_id: line.itemId, portion_key: line.portion, ...(menuId ? { menu_id: menuId } : {}) },
+      },
+    },
+  };
 }
 
 function readUnitAmount(value) {
@@ -290,6 +363,7 @@ function buildMetadata(orderId, order, site) {
   const summary = order.lines.map((line) => `${line.qty}x ${line.item.title || line.itemId} (${line.portionLabel})`).join('; ');
   return {
     order_id: orderId, project: 'rvsite', business: site.settings?.business?.name || 'La cuisine de Rosalie',
+    menu_id: clean(site.menus?.current_menu?.id), checkout_worker_version: WORKER_VERSION,
     fulfillment_type: order.fulfillment.type, fulfillment_option_id: order.fulfillment.id, fulfillment_label: order.fulfillment.label,
     delivery_date: order.deliveryDate, delivery_policy_version: order.fulfillment.policyVersion,
     cooler_available: order.coolerAvailable ? 'Oui' : 'Non', delivery_instructions: order.deliveryInstructions,
