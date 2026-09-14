@@ -7,20 +7,20 @@
     "start_date": "2026-09-11",
     "end_date": "2026-09-16",
     "item_ids": [
-      "macaroni-viande_20260828",
-      "pizza-jambon-pitas_20260828",
-      "muffin-pepites-chocolat_20260828",
-      "porc-a-la-grecque-avec-patates-cubes_20260902",
-      "nouilles-saute-aux-legumes_20260902"
+      "item_f4b3ab49ce014d7095be301592536dd2",
+      "item_3ca9e12d27b745c7b228a4dcfef55e5e",
+      "item_91fa4681a1c344f0914c22ef2cfccf19",
+      "item_2ab149806f5c477f91db514c08c4f9a1",
+      "item_c31e46bb03674e5c9eecc158ed305baa"
     ],
     "extra_ids": [
-      "soupe-legumes_20260828",
-      "salade-chef_20260828",
-      "salade-grecque_20260828",
-      "sous-marin-pizza_20260828",
-      "sous-marin-viandes-froides_20260828",
-      "collation-celeri-fromage-a-la-creme_20260902",
-      "collation-bleuets-yogourt-grecque_20260902"
+      "item_d009e983814b47fdafd39dbeaec49200",
+      "item_880771be5305474b9e10444d20bb77f2",
+      "item_7615c607daa24656970c167778c33cca",
+      "item_7515ffacaabd4444a03ce438cde197e8",
+      "item_24206193a37d4492b6da6162fec27304",
+      "item_fef3968e8a0e4cef871f83899cb8881d",
+      "item_10ea4e76e47d45be978490f54566b88e"
     ],
     "promotion_ids": []
   },
@@ -217,6 +217,31 @@
         "sous-marin-pizza_20260828",
         "sous-marin-viandes-froides_20260828",
         "collation-raisin-fromage_20260902",
+        "collation-celeri-fromage-a-la-creme_20260902",
+        "collation-bleuets-yogourt-grecque_20260902"
+      ],
+      "promotion_ids": []
+    },
+    {
+      "id": "menu-2026-08-28",
+      "active": true,
+      "title": "Nouveau menu",
+      "description": "NOUVEAU MENU , de nouveaux plats et de nouvelles collations pour tous. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-16",
+      "item_ids": [
+        "macaroni-viande_20260828",
+        "pizza-jambon-pitas_20260828",
+        "muffin-pepites-chocolat_20260828",
+        "porc-a-la-grecque-avec-patates-cubes_20260902",
+        "nouilles-saute-aux-legumes_20260902"
+      ],
+      "extra_ids": [
+        "soupe-legumes_20260828",
+        "salade-chef_20260828",
+        "salade-grecque_20260828",
+        "sous-marin-pizza_20260828",
+        "sous-marin-viandes-froides_20260828",
         "collation-celeri-fromage-a-la-creme_20260902",
         "collation-bleuets-yogourt-grecque_20260902"
       ],

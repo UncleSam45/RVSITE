@@ -1,13 +1,13 @@
 {
   "items": [
     {
-      "id": "macaroni-viande_20260828",
+      "id": "item_f4b3ab49ce014d7095be301592536dd2",
       "title": "Macaroni Fromage bacon",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "assets/images/items/macaroni-viande_20260828/card.webp",
+      "image": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/card.webp",
       "pricing": {
         "petit": 8,
         "grand": 12,
@@ -16,14 +16,14 @@
       "tags": [],
       "showcase": false,
       "images": {
-        "original": "assets/images/items/macaroni-viande_20260828/original.jpg",
-        "thumb": "assets/images/items/macaroni-viande_20260828/thumb.webp",
-        "card": "assets/images/items/macaroni-viande_20260828/card.webp",
-        "hero": "assets/images/items/macaroni-viande_20260828/hero.webp"
+        "original": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/original.jpg",
+        "thumb": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/thumb.webp",
+        "card": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/card.webp",
+        "hero": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/hero.webp"
       }
     },
     {
-      "id": "pizza-jambon-pitas_20260828",
+      "id": "item_3ca9e12d27b745c7b228a4dcfef55e5e",
       "title": "Riz mexicain au boeuf",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
@@ -36,16 +36,16 @@
       },
       "tags": [],
       "showcase": false,
-      "image": "assets/images/items/pizza-jambon-pitas_20260828/card.webp",
+      "image": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/card.webp",
       "images": {
-        "original": "assets/images/items/pizza-jambon-pitas_20260828/original.jpg",
-        "thumb": "assets/images/items/pizza-jambon-pitas_20260828/thumb.webp",
-        "card": "assets/images/items/pizza-jambon-pitas_20260828/card.webp",
-        "hero": "assets/images/items/pizza-jambon-pitas_20260828/hero.webp"
+        "original": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/original.jpg",
+        "thumb": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/thumb.webp",
+        "card": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/card.webp",
+        "hero": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/hero.webp"
       }
     },
     {
-      "id": "muffin-pepites-chocolat_20260828",
+      "id": "item_91fa4681a1c344f0914c22ef2cfccf19",
       "title": "Poulet chasseur",
       "description": "Préparé maison avec soin.",
       "category": "Les plats",
@@ -58,111 +58,13 @@
       },
       "tags": [],
       "showcase": false,
-      "image": "assets/images/items/muffin-pepites-chocolat_20260828/card.webp",
+      "image": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/card.webp",
       "images": {
-        "original": "assets/images/items/muffin-pepites-chocolat_20260828/original.jpg",
-        "thumb": "assets/images/items/muffin-pepites-chocolat_20260828/thumb.webp",
-        "card": "assets/images/items/muffin-pepites-chocolat_20260828/card.webp",
-        "hero": "assets/images/items/muffin-pepites-chocolat_20260828/hero.webp"
+        "original": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/original.jpg",
+        "thumb": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/thumb.webp",
+        "card": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/card.webp",
+        "hero": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/hero.webp"
       }
-    },
-    {
-      "id": "soupe-legumes_20260828",
-      "title": "Soupe aux légumes",
-      "description": "Préparé maison avec soin.",
-      "category": "Les soupes",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 4
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "salade-chef_20260828",
-      "title": "Salade césar ",
-      "description": "Préparé maison avec soin.",
-      "category": "Les salades",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 5
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "salade-cesar_20260828",
-      "title": "Salade thon",
-      "description": "Préparé maison avec soin.",
-      "category": "Les salades",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 7
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "salade-grecque_20260828",
-      "title": "Salade grecque",
-      "description": "Préparé maison avec soin.",
-      "category": "Les salades",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 5
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "sous-marin-pizza_20260828",
-      "title": "Sous-marin pizza",
-      "description": "Préparé maison avec soin.",
-      "category": "Les sous-marins",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 7
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "sous-marin-viandes-froides_20260828",
-      "title": "Sous-marin aux viandes froides",
-      "description": "Préparé maison avec soin.",
-      "category": "Les sous-marins",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 7
-      },
-      "tags": [],
-      "showcase": false
-    },
-    {
-      "id": "sous-marin-poulet-bbq_20260828",
-      "title": "Sous-marin au poulet BBQ",
-      "description": "Préparé maison avec soin.",
-      "category": "Les sous-marins",
-      "available": true,
-      "featured": false,
-      "image": "",
-      "pricing": {
-        "standard": 7
-      },
-      "tags": [],
-      "showcase": false
     },
     {
       "title": "Penne sauce rosée avec saucisse italiennes",
@@ -175,13 +77,13 @@
       },
       "available": true,
       "featured": false,
-      "id": "porc-a-la-grecque-avec-patates-cubes_20260902",
-      "image": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/card.webp",
+      "id": "item_2ab149806f5c477f91db514c08c4f9a1",
+      "image": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/card.webp",
       "images": {
-        "original": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/original.jpg",
-        "thumb": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/thumb.webp",
-        "card": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/card.webp",
-        "hero": "assets/images/items/porc-a-la-grecque-avec-patates-cubes_20260902/hero.webp"
+        "original": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/original.jpg",
+        "thumb": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/thumb.webp",
+        "card": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/card.webp",
+        "hero": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/hero.webp"
       }
     },
     {
@@ -195,25 +97,84 @@
       },
       "available": true,
       "featured": false,
-      "id": "nouilles-saute-aux-legumes_20260902",
-      "image": "assets/images/items/nouilles-saute-aux-legumes_20260902/card.webp",
+      "id": "item_c31e46bb03674e5c9eecc158ed305baa",
+      "image": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/card.webp",
       "images": {
-        "original": "assets/images/items/nouilles-saute-aux-legumes_20260902/original.jpg",
-        "thumb": "assets/images/items/nouilles-saute-aux-legumes_20260902/thumb.webp",
-        "card": "assets/images/items/nouilles-saute-aux-legumes_20260902/card.webp",
-        "hero": "assets/images/items/nouilles-saute-aux-legumes_20260902/hero.webp"
+        "original": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/original.jpg",
+        "thumb": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/thumb.webp",
+        "card": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/card.webp",
+        "hero": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/hero.webp"
       }
     },
     {
-      "title": "Collation raisin fromage",
-      "description": "Collation ",
-      "category": "Collation",
+      "id": "item_d009e983814b47fdafd39dbeaec49200",
+      "title": "Soupe aux légumes",
+      "description": "Préparé maison avec soin.",
+      "category": "Les soupes",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 4
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "item_880771be5305474b9e10444d20bb77f2",
+      "title": "Salade césar ",
+      "description": "Préparé maison avec soin.",
+      "category": "Les salades",
+      "available": true,
+      "featured": false,
+      "image": "",
       "pricing": {
         "standard": 5
       },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "item_7615c607daa24656970c167778c33cca",
+      "title": "Salade grecque",
+      "description": "Préparé maison avec soin.",
+      "category": "Les salades",
       "available": true,
       "featured": false,
-      "id": "collation-raisin-fromage_20260902"
+      "image": "",
+      "pricing": {
+        "standard": 5
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "item_7515ffacaabd4444a03ce438cde197e8",
+      "title": "Sous-marin pizza",
+      "description": "Préparé maison avec soin.",
+      "category": "Les sous-marins",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "item_24206193a37d4492b6da6162fec27304",
+      "title": "Sous-marin aux viandes froides",
+      "description": "Préparé maison avec soin.",
+      "category": "Les sous-marins",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 7
+      },
+      "tags": [],
+      "showcase": false
     },
     {
       "title": "Collation carotte céleri trempette maison",
@@ -224,18 +185,7 @@
       },
       "available": true,
       "featured": false,
-      "id": "collation-celeri-fromage-a-la-creme_20260902"
-    },
-    {
-      "title": "Collation carottes brocolis trempette maison",
-      "description": "Collation ",
-      "category": "Collation",
-      "pricing": {
-        "standard": 5
-      },
-      "available": true,
-      "featured": false,
-      "id": "collation-carottes-brocolis-trempette-maison_20260902"
+      "id": "item_fef3968e8a0e4cef871f83899cb8881d"
     },
     {
       "title": "Collation bleuets yogourt grecque",
@@ -246,7 +196,7 @@
       },
       "available": true,
       "featured": false,
-      "id": "collation-bleuets-yogourt-grecque_20260902"
+      "id": "item_10ea4e76e47d45be978490f54566b88e"
     }
   ]
 }
