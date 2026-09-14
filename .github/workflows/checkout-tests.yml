@@ -1,0 +1,25 @@
+name: Checkout integrity tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Order validation tests
+        run: node worker/src/order-validation.test.mjs
+      - name: Payment worker tests
+        run: node worker/src/payment-worker.test.mjs
+      - name: Full checkout worker tests
+        run: node worker/src/full-worker.test.mjs
