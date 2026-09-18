@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "id": "penne-alfredo-poulet_20260918",
+      "id": "item_26307a652827476980354316c080cd0b",
       "title": "Penne alfredo au poulet",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
@@ -17,7 +17,7 @@
       "showcase": false
     },
     {
-      "id": "boulettes-asiatiques-riz-legumes_20260918",
+      "id": "item_8f00ff58b47f4fafb5686030089d0a3f",
       "title": "Boulettes asiatiques avec riz aux légumes",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
@@ -33,7 +33,7 @@
       "showcase": false
     },
     {
-      "id": "lasagne-pepperoni-fromage_20260821",
+      "id": "item_4570c42189c642e6968759d6757c8a61",
       "title": "Lasagne pepperoni fromage",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
@@ -49,7 +49,7 @@
       "showcase": false
     },
     {
-      "id": "chaudron-saucisses-patates-legumes_20260918",
+      "id": "item_c7297097395c46829ef6ad53fe1e764f",
       "title": "Chaudron de saucisses, patates et légumes",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
@@ -65,7 +65,7 @@
       "showcase": false
     },
     {
-      "id": "porc-miel-ail-riz-brocoli_20260918",
+      "id": "item_23a1fbe8db3c4da58e405faad9698986",
       "title": "Porc miel et ail, riz et brocoli",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
@@ -81,7 +81,7 @@
       "showcase": false
     },
     {
-      "id": "item_d009e983814b47fdafd39dbeaec49200",
+      "id": "item_b7a6f709ed924c83834f1289fd883f11",
       "title": "Soupe aux légumes",
       "description": "Préparé maison avec soin.",
       "category": "Les soupes",
@@ -95,7 +95,7 @@
       "showcase": false
     },
     {
-      "id": "salade-chef_20260828",
+      "id": "item_80b3401cebcd4995b1f5930d6ffbc295",
       "title": "Salade du chef",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
@@ -109,7 +109,7 @@
       "showcase": false
     },
     {
-      "id": "item_7615c607daa24656970c167778c33cca",
+      "id": "item_7e75b8a217584d5f8e023e25ccb5a6c2",
       "title": "Salade grecque",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
@@ -123,7 +123,7 @@
       "showcase": false
     },
     {
-      "id": "item_fef3968e8a0e4cef871f83899cb8881d",
+      "id": "item_63f0ee3ff25b4527a1b84979068dc20f",
       "title": "Collation céleri et carottes, trempette maison",
       "description": "Préparé maison avec soin.",
       "category": "Collations",
@@ -137,7 +137,7 @@
       "showcase": false
     },
     {
-      "id": "item_10ea4e76e47d45be978490f54566b88e",
+      "id": "item_37c8871cecd7410c803011694297d1eb",
       "title": "Collation yogourt grec et bleuets",
       "description": "Préparé maison avec soin.",
       "category": "Collations",
@@ -151,7 +151,7 @@
       "showcase": false
     },
     {
-      "id": "item_24206193a37d4492b6da6162fec27304",
+      "id": "item_d1083d37c9c94f3195fbaf054d337334",
       "title": "Sous-marins viande froide",
       "description": "Préparé maison avec soin.",
       "category": "Les sous-marins",
@@ -165,7 +165,7 @@
       "showcase": false
     },
     {
-      "id": "item_7515ffacaabd4444a03ce438cde197e8",
+      "id": "item_f7f1e87d186c4974ae48550eae09f334",
       "title": "Sous-marins pizza",
       "description": "Préparé maison avec soin.",
       "category": "Les sous-marins",

@@ -7,20 +7,20 @@
     "start_date": "2026-09-18",
     "end_date": "2026-09-23",
     "item_ids": [
-      "penne-alfredo-poulet_20260918",
-      "boulettes-asiatiques-riz-legumes_20260918",
-      "lasagne-pepperoni-fromage_20260821",
-      "chaudron-saucisses-patates-legumes_20260918",
-      "porc-miel-ail-riz-brocoli_20260918"
+      "item_26307a652827476980354316c080cd0b",
+      "item_8f00ff58b47f4fafb5686030089d0a3f",
+      "item_4570c42189c642e6968759d6757c8a61",
+      "item_c7297097395c46829ef6ad53fe1e764f",
+      "item_23a1fbe8db3c4da58e405faad9698986"
     ],
     "extra_ids": [
-      "item_d009e983814b47fdafd39dbeaec49200",
-      "salade-chef_20260828",
-      "item_7615c607daa24656970c167778c33cca",
-      "item_fef3968e8a0e4cef871f83899cb8881d",
-      "item_10ea4e76e47d45be978490f54566b88e",
-      "item_24206193a37d4492b6da6162fec27304",
-      "item_7515ffacaabd4444a03ce438cde197e8"
+      "item_b7a6f709ed924c83834f1289fd883f11",
+      "item_80b3401cebcd4995b1f5930d6ffbc295",
+      "item_7e75b8a217584d5f8e023e25ccb5a6c2",
+      "item_63f0ee3ff25b4527a1b84979068dc20f",
+      "item_37c8871cecd7410c803011694297d1eb",
+      "item_d1083d37c9c94f3195fbaf054d337334",
+      "item_f7f1e87d186c4974ae48550eae09f334"
     ],
     "promotion_ids": []
   },
@@ -269,6 +269,31 @@
         "sous-marin-viandes-froides_20260828",
         "collation-celeri-fromage-a-la-creme_20260902",
         "collation-bleuets-yogourt-grecque_20260902"
+      ],
+      "promotion_ids": []
+    },
+    {
+      "id": "menu-2026-09-18",
+      "active": true,
+      "title": "Menu actuel",
+      "description": "Plats maison en formats Petit, Grand et Famille, avec soupes, salades, collations et sous-marins. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-09-18",
+      "end_date": "2026-09-23",
+      "item_ids": [
+        "penne-alfredo-poulet_20260918",
+        "boulettes-asiatiques-riz-legumes_20260918",
+        "lasagne-pepperoni-fromage_20260821",
+        "chaudron-saucisses-patates-legumes_20260918",
+        "porc-miel-ail-riz-brocoli_20260918"
+      ],
+      "extra_ids": [
+        "item_d009e983814b47fdafd39dbeaec49200",
+        "salade-chef_20260828",
+        "item_7615c607daa24656970c167778c33cca",
+        "item_fef3968e8a0e4cef871f83899cb8881d",
+        "item_10ea4e76e47d45be978490f54566b88e",
+        "item_24206193a37d4492b6da6162fec27304",
+        "item_7515ffacaabd4444a03ce438cde197e8"
       ],
       "promotion_ids": []
     }
