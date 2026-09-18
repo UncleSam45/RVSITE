@@ -11,12 +11,241 @@
     "menus_json": "assets/data/menus.json"
   },
   "menu": {
-    "id": "menu-2026-08-28",
-    "title": "Petit menu — semaine de réorganisation",
-    "start_date": "2026-08-28",
-    "end_date": "2026-09-03"
+    "id": "menu-2026-09-18",
+    "title": "Menu actuel",
+    "start_date": "2026-09-18",
+    "end_date": "2026-09-23"
   },
-  "items": {},
+  "items": {
+    "penne-alfredo-poulet_20260918": {
+      "title": "Penne alfredo au poulet",
+      "category": "Les plats",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "petit": {
+          "price_id": "",
+          "amount": 8,
+          "currency": "cad",
+          "active": false
+        },
+        "grand": {
+          "price_id": "",
+          "amount": 12,
+          "currency": "cad",
+          "active": false
+        },
+        "familial": {
+          "price_id": "",
+          "amount": 23,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "boulettes-asiatiques-riz-legumes_20260918": {
+      "title": "Boulettes asiatiques avec riz aux légumes",
+      "category": "Les plats",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "petit": {
+          "price_id": "",
+          "amount": 8,
+          "currency": "cad",
+          "active": false
+        },
+        "grand": {
+          "price_id": "",
+          "amount": 12,
+          "currency": "cad",
+          "active": false
+        },
+        "familial": {
+          "price_id": "",
+          "amount": 23,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "lasagne-pepperoni-fromage_20260821": {
+      "title": "Lasagne pepperoni fromage",
+      "category": "Les plats",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "petit": {
+          "price_id": "",
+          "amount": 8,
+          "currency": "cad",
+          "active": false
+        },
+        "grand": {
+          "price_id": "",
+          "amount": 12,
+          "currency": "cad",
+          "active": false
+        },
+        "familial": {
+          "price_id": "",
+          "amount": 23,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "chaudron-saucisses-patates-legumes_20260918": {
+      "title": "Chaudron de saucisses, patates et légumes",
+      "category": "Les plats",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "petit": {
+          "price_id": "",
+          "amount": 8,
+          "currency": "cad",
+          "active": false
+        },
+        "grand": {
+          "price_id": "",
+          "amount": 12,
+          "currency": "cad",
+          "active": false
+        },
+        "familial": {
+          "price_id": "",
+          "amount": 23,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "porc-miel-ail-riz-brocoli_20260918": {
+      "title": "Porc miel et ail, riz et brocoli",
+      "category": "Les plats",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "petit": {
+          "price_id": "",
+          "amount": 8,
+          "currency": "cad",
+          "active": false
+        },
+        "grand": {
+          "price_id": "",
+          "amount": 12,
+          "currency": "cad",
+          "active": false
+        },
+        "familial": {
+          "price_id": "",
+          "amount": 23,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "item_d009e983814b47fdafd39dbeaec49200": {
+      "title": "Soupe aux légumes",
+      "category": "Les soupes",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 4,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "salade-chef_20260828": {
+      "title": "Salade du chef",
+      "category": "Les salades",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 5,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "item_7615c607daa24656970c167778c33cca": {
+      "title": "Salade grecque",
+      "category": "Les salades",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 5,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "item_fef3968e8a0e4cef871f83899cb8881d": {
+      "title": "Collation céleri et carottes, trempette maison",
+      "category": "Collations",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 5,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "item_10ea4e76e47d45be978490f54566b88e": {
+      "title": "Collation yogourt grec et bleuets",
+      "category": "Collations",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 5,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "item_24206193a37d4492b6da6162fec27304": {
+      "title": "Sous-marins viande froide",
+      "category": "Les sous-marins",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 7,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    },
+    "item_7515ffacaabd4444a03ce438cde197e8": {
+      "title": "Sous-marins pizza",
+      "category": "Les sous-marins",
+      "product_id": "",
+      "active": true,
+      "prices": {
+        "standard": {
+          "price_id": "",
+          "amount": 7,
+          "currency": "cad",
+          "active": false
+        }
+      }
+    }
+  },
   "archived": {
     "products": [],
     "prices": []

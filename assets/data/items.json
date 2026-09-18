@@ -1,110 +1,84 @@
 {
   "items": [
     {
-      "id": "item_f4b3ab49ce014d7095be301592536dd2",
-      "title": "Macaroni Fromage bacon",
-      "description": "Préparé maison avec soin.",
+      "id": "penne-alfredo-poulet_20260918",
+      "title": "Penne alfredo au poulet",
+      "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
       "featured": false,
-      "image": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/card.webp",
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
       "tags": [],
-      "showcase": false,
-      "images": {
-        "original": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/original.jpg",
-        "thumb": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/thumb.webp",
-        "card": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/card.webp",
-        "hero": "assets/images/items/item_f4b3ab49ce014d7095be301592536dd2/hero.webp"
-      }
+      "showcase": false
     },
     {
-      "id": "item_3ca9e12d27b745c7b228a4dcfef55e5e",
-      "title": "Riz mexicain au boeuf",
-      "description": "Préparé maison avec soin.",
+      "id": "boulettes-asiatiques-riz-legumes_20260918",
+      "title": "Boulettes asiatiques avec riz aux légumes",
+      "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
       "featured": false,
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
       "tags": [],
-      "showcase": false,
-      "image": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/card.webp",
-      "images": {
-        "original": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/original.jpg",
-        "thumb": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/thumb.webp",
-        "card": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/card.webp",
-        "hero": "assets/images/items/item_3ca9e12d27b745c7b228a4dcfef55e5e/hero.webp"
-      }
+      "showcase": false
     },
     {
-      "id": "item_91fa4681a1c344f0914c22ef2cfccf19",
-      "title": "Poulet chasseur",
-      "description": "Préparé maison avec soin.",
+      "id": "lasagne-pepperoni-fromage_20260821",
+      "title": "Lasagne pepperoni fromage",
+      "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
       "featured": false,
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
       "tags": [],
-      "showcase": false,
-      "image": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/card.webp",
-      "images": {
-        "original": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/original.jpg",
-        "thumb": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/thumb.webp",
-        "card": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/card.webp",
-        "hero": "assets/images/items/item_91fa4681a1c344f0914c22ef2cfccf19/hero.webp"
-      }
+      "showcase": false
     },
     {
-      "title": "Penne sauce rosée avec saucisse italiennes",
-      "description": "Préparé maison avec soin.",
-      "category": "Plats",
+      "id": "chaudron-saucisses-patates-legumes_20260918",
+      "title": "Chaudron de saucisses, patates et légumes",
+      "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
-      "available": true,
-      "featured": false,
-      "id": "item_2ab149806f5c477f91db514c08c4f9a1",
-      "image": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/card.webp",
-      "images": {
-        "original": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/original.jpg",
-        "thumb": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/thumb.webp",
-        "card": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/card.webp",
-        "hero": "assets/images/items/item_2ab149806f5c477f91db514c08c4f9a1/hero.webp"
-      }
+      "tags": [],
+      "showcase": false
     },
     {
-      "title": "Spaguetti sauce à la viande et parmesan",
-      "description": "Préparé maison avec soin.",
-      "category": "Plats",
+      "id": "porc-miel-ail-riz-brocoli_20260918",
+      "title": "Porc miel et ail, riz et brocoli",
+      "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
+      "category": "Les plats",
+      "available": true,
+      "featured": false,
+      "image": "",
       "pricing": {
         "petit": 8,
         "grand": 12,
         "familial": 23
       },
-      "available": true,
-      "featured": false,
-      "id": "item_c31e46bb03674e5c9eecc158ed305baa",
-      "image": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/card.webp",
-      "images": {
-        "original": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/original.jpg",
-        "thumb": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/thumb.webp",
-        "card": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/card.webp",
-        "hero": "assets/images/items/item_c31e46bb03674e5c9eecc158ed305baa/hero.webp"
-      }
+      "tags": [],
+      "showcase": false
     },
     {
       "id": "item_d009e983814b47fdafd39dbeaec49200",
@@ -121,8 +95,8 @@
       "showcase": false
     },
     {
-      "id": "item_880771be5305474b9e10444d20bb77f2",
-      "title": "Salade césar ",
+      "id": "salade-chef_20260828",
+      "title": "Salade du chef",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
       "available": true,
@@ -149,22 +123,36 @@
       "showcase": false
     },
     {
-      "id": "item_7515ffacaabd4444a03ce438cde197e8",
-      "title": "Sous-marin pizza",
+      "id": "item_fef3968e8a0e4cef871f83899cb8881d",
+      "title": "Collation céleri et carottes, trempette maison",
       "description": "Préparé maison avec soin.",
-      "category": "Les sous-marins",
+      "category": "Collations",
       "available": true,
       "featured": false,
       "image": "",
       "pricing": {
-        "standard": 7
+        "standard": 5
+      },
+      "tags": [],
+      "showcase": false
+    },
+    {
+      "id": "item_10ea4e76e47d45be978490f54566b88e",
+      "title": "Collation yogourt grec et bleuets",
+      "description": "Préparé maison avec soin.",
+      "category": "Collations",
+      "available": true,
+      "featured": false,
+      "image": "",
+      "pricing": {
+        "standard": 5
       },
       "tags": [],
       "showcase": false
     },
     {
       "id": "item_24206193a37d4492b6da6162fec27304",
-      "title": "Sous-marin aux viandes froides",
+      "title": "Sous-marins viande froide",
       "description": "Préparé maison avec soin.",
       "category": "Les sous-marins",
       "available": true,
@@ -177,26 +165,18 @@
       "showcase": false
     },
     {
-      "title": "Collation carotte céleri trempette maison",
-      "description": "Collation ",
-      "category": "Collation",
-      "pricing": {
-        "standard": 5
-      },
+      "id": "item_7515ffacaabd4444a03ce438cde197e8",
+      "title": "Sous-marins pizza",
+      "description": "Préparé maison avec soin.",
+      "category": "Les sous-marins",
       "available": true,
       "featured": false,
-      "id": "item_fef3968e8a0e4cef871f83899cb8881d"
-    },
-    {
-      "title": "Collation bleuets yogourt grecque",
-      "description": "Collation ",
-      "category": "Collation",
+      "image": "",
       "pricing": {
-        "standard": 6
+        "standard": 7
       },
-      "available": true,
-      "featured": false,
-      "id": "item_10ea4e76e47d45be978490f54566b88e"
+      "tags": [],
+      "showcase": false
     }
   ]
 }
