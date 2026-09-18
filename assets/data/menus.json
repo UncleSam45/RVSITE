@@ -1,30 +1,55 @@
 {
   "current_menu": {
-    "id": "menu-2026-08-28",
+    "id": "menu-2026-09-18",
     "active": true,
-    "title": "Nouveau menu",
-    "description": "NOUVEAU MENU , de nouveaux plats et de nouvelles collations pour tous. Commandez au moins 72 heures à l’avance.",
-    "start_date": "2026-09-11",
-    "end_date": "2026-09-16",
+    "title": "Menu actuel",
+    "description": "Plats maison en formats Petit, Grand et Famille, avec soupes, salades, collations et sous-marins. Commandez au moins 72 heures à l’avance.",
+    "start_date": "2026-09-18",
+    "end_date": "2026-09-23",
     "item_ids": [
-      "item_f4b3ab49ce014d7095be301592536dd2",
-      "item_3ca9e12d27b745c7b228a4dcfef55e5e",
-      "item_91fa4681a1c344f0914c22ef2cfccf19",
-      "item_2ab149806f5c477f91db514c08c4f9a1",
-      "item_c31e46bb03674e5c9eecc158ed305baa"
+      "penne-alfredo-poulet_20260918",
+      "boulettes-asiatiques-riz-legumes_20260918",
+      "lasagne-pepperoni-fromage_20260821",
+      "chaudron-saucisses-patates-legumes_20260918",
+      "porc-miel-ail-riz-brocoli_20260918"
     ],
     "extra_ids": [
       "item_d009e983814b47fdafd39dbeaec49200",
-      "item_880771be5305474b9e10444d20bb77f2",
+      "salade-chef_20260828",
       "item_7615c607daa24656970c167778c33cca",
-      "item_7515ffacaabd4444a03ce438cde197e8",
-      "item_24206193a37d4492b6da6162fec27304",
       "item_fef3968e8a0e4cef871f83899cb8881d",
-      "item_10ea4e76e47d45be978490f54566b88e"
+      "item_10ea4e76e47d45be978490f54566b88e",
+      "item_24206193a37d4492b6da6162fec27304",
+      "item_7515ffacaabd4444a03ce438cde197e8"
     ],
     "promotion_ids": []
   },
   "archive": [
+    {
+      "id": "menu-2026-08-28",
+      "active": true,
+      "title": "Nouveau menu",
+      "description": "NOUVEAU MENU , de nouveaux plats et de nouvelles collations pour tous. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-09-11",
+      "end_date": "2026-09-16",
+      "item_ids": [
+        "item_f4b3ab49ce014d7095be301592536dd2",
+        "item_3ca9e12d27b745c7b228a4dcfef55e5e",
+        "item_91fa4681a1c344f0914c22ef2cfccf19",
+        "item_2ab149806f5c477f91db514c08c4f9a1",
+        "item_c31e46bb03674e5c9eecc158ed305baa"
+      ],
+      "extra_ids": [
+        "item_d009e983814b47fdafd39dbeaec49200",
+        "item_880771be5305474b9e10444d20bb77f2",
+        "item_7615c607daa24656970c167778c33cca",
+        "item_7515ffacaabd4444a03ce438cde197e8",
+        "item_24206193a37d4492b6da6162fec27304",
+        "item_fef3968e8a0e4cef871f83899cb8881d",
+        "item_10ea4e76e47d45be978490f54566b88e"
+      ],
+      "promotion_ids": []
+    },
     {
       "id": "menu-2026-08-21",
       "active": true,
