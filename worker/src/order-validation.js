@@ -18,7 +18,7 @@ export function validateOrderItems(payloadItems, site) {
   for (const rawLine of payloadItems) {
     const itemId = String(rawLine?.item_id || '').trim();
     const portion = String(rawLine?.portion || '').trim();
-    const qty = Math.floor(Number(rawLine?.qty));
+    const qty = Number(rawLine?.qty);
     const item = itemById.get(itemId);
     if (!item || !activeIds.has(itemId) || item.available === false) throw checkoutError('Un item du panier n’est plus disponible.');
     if (!Number.isInteger(qty) || qty < 1 || qty > 99) throw checkoutError(`Quantité invalide pour ${item.title || itemId}.`);
