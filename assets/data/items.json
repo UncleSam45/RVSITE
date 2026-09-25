@@ -1,8 +1,8 @@
 {
   "items": [
     {
-      "id": "item_26307a652827476980354316c080cd0b",
-      "title": "Penne alfredo au poulet",
+      "id": "item_5e5d686b4d1c40c5bd5751ea84c0d8b9",
+      "title": "Fusili crémeux au poulets et légumes ",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
@@ -17,8 +17,8 @@
       "showcase": false
     },
     {
-      "id": "item_8f00ff58b47f4fafb5686030089d0a3f",
-      "title": "Boulettes asiatiques avec riz aux légumes",
+      "id": "item_3124e1a5db944f7798387b44fec5004e",
+      "title": "Pâté chinois",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
@@ -33,8 +33,8 @@
       "showcase": false
     },
     {
-      "id": "item_4570c42189c642e6968759d6757c8a61",
-      "title": "Lasagne pepperoni fromage",
+      "id": "item_e7430342389045159d986bf68df63d94",
+      "title": "Souvlaki de porc déconstruit avec riz",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
@@ -49,8 +49,8 @@
       "showcase": false
     },
     {
-      "id": "item_c7297097395c46829ef6ad53fe1e764f",
-      "title": "Chaudron de saucisses, patates et légumes",
+      "id": "item_358f9ba125e041bea38acbbfb9a4d098",
+      "title": "Chilli végétarien avec riz",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
@@ -65,8 +65,8 @@
       "showcase": false
     },
     {
-      "id": "item_23a1fbe8db3c4da58e405faad9698986",
-      "title": "Porc miel et ail, riz et brocoli",
+      "id": "item_e8655ac8ffca4c68ab9763f68c7c1b24",
+      "title": "Macaroni à la viande",
       "description": "1 personne (Petit), pour appétits (Grand) ou parfait pour partager (Famille).",
       "category": "Les plats",
       "available": true,
@@ -81,7 +81,7 @@
       "showcase": false
     },
     {
-      "id": "item_b7a6f709ed924c83834f1289fd883f11",
+      "id": "item_91c04c37f8294bd69225871b1d1888d3",
       "title": "Soupe aux légumes",
       "description": "Préparé maison avec soin.",
       "category": "Les soupes",
@@ -95,7 +95,7 @@
       "showcase": false
     },
     {
-      "id": "item_80b3401cebcd4995b1f5930d6ffbc295",
+      "id": "item_80913136b5d44beab5920643681698f1",
       "title": "Salade du chef",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
@@ -109,7 +109,7 @@
       "showcase": false
     },
     {
-      "id": "item_7e75b8a217584d5f8e023e25ccb5a6c2",
+      "id": "item_862e431434d4474cbac1e878fe0d53a5",
       "title": "Salade grecque",
       "description": "Préparé maison avec soin.",
       "category": "Les salades",
@@ -123,7 +123,7 @@
       "showcase": false
     },
     {
-      "id": "item_63f0ee3ff25b4527a1b84979068dc20f",
+      "id": "item_de1a623ba9cb4112ab46d27b0f32fed2",
       "title": "Collation céleri et carottes, trempette maison",
       "description": "Préparé maison avec soin.",
       "category": "Collations",
@@ -137,7 +137,7 @@
       "showcase": false
     },
     {
-      "id": "item_37c8871cecd7410c803011694297d1eb",
+      "id": "item_b075d721378348ec87f1524ca39a1f4e",
       "title": "Collation yogourt grec et bleuets",
       "description": "Préparé maison avec soin.",
       "category": "Collations",
@@ -151,7 +151,7 @@
       "showcase": false
     },
     {
-      "id": "item_d1083d37c9c94f3195fbaf054d337334",
+      "id": "item_9090c7a17eb342a89d0a278a52d0e9c4",
       "title": "Sous-marins viande froide",
       "description": "Préparé maison avec soin.",
       "category": "Les sous-marins",
@@ -165,7 +165,7 @@
       "showcase": false
     },
     {
-      "id": "item_f7f1e87d186c4974ae48550eae09f334",
+      "id": "item_002f0610cec64a64b1fc5cf69fabf571",
       "title": "Sous-marins pizza",
       "description": "Préparé maison avec soin.",
       "category": "Les sous-marins",
