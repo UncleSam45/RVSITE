@@ -7,20 +7,20 @@
     "start_date": "2026-09-18",
     "end_date": "2026-09-23",
     "item_ids": [
-      "item_5e5d686b4d1c40c5bd5751ea84c0d8b9",
-      "item_3124e1a5db944f7798387b44fec5004e",
-      "item_e7430342389045159d986bf68df63d94",
-      "item_358f9ba125e041bea38acbbfb9a4d098",
-      "item_e8655ac8ffca4c68ab9763f68c7c1b24"
+      "item_7e5b8b8cfcac4475835a566def7728c8",
+      "item_076d955dd2144dae8c9efb25e83b55d8",
+      "item_59e6640bee824fad8d75e6bb061862ff",
+      "item_59aadb73c7604fdf97a8b2669023b22f",
+      "item_cebe14be1e1548f9a7ed059eafc73e6c"
     ],
     "extra_ids": [
-      "item_91c04c37f8294bd69225871b1d1888d3",
-      "item_80913136b5d44beab5920643681698f1",
-      "item_862e431434d4474cbac1e878fe0d53a5",
-      "item_de1a623ba9cb4112ab46d27b0f32fed2",
-      "item_b075d721378348ec87f1524ca39a1f4e",
-      "item_9090c7a17eb342a89d0a278a52d0e9c4",
-      "item_002f0610cec64a64b1fc5cf69fabf571"
+      "item_c1071418ba424c7aad41d1558bf01c9a",
+      "item_b594223a3b7e41d2a922bdd365de4518",
+      "item_e80145818afe4ddb877f1ff010603f14",
+      "item_7ed868dc04c9441683df470553feb8d1",
+      "item_465924bbbaad427fb3709cefa3ff1413",
+      "item_d5be13e0a5174ae6878fe412c86f6354",
+      "item_288c92191bfa4fcf9f3aa92a4ca018ec"
     ],
     "promotion_ids": []
   },
@@ -319,6 +319,31 @@
         "item_37c8871cecd7410c803011694297d1eb",
         "item_d1083d37c9c94f3195fbaf054d337334",
         "item_f7f1e87d186c4974ae48550eae09f334"
+      ],
+      "promotion_ids": []
+    },
+    {
+      "id": "menu-2026-09-18",
+      "active": true,
+      "title": "Menu actuel",
+      "description": "Plats maison en formats Petit, Grand et Famille, avec soupes, salades, collations et sous-marins. Commandez au moins 72 heures à l’avance.",
+      "start_date": "2026-09-18",
+      "end_date": "2026-09-23",
+      "item_ids": [
+        "item_5e5d686b4d1c40c5bd5751ea84c0d8b9",
+        "item_3124e1a5db944f7798387b44fec5004e",
+        "item_e7430342389045159d986bf68df63d94",
+        "item_358f9ba125e041bea38acbbfb9a4d098",
+        "item_e8655ac8ffca4c68ab9763f68c7c1b24"
+      ],
+      "extra_ids": [
+        "item_91c04c37f8294bd69225871b1d1888d3",
+        "item_80913136b5d44beab5920643681698f1",
+        "item_862e431434d4474cbac1e878fe0d53a5",
+        "item_de1a623ba9cb4112ab46d27b0f32fed2",
+        "item_b075d721378348ec87f1524ca39a1f4e",
+        "item_9090c7a17eb342a89d0a278a52d0e9c4",
+        "item_002f0610cec64a64b1fc5cf69fabf571"
       ],
       "promotion_ids": []
     }
